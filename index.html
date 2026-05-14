@@ -6,222 +6,74 @@
   <title>客户录单系统</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: #f5f7fb;
-      color: #1f2937;
-    }
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px 16px;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-      margin-bottom: 16px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-    h2 {
-      margin: 0 0 16px;
-      font-size: 21px;
-    }
-    h3 {
-      margin: 0 0 8px;
-      font-size: 17px;
-    }
-    .muted {
-      color: #6b7280;
-      font-size: 14px;
-    }
-    .hidden {
-      display: none !important;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .nav {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-    .module {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      background: #ffffff;
-      padding: 18px;
-      cursor: pointer;
-      transition: all .15s ease;
-    }
-    .module:hover {
-      border-color: #2563eb;
-      transform: translateY(-1px);
-    }
-    label {
-      display: block;
-      font-size: 14px;
-      margin: 12px 0 6px;
-      color: #374151;
-    }
-    input, select, textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 11px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-    }
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-    button {
-      border: none;
-      background: #2563eb;
-      color: #fff;
-      padding: 10px 15px;
-      border-radius: 10px;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button.secondary {
-      background: #111827;
-    }
-    button.ghost {
-      background: #eef2ff;
-      color: #1f2937;
-    }
-    button.danger {
-      background: #dc2626;
-    }
-    .tag {
-      display: inline-block;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: #ecfdf5;
-      color: #047857;
-      font-size: 13px;
-      margin-left: 8px;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px 16px;
-    }
-    .full {
-      grid-column: 1 / -1;
-    }
-    .error {
-      color: #b91c1c;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    .success {
-      color: #047857;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    .warn {
-      color: #92400e;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      margin: 10px 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      background: #fff;
-    }
-    th, td {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 10px 8px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background: #f9fafb;
-      color: #374151;
-      white-space: nowrap;
-    }
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-    }
-    .small {
-      font-size: 13px;
-    }
-    @media (max-width: 900px) {
-      .grid, .form-grid {
-        grid-template-columns: 1fr;
-      }
-      .topbar {
-        display: block;
-      }
-    }
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937}
+    .page{max-width:1280px;margin:0 auto;padding:26px 14px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);margin-bottom:16px}
+    h1{margin:0 0 8px;font-size:28px} h2{margin:0 0 14px;font-size:21px} h3{margin:0 0 8px;font-size:17px}
+    .muted{color:#6b7280;font-size:14px}.small{font-size:13px}.hidden{display:none!important}
+    .topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}
+    .module{border:1px solid #e5e7eb;border-radius:14px;background:#fff;padding:18px;cursor:pointer;transition:.15s}
+    .module:hover{border-color:#2563eb;transform:translateY(-1px)}
+    label{display:block;font-size:14px;margin:12px 0 6px;color:#374151}
+    input,select,textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;outline:none;background:#fff}
+    textarea{min-height:86px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    button{border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin-top:10px}
+    button.secondary{background:#111827}button.ghost{background:#eef2ff;color:#1f2937}button.danger{background:#dc2626}
+    .tag{display:inline-block;padding:4px 9px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;margin-left:8px}
+    .error{color:#b91c1c;margin-top:12px;font-size:14px}.success{color:#047857;margin-top:12px;font-size:14px}
+    .warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+    .info{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+    .table-wrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px}table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}
+    th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;vertical-align:top}th{background:#f9fafb;color:#374151;white-space:nowrap}
+    tr.overdue td{background:#fee2e2!important}tr.due-soon td{background:#ffedd5!important}tr.due-warning td{background:#fef9c3!important}tr.closed td{background:#f3f4f6!important;color:#6b7280}
+    .searchbar{display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;margin:12px 0}
+    .pill{display:inline-block;background:#f3f4f6;border-radius:999px;padding:3px 8px;margin:2px;font-size:12px;color:#374151}
+    @media(max-width:900px){.grid,.form-grid,.searchbar{grid-template-columns:1fr}.topbar{display:block}}
   </style>
 </head>
-
 <body>
-  <div class="page">
-    <div class="card">
-      <h1>客户录单系统</h1>
-      <div class="muted">客服录单 / 写作分配 / 财务结算 / 管理员报表</div>
-    </div>
-
-    <div id="loginBox" class="card">
-      <h2>登录系统</h2>
-      <label>邮箱</label>
-      <input id="email" type="email" placeholder="请输入账号邮箱" />
-
-      <label>密码</label>
-      <input id="password" type="password" placeholder="请输入密码" />
-
-      <button onclick="login()">登录</button>
-      <div id="loginMsg"></div>
-    </div>
-
-    <div id="appBox" class="hidden">
-      <div class="card topbar">
-        <div>
-          <h2>系统首页 <span id="roleTag" class="tag"></span></h2>
-          <div class="muted" id="userInfo"></div>
-          <div id="navBox" class="nav"></div>
-        </div>
-        <button class="secondary" onclick="logout()">退出登录</button>
-      </div>
-
-      <div id="content"></div>
-    </div>
+<div class="page">
+  <div class="card">
+    <h1>客户录单系统</h1>
+    <div class="muted">客服录单 / 写作派单 / 财务结算 / 管理员统计</div>
   </div>
+
+  <div id="loginBox" class="card">
+    <h2>登录系统</h2>
+    <label>邮箱</label><input id="email" type="email" placeholder="请输入账号邮箱" />
+    <label>密码</label><input id="password" type="password" placeholder="请输入密码" />
+    <button onclick="login()">登录</button>
+    <button class="ghost" onclick="renderRegister()">员工注册</button>
+    <div id="loginMsg"></div>
+  </div>
+
+  <div id="registerBox" class="card hidden">
+    <h2>员工注册</h2>
+    <div class="info">注册后默认为“待审核”，需要管理员启用并分配部门后才能使用。</div>
+    <label>姓名/内部称呼</label><input id="reg_name" placeholder="如：客服小王、写作部A" />
+    <label>邮箱</label><input id="reg_email" type="email" placeholder="用于登录的邮箱" />
+    <label>密码</label><input id="reg_password" type="password" placeholder="至少6位" />
+    <button onclick="registerAccount()">提交注册</button>
+    <button class="ghost" onclick="showLogin()">返回登录</button>
+    <div id="registerMsg"></div>
+  </div>
+
+  <div id="appBox" class="hidden">
+    <div class="card topbar">
+      <div>
+        <h2>系统首页 <span id="roleTag" class="tag"></span></h2>
+        <div class="muted" id="userInfo"></div>
+        <div id="navBox" class="nav"></div>
+      </div>
+      <button class="secondary" onclick="logout()">退出登录</button>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
 
 <script>
   const SUPABASE_URL = 'https://kifnfihqavambwatclle.supabase.co';
@@ -229,995 +81,362 @@
 
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentUser = null;
-  let currentProfile = null;
-  let categories = [];
-  let projects = [];
-  let fieldsCache = {};
+  let currentUser=null,currentProfile=null;
+  let categories=[],projects=[],customerSources=[],writingUsers=[],profiles=[];
+  let fieldsCache={};
 
-  const roleMap = {
-    admin: '管理员',
-    service: '客服部',
-    writing: '写作部',
-    finance: '财务部'
-  };
+  const roleMap={admin:'管理员',service:'客服部',writing:'写作部',finance:'财务部',pending:'待审核'};
+  const closedStatus=['已完成','已取消','退款/异常','已交付'];
 
-  function $(id) {
-    return document.getElementById(id);
+  function $(id){return document.getElementById(id)}
+  function money(v){return Number(v||0).toFixed(2)}
+  function fmtDate(v){if(!v)return '-';try{return new Date(v).toLocaleString('zh-CN',{hour12:false})}catch(e){return v}}
+  function toISO(v){return v?new Date(v).toISOString():null}
+  function todayISO(){return new Date().toISOString().slice(0,10)}
+  function showContent(html){$('content').innerHTML=html}
+  function showMsg(id,html){const el=$(id);if(el)el.innerHTML=html}
+  function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function getDyn(r,key){return r?.dynamic_values?.[key] ?? ''}
+  function mainTitle(r){
+    return r.title || getDyn(r,'project_title') || getDyn(r,'micro_topic') || getDyn(r,'course_topic') || getDyn(r,'project_name') || '-';
+  }
+  function mainWord(r){
+    return r.word_count || getDyn(r,'word_count_req') || getDyn(r,'page_or_word_req') || '';
+  }
+  function approvalText(r){return getDyn(r,'approval_status') || '-'}
+  function rowClass(r){
+    const status=r.order_status||'';
+    if(closedStatus.includes(status)) return 'closed';
+    const due=r.due_at?new Date(r.due_at).getTime():null;
+    if(!due) return '';
+    const diff=due-Date.now();
+    const h=diff/36e5;
+    if(h<0) return 'overdue';
+    if(h<=24) return 'due-soon';
+    if(h<=48) return 'due-warning';
+    return '';
   }
 
-  function money(v) {
-    const n = Number(v || 0);
-    return n.toFixed(2);
+  function renderRegister(){
+    $('loginBox').classList.add('hidden');
+    $('registerBox').classList.remove('hidden');
+  }
+  function showLogin(){
+    $('registerBox').classList.add('hidden');
+    $('loginBox').classList.remove('hidden');
+  }
+  async function registerAccount(){
+    showMsg('registerMsg','');
+    const name=$('reg_name').value.trim();
+    const email=$('reg_email').value.trim();
+    const password=$('reg_password').value;
+    if(!name||!email||!password){showMsg('registerMsg','<div class="error">请填写姓名、邮箱和密码。</div>');return}
+    const {error}=await client.auth.signUp({email,password,options:{data:{display_name:name}}});
+    if(error){showMsg('registerMsg','<div class="error">注册失败：'+error.message+'</div>');return}
+    showMsg('registerMsg','<div class="success">注册成功。请联系管理员在账号管理里启用并分配角色。</div>');
   }
 
-  function fmtDate(v) {
-    if (!v) return '-';
-    try {
-      return new Date(v).toLocaleString('zh-CN', { hour12: false });
-    } catch(e) {
-      return v;
-    }
-  }
-
-  function toISO(v) {
-    if (!v) return null;
-    return new Date(v).toISOString();
-  }
-
-  function showContent(html) {
-    $('content').innerHTML = html;
-  }
-
-  function showMsg(id, html) {
-    const el = $(id);
-    if (el) el.innerHTML = html;
-  }
-
-  async function login() {
-    const msg = $('loginMsg');
-    msg.innerHTML = '';
-
-    const email = $('email').value.trim();
-    const password = $('password').value;
-
-    if (!email || !password) {
-      msg.innerHTML = '<div class="error">请输入邮箱和密码。</div>';
-      return;
-    }
-
-    const { error } = await client.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      msg.innerHTML = '<div class="error">登录失败：' + error.message + '</div>';
-      return;
-    }
-
-    msg.innerHTML = '<div class="success">登录成功，正在进入系统...</div>';
+  async function login(){
+    showMsg('loginMsg','');
+    const email=$('email').value.trim(),password=$('password').value;
+    if(!email||!password){showMsg('loginMsg','<div class="error">请输入邮箱和密码。</div>');return}
+    const {error}=await client.auth.signInWithPassword({email,password});
+    if(error){showMsg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}
     await loadApp();
   }
-
-  async function logout() {
+  async function logout(){
     await client.auth.signOut();
-    currentUser = null;
-    currentProfile = null;
-    $('loginBox').classList.remove('hidden');
-    $('appBox').classList.add('hidden');
-    $('content').innerHTML = '';
+    currentUser=null;currentProfile=null;
+    $('loginBox').classList.remove('hidden');$('registerBox').classList.add('hidden');$('appBox').classList.add('hidden');$('content').innerHTML='';
+  }
+  async function loadApp(){
+    const {data:sessionData}=await client.auth.getSession();
+    const session=sessionData.session;
+    if(!session){$('loginBox').classList.remove('hidden');$('appBox').classList.add('hidden');return}
+    currentUser=session.user;
+    const {data:profile,error}=await client.from('profiles').select('display_name,role,is_active').eq('id',currentUser.id).single();
+    if(error||!profile){$('loginBox').classList.remove('hidden');$('appBox').classList.add('hidden');showMsg('loginMsg','<div class="error">账号已登录，但没有找到角色信息。</div>');return}
+    if(!profile.is_active){await client.auth.signOut();showMsg('loginMsg','<div class="error">该账号未启用或已停用，请联系管理员。</div>');return}
+    currentProfile=profile;
+    $('loginBox').classList.add('hidden');$('registerBox').classList.add('hidden');$('appBox').classList.remove('hidden');
+    $('userInfo').innerText='当前账号：'+currentUser.email+'｜名称：'+profile.display_name;
+    $('roleTag').innerText=roleMap[profile.role]||profile.role;
+    renderNav();renderHome();
   }
 
-  async function loadApp() {
-    const { data: sessionData } = await client.auth.getSession();
-    const session = sessionData.session;
-
-    if (!session) {
-      $('loginBox').classList.remove('hidden');
-      $('appBox').classList.add('hidden');
-      return;
-    }
-
-    currentUser = session.user;
-
-    const { data: profile, error } = await client
-      .from('profiles')
-      .select('display_name, role, is_active')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (error || !profile) {
-      $('loginBox').classList.remove('hidden');
-      $('appBox').classList.add('hidden');
-      $('loginMsg').innerHTML =
-        '<div class="error">账号已登录，但没有找到角色信息。请检查 profiles 表。</div>';
-      return;
-    }
-
-    if (!profile.is_active) {
-      await client.auth.signOut();
-      $('loginMsg').innerHTML = '<div class="error">该账号已被停用。</div>';
-      return;
-    }
-
-    currentProfile = profile;
-
-    $('loginBox').classList.add('hidden');
-    $('appBox').classList.remove('hidden');
-
-    $('userInfo').innerText =
-      '当前账号：' + currentUser.email + '｜名称：' + profile.display_name;
-
-    $('roleTag').innerText = roleMap[profile.role] || profile.role;
-
-    renderNav();
-    renderHome();
-  }
-
-  function renderNav() {
-    const role = currentProfile.role;
-    const items = [];
-
+  function renderNav(){
+    const role=currentProfile.role,items=[];
     items.push(`<button class="ghost" onclick="renderHome()">首页</button>`);
+    if(['admin','service'].includes(role)){items.push(`<button class="ghost" onclick="renderOrderForm()">客户录单</button>`);items.push(`<button class="ghost" onclick="renderOrderList()">订单查询</button>`)}
+    if(['admin','writing'].includes(role))items.push(`<button class="ghost" onclick="renderWritingOrders()">写作订单查询</button>`);
+    if(['admin','finance'].includes(role))items.push(`<button class="ghost" onclick="renderFinanceOrders()">财务订单查询</button>`);
+    if(role==='admin'){items.push(`<button class="ghost" onclick="renderBusinessManage()">业务/字段管理</button>`);items.push(`<button class="ghost" onclick="renderSourceManage()">来源管理</button>`);items.push(`<button class="ghost" onclick="renderAccountManage()">账号管理</button>`);items.push(`<button class="ghost" onclick="renderReportView()">统计报表</button>`)}
+    $('navBox').innerHTML=items.join('');
+  }
+  function renderHome(){
+    const r=currentProfile.role;let cards='';
+    if(r==='admin'){cards+=moduleCard('客户录单','录入订单，自动生成6位编号。','renderOrderForm()');cards+=moduleCard('订单查询','按编号、微信号、淘宝账号、要求等查询。','renderOrderList()');cards+=moduleCard('业务/字段管理','自定义业务大类、具体项目、项目字段。','renderBusinessManage()');cards+=moduleCard('统计报表','输入时间范围查询客服、业务、财务、写手统计。','renderReportView()')}
+    if(r==='service'){cards+=moduleCard('客户录单','只填微信/淘宝账号、客户要求、金额、交稿时间。','renderOrderForm()');cards+=moduleCard('我的订单查询','按订单编号、微信号、淘宝账号查询自己的订单。','renderOrderList()')}
+    if(r==='writing')cards+=moduleCard('写作订单查询','只看派给自己的订单，可安排写手和稿费。','renderWritingOrders()');
+    if(r==='finance')cards+=moduleCard('财务订单查询','查询订单金额、尾款、稿费、结算、利润。','renderFinanceOrders()');
+    showContent(`<div class="card"><h2>功能入口</h2><div class="grid">${cards}</div><div class="info">到期颜色：红色=已超期，橙色=24小时内，黄色=48小时内，灰色=已完成/取消。</div></div>`);
+  }
+  function moduleCard(t,d,a){return `<div class="module" onclick="${a}"><h3>${t}</h3><div class="muted">${d}</div></div>`}
 
-    if (role === 'admin' || role === 'service') {
-      items.push(`<button class="ghost" onclick="renderOrderForm()">客户录单</button>`);
-      items.push(`<button class="ghost" onclick="renderOrderList()">订单列表</button>`);
-    }
-
-    if (role === 'admin' || role === 'writing') {
-      items.push(`<button class="ghost" onclick="renderWritingOrders()">写作订单</button>`);
-    }
-
-    if (role === 'admin' || role === 'finance') {
-      items.push(`<button class="ghost" onclick="renderFinanceOrders()">财务订单</button>`);
-    }
-
-    if (role === 'admin') {
-      items.push(`<button class="ghost" onclick="renderBusinessView()">业务项目</button>`);
-      items.push(`<button class="ghost" onclick="renderReportView()">报表统计</button>`);
-    }
-
-    $('navBox').innerHTML = items.join('');
+  async function loadBaseData(force=false){
+    if(!force&&categories.length&&projects.length&&customerSources.length)return;
+    const [cat,pro,src,prof]=await Promise.all([
+      client.from('business_categories').select('*').eq('is_active',true).order('sort_order',{ascending:true}),
+      client.from('service_projects').select('*').eq('is_active',true).order('sort_order',{ascending:true}),
+      client.from('customer_sources').select('*').eq('is_active',true).order('sort_order',{ascending:true}),
+      client.from('profiles').select('id,display_name,role,is_active').in('role',['writing','service','finance','admin','pending']).order('created_at',{ascending:false})
+    ]);
+    if(cat.error)throw cat.error;if(pro.error)throw pro.error;if(src.error)throw src.error;
+    categories=cat.data||[];projects=pro.data||[];customerSources=src.data||[];
+    profiles=prof.data||[];writingUsers=profiles.filter(p=>p.role==='writing'&&p.is_active);
+  }
+  async function getProjectFields(projectId){
+    if(!projectId)return[]; if(fieldsCache[projectId])return fieldsCache[projectId];
+    const {data,error}=await client.from('project_fields').select('*').eq('project_id',projectId).eq('is_active',true).order('sort_order',{ascending:true});
+    if(error)throw error; fieldsCache[projectId]=data||[];return fieldsCache[projectId];
   }
 
-  function renderHome() {
-    const role = currentProfile.role;
-    let cards = '';
-
-    if (role === 'admin') {
-      cards += moduleCard('客户录单', '录入客户微信/淘宝账号、题目、字数、要求、定金尾款。', 'renderOrderForm()');
-      cards += moduleCard('全部订单', '管理员查看全部订单数据。', 'renderOrderList()');
-      cards += moduleCard('写作订单', '查看写作部可见内容。', 'renderWritingOrders()');
-      cards += moduleCard('财务订单', '查看收款、尾款、稿费、结算和利润。', 'renderFinanceOrders()');
-      cards += moduleCard('业务项目', '查看业务大类、具体项目、项目字段。', 'renderBusinessView()');
-      cards += moduleCard('报表统计', '查看客服日报、月报、年报。', 'renderReportView()');
+  async function renderOrderForm(orderId=null){
+    if(!['admin','service'].includes(currentProfile.role)){showContent('<div class="card"><div class="error">你没有录单权限。</div></div>');return}
+    await loadBaseData(true);
+    let existing=null,fields=[];
+    if(orderId){
+      const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
+      const {data,error}=await client.from(view).select('*').eq(currentProfile.role==='admin'?'id':'id',orderId).single();
+      if(error){showContent(`<div class="card"><div class="error">加载订单失败：${error.message}</div></div>`);return}
+      existing=data;
     }
-
-    if (role === 'service') {
-      cards += moduleCard('客户录单', '填写客户账号、业务项目、客户要求、订单金额和定金尾款。', 'renderOrderForm()');
-      cards += moduleCard('我的订单', '只能查看自己录入的订单，看不到写手和稿费。', 'renderOrderList()');
-    }
-
-    if (role === 'writing') {
-      cards += moduleCard('写作订单', '查看题目、字数、要求、截止时间，不显示订单价格。', 'renderWritingOrders()');
-    }
-
-    if (role === 'finance') {
-      cards += moduleCard('财务订单', '查看定金、尾款、稿费、结算和利润。', 'renderFinanceOrders()');
-    }
-
+    const catOptions=categories.map(c=>`<option value="${c.id}" ${existing?.category_id===c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('');
+    const sourceOptions=customerSources.map(s=>`<option value="${escapeHtml(s.name)}" ${existing?.customer_source===s.name?'selected':''}>${escapeHtml(s.name)}</option>`).join('');
+    const writingOptions=writingUsers.map(u=>`<option value="${u.id}" ${existing?.assigned_writing_user_id===u.id?'selected':''}>${escapeHtml(u.display_name)}</option>`).join('');
     showContent(`
       <div class="card">
-        <h2>功能入口</h2>
-        <div class="grid">${cards}</div>
-      </div>
-    `);
-  }
-
-  function moduleCard(title, desc, action) {
-    return `
-      <div class="module" onclick="${action}">
-        <h3>${title}</h3>
-        <div class="muted">${desc}</div>
-      </div>
-    `;
-  }
-
-  async function loadBaseData() {
-    if (categories.length && projects.length) return;
-
-    const { data: cats, error: catErr } = await client
-      .from('business_categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-
-    if (catErr) throw catErr;
-
-    const { data: pros, error: proErr } = await client
-      .from('service_projects')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-
-    if (proErr) throw proErr;
-
-    categories = cats || [];
-    projects = pros || [];
-  }
-
-  async function getProjectFields(projectId) {
-    if (!projectId) return [];
-    if (fieldsCache[projectId]) return fieldsCache[projectId];
-
-    const { data, error } = await client
-      .from('project_fields')
-      .select('*')
-      .eq('project_id', projectId)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-
-    if (error) throw error;
-
-    fieldsCache[projectId] = data || [];
-    return fieldsCache[projectId];
-  }
-
-  async function renderOrderForm() {
-    if (!['admin', 'service'].includes(currentProfile.role)) {
-      showContent('<div class="card"><div class="error">你没有录单权限。</div></div>');
-      return;
-    }
-
-    try {
-      await loadBaseData();
-    } catch (e) {
-      showContent(`<div class="card"><div class="error">加载业务项目失败：${e.message}</div></div>`);
-      return;
-    }
-
-    const catOptions = categories.map(c =>
-      `<option value="${c.id}">${c.name}</option>`
-    ).join('');
-
-    showContent(`
-      <div class="card">
-        <h2>客户录单</h2>
-        <div class="warn">系统不记录客户姓名，只记录微信号或淘宝账号。微信号和淘宝账号至少填写一个。</div>
-
+        <h2>${orderId?'修改订单':'客户录单'}</h2>
+        <div class="warn">不记录客户姓名；微信号和淘宝账号至少填写一个。订单编号由系统自动生成，从140000开始。</div>
         <div class="form-grid">
-          <div>
-            <label>业务大类</label>
-            <select id="category_id" onchange="onCategoryChange()">
-              <option value="">请选择业务大类</option>
-              ${catOptions}
-            </select>
-          </div>
-
-          <div>
-            <label>具体项目</label>
-            <select id="project_id" onchange="onProjectChange()">
-              <option value="">请先选择业务大类</option>
-            </select>
-          </div>
-
-          <div>
-            <label>微信号</label>
-            <input id="wechat_account" placeholder="客户微信号，可空" />
-          </div>
-
-          <div>
-            <label>淘宝账号</label>
-            <input id="taobao_account" placeholder="淘宝昵称/淘宝账号，可空" />
-          </div>
-
-          <div>
-            <label>客户来源</label>
-            <select id="customer_source">
-              <option value="淘宝">淘宝</option>
-              <option value="微信">微信</option>
-              <option value="小红书">小红书</option>
-              <option value="老客户介绍">老客户介绍</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-
-          <div>
-            <label>联系平台</label>
-            <select id="contact_platform">
-              <option value="微信">微信</option>
-              <option value="淘宝">淘宝</option>
-              <option value="小红书">小红书</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-
-          <div>
-            <label>题目/主题</label>
-            <input id="title" placeholder="课题题目、微课主题等" />
-          </div>
-
-          <div>
-            <label>字数要求</label>
-            <input id="word_count" placeholder="如3000字、按模板、不限字数" />
-          </div>
-
+          <div><label>客户来源</label><select id="customer_source"><option value="">请选择来源</option>${sourceOptions}</select></div>
+          <div><label>派给写作部</label><select id="assigned_writing_user_id"><option value="">暂不指定</option>${writingOptions}</select></div>
+          <div><label>微信号</label><input id="wechat_account" value="${escapeHtml(existing?.wechat_account||'')}" placeholder="客户微信号" /></div>
+          <div><label>淘宝账号</label><input id="taobao_account" value="${escapeHtml(existing?.taobao_account||'')}" placeholder="淘宝昵称/账号" /></div>
+          <div><label>业务大类</label><select id="category_id" onchange="onCategoryChange()"><option value="">请选择业务大类</option>${catOptions}</select></div>
+          <div><label>具体项目</label><select id="project_id" onchange="onProjectChange()"><option value="">请选择具体项目</option></select></div>
           <div class="full" id="dynamicFieldsBox"></div>
-
-          <div class="full">
-            <label>客户具体要求</label>
-            <textarea id="customer_requirements" placeholder="记录客户原始要求、重点要求、注意事项"></textarea>
-          </div>
-
-          <div class="full">
-            <label>格式要求</label>
-            <textarea id="format_requirements" placeholder="是否有模板、是否按通知要求、是否查重、是否降AI痕迹等"></textarea>
-          </div>
-
-          <div>
-            <label>截止时间</label>
-            <input id="due_at" type="datetime-local" />
-          </div>
-
-          <div>
-            <label>订单状态</label>
-            <select id="order_status">
-              <option value="待跟进">待跟进</option>
-              <option value="已报价">已报价</option>
-              <option value="待付定金">待付定金</option>
-              <option value="已付定金">已付定金</option>
-              <option value="进行中">进行中</option>
-              <option value="待收尾款">待收尾款</option>
-              <option value="已收全款">已收全款</option>
-              <option value="已交付">已交付</option>
-              <option value="修改中">修改中</option>
-              <option value="已完成">已完成</option>
-              <option value="已取消">已取消</option>
-              <option value="退款/异常">退款/异常</option>
-            </select>
-          </div>
-
-          <div>
-            <label>订单总金额</label>
-            <input id="total_amount" type="number" step="0.01" placeholder="如1500" oninput="updateBalancePreview()" />
-          </div>
-
-          <div>
-            <label>定金金额</label>
-            <input id="deposit_amount" type="number" step="0.01" placeholder="如500" oninput="updateBalancePreview()" />
-          </div>
-
-          <div>
-            <label>尾款金额</label>
-            <input id="balance_preview" readonly placeholder="系统自动计算" />
-          </div>
-
-          <div>
-            <label>定金状态</label>
-            <select id="deposit_status">
-              <option value="未付">未付</option>
-              <option value="已付">已付</option>
-            </select>
-          </div>
-
-          <div>
-            <label>定金收款时间</label>
-            <input id="deposit_paid_at" type="datetime-local" />
-          </div>
-
-          <div>
-            <label>尾款状态</label>
-            <select id="balance_status">
-              <option value="未付">未付</option>
-              <option value="已付">已付</option>
-            </select>
-          </div>
-
-          <div>
-            <label>尾款收款时间</label>
-            <input id="balance_paid_at" type="datetime-local" />
-          </div>
-
-          <div>
-            <label>退款金额</label>
-            <input id="refund_amount" type="number" step="0.01" value="0" />
-          </div>
-
-          <div class="full">
-            <label>客服备注</label>
-            <textarea id="service_notes" placeholder="客户沟通情况、特殊说明、催稿情况等"></textarea>
-          </div>
+          <div class="full"><label>客户具体要求</label><textarea id="customer_requirements" placeholder="把格式要求、客户原始要求、注意事项都写这里">${escapeHtml(existing?.customer_requirements||'')}</textarea></div>
+          <div><label>交稿时间</label><input id="due_at" type="datetime-local" value="${existing?.due_at?new Date(existing.due_at).toISOString().slice(0,16):''}" /></div>
+          <div><label>订单状态</label><select id="order_status">${['待跟进','已报价','待付定金','已付定金','进行中','待收尾款','已收全款','已交付','修改中','已完成','已取消','退款/异常'].map(s=>`<option value="${s}" ${existing?.order_status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div><label>订单总金额</label><input id="total_amount" type="number" step="0.01" value="${existing?.total_amount??0}" oninput="updateBalancePreview()" /></div>
+          <div><label>定金金额</label><input id="deposit_amount" type="number" step="0.01" value="${existing?.deposit_amount??0}" oninput="updateBalancePreview()" /></div>
+          <div><label>尾款金额</label><input id="balance_preview" readonly /></div>
+          <div><label>尾款状态</label><select id="balance_status"><option value="未付" ${existing?.balance_status!=='已付'?'selected':''}>未付</option><option value="已付" ${existing?.balance_status==='已付'?'selected':''}>已付</option></select></div>
+          <div><label>退款金额</label><input id="refund_amount" type="number" step="0.01" value="${existing?.refund_amount??0}" /></div>
+          <div class="full"><label>客服备注</label><textarea id="service_notes">${escapeHtml(existing?.service_notes||'')}</textarea></div>
         </div>
-
-        <button onclick="saveOrder()">保存订单</button>
-        <button class="ghost" onclick="renderOrderList()">查看订单列表</button>
+        <button onclick="${orderId?`saveOrder('${orderId}')`:'saveOrder()'}">${orderId?'保存修改':'保存订单'}</button>
+        <button class="ghost" onclick="renderOrderList()">返回查询</button>
         <div id="orderFormMsg"></div>
       </div>
     `);
+    if(existing?.category_id){await onCategoryChange(existing.project_id);await onProjectChange(existing.project_id,existing.dynamic_values||{})}
+    updateBalancePreview();
   }
-
-  function updateBalancePreview() {
-    const total = Number($('total_amount')?.value || 0);
-    const deposit = Number($('deposit_amount')?.value || 0);
-    const balance = total - deposit;
-    if ($('balance_preview')) $('balance_preview').value = balance.toFixed(2);
+  function updateBalancePreview(){
+    const total=Number($('total_amount')?.value||0),deposit=Number($('deposit_amount')?.value||0);
+    if($('balance_preview'))$('balance_preview').value=(total-deposit).toFixed(2);
   }
-
-  async function onCategoryChange() {
-    const categoryId = $('category_id').value;
-    const list = projects.filter(p => p.category_id === categoryId);
-
-    $('project_id').innerHTML =
-      '<option value="">请选择具体项目</option>' +
-      list.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-
-    $('dynamicFieldsBox').innerHTML = '';
+  async function onCategoryChange(selectedProjectId=''){
+    const cid=$('category_id').value,list=projects.filter(p=>p.category_id===cid);
+    $('project_id').innerHTML='<option value="">请选择具体项目</option>'+list.map(p=>`<option value="${p.id}" ${selectedProjectId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('');
+    $('dynamicFieldsBox').innerHTML='';
   }
-
-  async function onProjectChange() {
-    const projectId = $('project_id').value;
-    const box = $('dynamicFieldsBox');
-
-    if (!projectId) {
-      box.innerHTML = '';
-      return;
-    }
-
-    try {
-      const fields = await getProjectFields(projectId);
-      if (!fields.length) {
-        box.innerHTML = '<div class="warn">该项目暂未配置专属字段，只填写通用字段即可。</div>';
-        return;
-      }
-
-      box.innerHTML = `
-        <div class="card" style="box-shadow:none;background:#f9fafb;">
-          <h3>项目专属字段</h3>
-          <div class="form-grid">
-            ${fields.map(renderDynamicField).join('')}
-          </div>
-        </div>
-      `;
-    } catch (e) {
-      box.innerHTML = `<div class="error">加载项目字段失败：${e.message}</div>`;
-    }
+  async function onProjectChange(selectedProjectId='',values={}){
+    const pid=selectedProjectId||$('project_id').value,box=$('dynamicFieldsBox');
+    if(!pid){box.innerHTML='';return}
+    const fields=await getProjectFields(pid);
+    box.innerHTML= fields.length ? `
+      <div class="card" style="box-shadow:none;background:#f9fafb">
+        <h3>项目专属字段</h3>
+        <div class="form-grid">${fields.map(f=>renderDynamicField(f,values[f.field_key])).join('')}</div>
+      </div>` : '<div class="warn">该项目暂未配置专属字段。</div>';
   }
-
-  function renderDynamicField(f) {
-    const req = f.is_required ? ' required ' : '';
-    const label = `${f.field_label}${f.is_required ? ' *' : ''}`;
-    const id = 'dyn_' + f.field_key;
-
-    if (f.field_type === 'textarea') {
-      return `
-        <div class="full">
-          <label>${label}</label>
-          <textarea id="${id}" ${req} placeholder="${f.placeholder || ''}"></textarea>
-        </div>
-      `;
-    }
-
-    if (f.field_type === 'select') {
-      const opts = Array.isArray(f.options) ? f.options : [];
-      return `
-        <div>
-          <label>${label}</label>
-          <select id="${id}" ${req}>
-            <option value="">请选择</option>
-            ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-          </select>
-        </div>
-      `;
-    }
-
-    if (f.field_type === 'multi_select') {
-      const opts = Array.isArray(f.options) ? f.options : [];
-      return `
-        <div>
-          <label>${label}</label>
-          <select id="${id}" ${req} multiple>
-            ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
-          </select>
-          <div class="muted small">按住 Command 可多选</div>
-        </div>
-      `;
-    }
-
-    if (f.field_type === 'boolean') {
-      return `
-        <div>
-          <label>${label}</label>
-          <select id="${id}">
-            <option value="">请选择</option>
-            <option value="是">是</option>
-            <option value="否">否</option>
-          </select>
-        </div>
-      `;
-    }
-
-    const inputType = f.field_type === 'number' ? 'number' :
-                      f.field_type === 'date' ? 'date' :
-                      f.field_type === 'datetime' ? 'datetime-local' : 'text';
-
-    return `
-      <div>
-        <label>${label}</label>
-        <input id="${id}" type="${inputType}" ${req} placeholder="${f.placeholder || ''}" />
-      </div>
-    `;
+  function renderDynamicField(f,val=''){
+    const label=escapeHtml(f.field_label)+(f.is_required?' *':''),id='dyn_'+f.field_key;
+    if(f.field_type==='textarea')return `<div class="full"><label>${label}</label><textarea id="${id}" placeholder="${escapeHtml(f.placeholder||'')}">${escapeHtml(val||'')}</textarea></div>`;
+    if(f.field_type==='select'){const opts=Array.isArray(f.options)?f.options:[];return `<div><label>${label}</label><select id="${id}"><option value="">请选择</option>${opts.map(o=>`<option value="${escapeHtml(o)}" ${val===o?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></div>`}
+    if(f.field_type==='multi_select'){const vals=Array.isArray(val)?val:[];const opts=Array.isArray(f.options)?f.options:[];return `<div><label>${label}</label><select id="${id}" multiple>${opts.map(o=>`<option value="${escapeHtml(o)}" ${vals.includes(o)?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select><div class="muted small">按住 Command 可多选</div></div>`}
+    const type=f.field_type==='number'?'number':f.field_type==='date'?'date':f.field_type==='datetime'?'datetime-local':'text';
+    return `<div><label>${label}</label><input id="${id}" type="${type}" value="${escapeHtml(val||'')}" placeholder="${escapeHtml(f.placeholder||'')}" /></div>`;
   }
-
-  async function saveOrder() {
-    showMsg('orderFormMsg', '');
-
-    const wechat = $('wechat_account').value.trim();
-    const taobao = $('taobao_account').value.trim();
-
-    if (!wechat && !taobao) {
-      showMsg('orderFormMsg', '<div class="error">微信号和淘宝账号至少填写一个。</div>');
-      return;
+  async function saveOrder(orderId=null){
+    showMsg('orderFormMsg','');
+    const wechat=$('wechat_account').value.trim(),taobao=$('taobao_account').value.trim();
+    if(!wechat&&!taobao){showMsg('orderFormMsg','<div class="error">微信号和淘宝账号至少填写一个。</div>');return}
+    const categoryId=$('category_id').value,projectId=$('project_id').value;
+    if(!categoryId||!projectId){showMsg('orderFormMsg','<div class="error">请选择业务大类和具体项目。</div>');return}
+    const fields=await getProjectFields(projectId),dynamicValues={};
+    for(const f of fields){
+      const el=$('dyn_'+f.field_key); if(!el)continue;
+      let v=f.field_type==='multi_select'?Array.from(el.selectedOptions).map(o=>o.value):el.value;
+      if(f.is_required&&(Array.isArray(v)?!v.length:!v)){showMsg('orderFormMsg',`<div class="error">请填写必填字段：${escapeHtml(f.field_label)}</div>`);return}
+      dynamicValues[f.field_key]=v;
     }
-
-    const categoryId = $('category_id').value;
-    const projectId = $('project_id').value;
-
-    if (!categoryId || !projectId) {
-      showMsg('orderFormMsg', '<div class="error">请选择业务大类和具体项目。</div>');
-      return;
-    }
-
-    const fields = await getProjectFields(projectId);
-    const dynamicValues = {};
-
-    for (const f of fields) {
-      const el = $('dyn_' + f.field_key);
-      if (!el) continue;
-
-      let value = '';
-
-      if (f.field_type === 'multi_select') {
-        value = Array.from(el.selectedOptions).map(o => o.value);
-      } else {
-        value = el.value;
-      }
-
-      if (f.is_required) {
-        const empty = Array.isArray(value) ? value.length === 0 : !value;
-        if (empty) {
-          showMsg('orderFormMsg', `<div class="error">请填写必填字段：${f.field_label}</div>`);
-          return;
-        }
-      }
-
-      dynamicValues[f.field_key] = value;
-    }
-
-    const project = projects.find(p => p.id === projectId);
-    const orderNo = generateOrderNo(project ? project.code : 'ORDER');
-
-    const payload = {
-      order_no: orderNo,
-      created_by: currentUser.id,
-      category_id: categoryId,
-      project_id: projectId,
-
-      wechat_account: wechat || null,
-      taobao_account: taobao || null,
-      customer_source: $('customer_source').value,
-      contact_platform: $('contact_platform').value,
-
-      title: $('title').value.trim(),
-      word_count: $('word_count').value.trim(),
-      customer_requirements: $('customer_requirements').value.trim(),
-      format_requirements: $('format_requirements').value.trim(),
-      due_at: toISO($('due_at').value),
-      dynamic_values: dynamicValues,
-
-      order_status: $('order_status').value,
-
-      total_amount: Number($('total_amount').value || 0),
-      deposit_amount: Number($('deposit_amount').value || 0),
-      deposit_status: $('deposit_status').value,
-      deposit_paid_at: toISO($('deposit_paid_at').value),
-      balance_status: $('balance_status').value,
-      balance_paid_at: toISO($('balance_paid_at').value),
-      refund_amount: Number($('refund_amount').value || 0),
-
-      service_notes: $('service_notes').value.trim()
+    const title=dynamicValues.project_title||dynamicValues.micro_topic||dynamicValues.course_topic||dynamicValues.project_name||'';
+    const word=dynamicValues.word_count_req||dynamicValues.page_or_word_req||'';
+    const payload={
+      created_by:currentUser.id,category_id:categoryId,project_id:projectId,assigned_writing_user_id:$('assigned_writing_user_id').value||null,
+      wechat_account:wechat||null,taobao_account:taobao||null,customer_source:$('customer_source').value||null,contact_platform:'微信',
+      title:title||null,word_count:word||null,customer_requirements:$('customer_requirements').value.trim(),format_requirements:null,
+      due_at:toISO($('due_at').value),dynamic_values:dynamicValues,order_status:$('order_status').value,
+      total_amount:Number($('total_amount').value||0),deposit_amount:Number($('deposit_amount').value||0),
+      deposit_status:Number($('deposit_amount').value||0)>0?'已付':'未付',balance_status:$('balance_status').value,refund_amount:Number($('refund_amount').value||0),
+      service_notes:$('service_notes').value.trim()
     };
-
-    const { error } = await client
-      .from('orders')
-      .insert(payload);
-
-    if (error) {
-      showMsg('orderFormMsg', `<div class="error">保存失败：${error.message}</div>`);
-      return;
-    }
-
-    showMsg('orderFormMsg', `<div class="success">订单保存成功，订单编号：${orderNo}</div>`);
+    const q=orderId?client.from('orders').update(payload).eq('id',orderId):client.from('orders').insert(payload).select('order_no').single();
+    const {data,error}=await q;
+    if(error){showMsg('orderFormMsg',`<div class="error">保存失败：${error.message}</div>`);return}
+    showMsg('orderFormMsg',`<div class="success">保存成功${data?.order_no?'，订单编号：'+data.order_no:''}</div>`);
   }
 
-  function generateOrderNo(code) {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const r = Math.floor(Math.random() * 9000 + 1000);
-    return `${code}-${y}${m}${day}-${r}`;
+  function searchFilter(rows,kw,fields){
+    kw=(kw||'').trim().toLowerCase(); if(!kw)return rows;
+    return rows.filter(r=>fields.some(f=>String(f(r)??'').toLowerCase().includes(kw)));
+  }
+  function renderSearchBox(fn,placeholder='输入订单编号/关键词查询'){
+    return `<div class="searchbar"><div><label>查询关键词</label><input id="search_kw" placeholder="${placeholder}" /></div><div></div><button onclick="${fn}()">查询</button><button class="ghost" onclick="$('search_kw').value='';${fn}()">清空</button></div>`;
   }
 
-  async function renderOrderList() {
-    if (!['admin', 'service'].includes(currentProfile.role)) {
-      showContent('<div class="card"><div class="error">你没有查看客服订单列表的权限。</div></div>');
-      return;
-    }
+  async function renderOrderList(){
+    if(!['admin','service'].includes(currentProfile.role)){showContent('<div class="card"><div class="error">无权限。</div></div>');return}
+    const kw=$('search_kw')?.value||'';
+    const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
+    const {data,error}=await client.from(view).select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);return}
+    const rows=searchFilter(data||[],kw,[r=>r.order_no,r=>r.wechat_account,r=>r.taobao_account,r=>r.customer_source,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>mainWord(r),r=>r.customer_requirements,r=>approvalText(r),r=>r.assigned_writing_name]);
+    showContent(`<div class="card"><h2>${currentProfile.role==='admin'?'全部订单查询':'我的订单查询'}</h2>${renderSearchBox('renderOrderList','可查订单编号、微信号、淘宝账号、题目、要求、是否立项')}<button class="ghost" onclick="renderOrderForm()">新增订单</button><div class="muted" style="margin:10px 0">共 ${rows.length} 条</div>${renderServiceTable(rows)}</div>`);
+    if(kw)$('search_kw').value=kw;
+  }
+  function renderServiceTable(rows){
+    if(!rows.length)return '<div class="warn">暂无订单。</div>';
+    return `<div class="table-wrap"><table><thead><tr><th>编号</th><th>业务/项目</th><th>客户账号</th><th>项目核心信息</th><th>是否立项</th><th>交稿时间</th><th>状态</th><th>金额</th><th>派给写作部</th><th>操作</th>${currentProfile.role==='admin'?'<th>写手/稿费</th><th>利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td><strong>${escapeHtml(mainTitle(r))}</strong><br><span class="muted">${escapeHtml(mainWord(r))}</span><br>${escapeHtml(r.customer_requirements||'')}</td><td>${approvalText(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>定：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)} ${r.balance_status||''}</td><td>${r.assigned_writing_name||'-'}</td><td><button class="ghost" onclick="renderOrderForm('${r.id}')">修改</button></td>${currentProfile.role==='admin'?`<td>${r.writer_name||'-'}<br>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`;
+  }
 
-    showContent(`<div class="card"><h2>订单列表</h2><div class="muted">正在加载...</div></div>`);
+  async function renderWritingOrders(){
+    if(!['admin','writing'].includes(currentProfile.role)){showContent('<div class="card"><div class="error">无权限。</div></div>');return}
+    const kw=$('search_kw')?.value||'';
+    const {data,error}=await client.from('v_writing_orders').select('*').order('due_at',{ascending:true});
+    if(error){showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);return}
+    const rows=searchFilter(data||[],kw,[r=>r.order_no,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>mainWord(r),r=>r.customer_requirements,r=>r.writing_status,r=>r.writer_name]);
+    showContent(`<div class="card"><h2>写作订单查询</h2><div class="warn">写作部只看派给自己的订单，不显示客户微信、淘宝账号和成交价格。</div>${renderSearchBox('renderWritingOrders','可查订单编号、题目、要求、写手、状态')}<div class="muted" style="margin:10px 0">共 ${rows.length} 条</div>${renderWritingTable(rows)}</div>`);
+    if(kw)$('search_kw').value=kw;
+  }
+  function renderWritingTable(rows){
+    if(!rows.length)return '<div class="warn">暂无写作订单。</div>';
+    return `<div class="table-wrap"><table><thead><tr><th>编号</th><th>业务/项目</th><th>项目核心信息</th><th>交稿时间</th><th>订单状态</th><th>派给</th><th>写手</th><th>稿费</th><th>写作状态</th><th>结算</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td><strong>${escapeHtml(mainTitle(r))}</strong><br><span class="muted">${escapeHtml(mainWord(r))}</span><br>${escapeHtml(r.customer_requirements||'')}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>${r.assigned_writing_name||'-'}</td><td>${r.writer_name||'-'}</td><td>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${r.writing_status||'-'}</td><td>${r.settlement_status||'-'}</td></tr>`).join('')}</tbody></table></div>`;
+  }
 
-    const view = currentProfile.role === 'admin' ? 'v_admin_orders_full' : 'v_service_orders';
+  async function renderFinanceOrders(){
+    if(!['admin','finance'].includes(currentProfile.role)){showContent('<div class="card"><div class="error">无权限。</div></div>');return}
+    const kw=$('search_kw')?.value||'';
+    const {data,error}=await client.from('v_finance_orders').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);return}
+    const rows=searchFilter(data||[],kw,[r=>r.order_no,r=>r.service_name,r=>r.assigned_writing_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.writer_name,r=>r.order_status]);
+    showContent(`<div class="card"><h2>财务订单查询</h2>${renderSearchBox('renderFinanceOrders','可查订单编号、客服、写作部、业务、写手、状态')}<div class="muted" style="margin:10px 0">共 ${rows.length} 条</div>${renderFinanceTable(rows)}</div>`);
+    if(kw)$('search_kw').value=kw;
+  }
+  function renderFinanceTable(rows){
+    if(!rows.length)return '<div class="warn">暂无财务订单。</div>';
+    return `<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>写作部</th><th>业务/项目</th><th>状态</th><th>金额</th><th>写手/稿费</th><th>结算</th><th>毛利润</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.service_name||'-'}</td><td>${r.assigned_writing_name||'-'}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>定：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)} ${r.balance_status||''}<br>退：${money(r.refund_amount)}</td><td>${r.writer_name||'-'}<br>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${r.settlement_status||'-'}<br>已结：${money(r.settled_amount)}</td><td>${money(r.gross_profit)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
 
-    const { data, error } = await client
-      .from(view)
-      .select('*')
-      .order('created_at', { ascending: false });
+  async function renderSourceManage(){
+    if(currentProfile.role!=='admin'){showContent('<div class="card"><div class="error">仅管理员可用。</div></div>');return}
+    await loadBaseData(true);
+    showContent(`<div class="card"><h2>客户来源管理</h2><div class="form-grid"><div><label>新增来源</label><input id="new_source_name" placeholder="如：视频号、闲鱼、转介绍" /></div><div><label>排序</label><input id="new_source_sort" type="number" value="10" /></div></div><button onclick="addCustomerSource()">添加来源</button><div id="sourceMsg"></div><div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>来源</th><th>排序</th><th>状态</th><th>操作</th></tr></thead><tbody>${customerSources.map(s=>`<tr><td>${escapeHtml(s.name)}</td><td>${s.sort_order}</td><td>${s.is_active?'启用':'停用'}</td><td><button class="danger" onclick="disableSource('${s.id}')">停用</button></td></tr>`).join('')}</tbody></table></div></div>`);
+  }
+  async function addCustomerSource(){const name=$('new_source_name').value.trim();if(!name){showMsg('sourceMsg','<div class="error">请输入来源名称。</div>');return}const {error}=await client.from('customer_sources').insert({name,sort_order:Number($('new_source_sort').value||10)});if(error){showMsg('sourceMsg','<div class="error">'+error.message+'</div>');return}await renderSourceManage()}
+  async function disableSource(id){await client.from('customer_sources').update({is_active:false}).eq('id',id);await renderSourceManage()}
 
-    if (error) {
-      showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);
-      return;
-    }
-
-    const rows = data || [];
-
+  async function renderBusinessManage(){
+    if(currentProfile.role!=='admin'){showContent('<div class="card"><div class="error">仅管理员可用。</div></div>');return}
+    await loadBaseData(true);
+    const catOptions=categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    const proOptions=projects.map(p=>`<option value="${p.id}">${escapeHtml(categories.find(c=>c.id===p.category_id)?.name||'-')} / ${escapeHtml(p.name)}</option>`).join('');
     showContent(`
       <div class="card">
-        <h2>${currentProfile.role === 'admin' ? '全部订单' : '我的订单'}</h2>
-        <button class="ghost" onclick="renderOrderForm()">新增订单</button>
-        <button class="ghost" onclick="renderOrderList()">刷新</button>
-        <div class="muted" style="margin:10px 0;">共 ${rows.length} 条</div>
-        ${renderServiceOrderTable(rows)}
-      </div>
-    `);
+        <h2>业务大类、具体项目、项目字段管理</h2>
+        <div class="info">项目编号在后台自动生成，页面不显示。删除采用“停用”，避免影响历史订单。</div>
+        <h3>新增业务大类</h3>
+        <div class="form-grid"><div><label>业务大类名称</label><input id="new_cat_name" placeholder="如：论文类、课件类" /></div><div><label>排序</label><input id="new_cat_sort" type="number" value="10" /></div></div>
+        <button onclick="addCategory()">添加业务大类</button>
+        <h3 style="margin-top:18px">新增具体项目</h3>
+        <div class="form-grid"><div><label>所属业务大类</label><select id="new_project_cat">${catOptions}</select></div><div><label>具体项目名称</label><input id="new_project_name" placeholder="如：职称论文、说课稿" /></div><div><label>排序</label><input id="new_project_sort" type="number" value="10" /></div></div>
+        <button onclick="addProject()">添加具体项目</button>
+        <h3 style="margin-top:18px">新增项目专属字段</h3>
+        <div class="form-grid"><div><label>选择项目</label><select id="field_project_id">${proOptions}</select></div><div><label>字段名称</label><input id="field_label" placeholder="如：是否立项、字数要求" /></div><div><label>字段类型</label><select id="field_type"><option value="text">单行文本</option><option value="textarea">多行文本</option><option value="number">数字</option><option value="date">日期</option><option value="datetime">日期时间</option><option value="select">单选</option><option value="multi_select">多选</option></select></div><div><label>选项</label><input id="field_options" placeholder="单选/多选用，逗号分隔，如：是,否,未知" /></div><div><label>是否必填</label><select id="field_required"><option value="false">否</option><option value="true">是</option></select></div><div><label>排序</label><input id="field_sort" type="number" value="10" /></div></div>
+        <button onclick="addProjectField()">添加字段</button>
+        <div id="bizMsg"></div>
+        <h3 style="margin-top:18px">现有项目</h3>
+        <div class="table-wrap"><table><thead><tr><th>业务大类</th><th>具体项目</th><th>状态</th><th>操作</th></tr></thead><tbody>${projects.map(p=>`<tr><td>${escapeHtml(categories.find(c=>c.id===p.category_id)?.name||'-')}</td><td>${escapeHtml(p.name)}</td><td>${p.is_active?'启用':'停用'}</td><td><button class="danger" onclick="disableProject('${p.id}')">停用</button></td></tr>`).join('')}</tbody></table></div>
+      </div>`);
   }
+  function makeCode(prefix){return prefix+'-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999)}
+  async function addCategory(){const name=$('new_cat_name').value.trim();if(!name){showMsg('bizMsg','<div class="error">请输入业务大类名称。</div>');return}const {error}=await client.from('business_categories').insert({name,code:makeCode('CAT'),sort_order:Number($('new_cat_sort').value||10)});if(error){showMsg('bizMsg','<div class="error">'+error.message+'</div>');return}categories=[];projects=[];await renderBusinessManage()}
+  async function addProject(){const name=$('new_project_name').value.trim(),category_id=$('new_project_cat').value;if(!name||!category_id){showMsg('bizMsg','<div class="error">请选择业务大类并填写项目名称。</div>');return}const {error}=await client.from('service_projects').insert({name,category_id,code:makeCode('PRJ'),sort_order:Number($('new_project_sort').value||10)});if(error){showMsg('bizMsg','<div class="error">'+error.message+'</div>');return}categories=[];projects=[];await renderBusinessManage()}
+  async function addProjectField(){const project_id=$('field_project_id').value,label=$('field_label').value.trim(),type=$('field_type').value;if(!project_id||!label){showMsg('bizMsg','<div class="error">请选择项目并填写字段名称。</div>');return}const options=$('field_options').value.trim()?$('field_options').value.split(',').map(x=>x.trim()).filter(Boolean):[];const key='f_'+Date.now().toString(36);const {error}=await client.from('project_fields').insert({project_id,field_key:key,field_label:label,field_type:type,is_required:$('field_required').value==='true',options,sort_order:Number($('field_sort').value||10),is_active:true});if(error){showMsg('bizMsg','<div class="error">'+error.message+'</div>');return}fieldsCache={};showMsg('bizMsg','<div class="success">字段已添加。</div>')}
+  async function disableProject(id){await client.from('service_projects').update({is_active:false}).eq('id',id);categories=[];projects=[];await renderBusinessManage()}
 
-  function renderServiceOrderTable(rows) {
-    if (!rows.length) {
-      return '<div class="warn">暂无订单。</div>';
-    }
+  async function renderAccountManage(){
+    if(currentProfile.role!=='admin'){showContent('<div class="card"><div class="error">仅管理员可用。</div></div>');return}
+    await loadBaseData(true);
+    showContent(`<div class="card"><h2>账号管理</h2><div class="info">员工可自己注册，但默认待审核。管理员在这里分配部门并启用。这里采用停用账号，不直接删除历史账号。</div><div class="table-wrap"><table><thead><tr><th>名称</th><th>角色</th><th>状态</th><th>修改角色</th><th>操作</th></tr></thead><tbody>${profiles.map(p=>`<tr><td>${escapeHtml(p.display_name)}</td><td>${roleMap[p.role]||p.role}</td><td>${p.is_active?'启用':'停用/待审核'}</td><td><select id="role_${p.id}">${['pending','service','writing','finance','admin'].map(r=>`<option value="${r}" ${p.role===r?'selected':''}>${roleMap[r]}</option>`).join('')}</select></td><td><button onclick="updateAccount('${p.id}',true)">保存并启用</button><button class="danger" onclick="updateAccount('${p.id}',false)">停用</button></td></tr>`).join('')}</tbody></table></div></div>`);
+  }
+  async function updateAccount(id,active){const role=$('role_'+id).value;const {error}=await client.from('profiles').update({role,is_active:active}).eq('id',id);if(error)alert(error.message);await renderAccountManage()}
 
-    return `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>订单编号</th>
-              <th>业务项目</th>
-              <th>客户账号</th>
-              <th>题目/主题</th>
-              <th>订单状态</th>
-              <th>总金额</th>
-              <th>定金</th>
-              <th>尾款</th>
-              <th>截止时间</th>
-              <th>录单客服</th>
-              ${currentProfile.role === 'admin' ? '<th>写手/稿费</th><th>利润</th>' : ''}
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(r => `
-              <tr>
-                <td>${r.order_no || '-'}</td>
-                <td>${r.business_category || '-'} / ${r.service_project || '-'}</td>
-                <td>
-                  微信：${r.wechat_account || '-'}<br>
-                  淘宝：${r.taobao_account || '-'}
-                </td>
-                <td>
-                  <strong>${r.title || '-'}</strong><br>
-                  <span class="muted">${r.word_count || ''}</span>
-                </td>
-                <td>${r.order_status || '-'}</td>
-                <td>${money(r.total_amount)}</td>
-                <td>${money(r.deposit_amount)}<br><span class="muted">${r.deposit_status || '-'}</span></td>
-                <td>${money(r.balance_amount)}<br><span class="muted">${r.balance_status || '-'}</span></td>
-                <td>${fmtDate(r.due_at)}</td>
-                <td>${r.service_name || '-'}</td>
-                ${currentProfile.role === 'admin' ? `
-                  <td>${r.writer_name || '-'}<br><span class="muted">${r.writer_fee ? money(r.writer_fee) : '-'}</span></td>
-                  <td>${r.gross_profit !== undefined && r.gross_profit !== null ? money(r.gross_profit) : '-'}</td>
-                ` : ''}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+  async function renderReportView(){
+    if(currentProfile.role!=='admin'){showContent('<div class="card"><div class="error">仅管理员可用。</div></div>');return}
+    const end=todayISO(),start=new Date(Date.now()-6*864e5).toISOString().slice(0,10);
+    showContent(`<div class="card"><h2>统计报表</h2><div class="info">输入时间范围查询，不再固定摆日报/月报/年报。</div><div class="form-grid"><div><label>开始日期</label><input id="report_start" type="date" value="${start}" /></div><div><label>结束日期</label><input id="report_end" type="date" value="${end}" /></div></div><div class="nav"><button onclick="setReportRange('today')">今天</button><button onclick="setReportRange('yesterday')">昨天</button><button onclick="setReportRange('7days')">最近7天</button><button onclick="setReportRange('month')">本月</button><button onclick="setReportRange('lastmonth')">上个月</button><button onclick="setReportRange('year')">今年</button><button class="secondary" onclick="queryReport()">查询</button></div><div id="reportBox"></div></div>`);
+    await queryReport();
+  }
+  function setReportRange(type){
+    const d=new Date();let s,e=new Date();
+    if(type==='today'){s=new Date();e=new Date()}
+    if(type==='yesterday'){s=new Date(Date.now()-864e5);e=new Date(Date.now()-864e5)}
+    if(type==='7days'){s=new Date(Date.now()-6*864e5);e=new Date()}
+    if(type==='month'){s=new Date(d.getFullYear(),d.getMonth(),1);e=new Date()}
+    if(type==='lastmonth'){s=new Date(d.getFullYear(),d.getMonth()-1,1);e=new Date(d.getFullYear(),d.getMonth(),0)}
+    if(type==='year'){s=new Date(d.getFullYear(),0,1);e=new Date()}
+    $('report_start').value=s.toISOString().slice(0,10);$('report_end').value=e.toISOString().slice(0,10);queryReport();
+  }
+  async function queryReport(){
+    const s=$('report_start').value,e=$('report_end').value;
+    const start=s+'T00:00:00',end=e+'T23:59:59';
+    const {data,error}=await client.from('v_admin_orders_full').select('*').gte('created_at',start).lte('created_at',end);
+    if(error){$('reportBox').innerHTML='<div class="error">'+error.message+'</div>';return}
+    const rows=data||[];
+    const total=rows.reduce((a,r)=>a+Number(r.total_amount||0),0),deposit=rows.reduce((a,r)=>a+Number(r.deposit_amount||0),0),balance=rows.reduce((a,r)=>a+Number(r.balance_amount||0),0),receivedBalance=rows.filter(r=>r.balance_status==='已付').reduce((a,r)=>a+Number(r.balance_amount||0),0),refund=rows.reduce((a,r)=>a+Number(r.refund_amount||0),0),income=rows.reduce((a,r)=>a+Number(r.actual_income||0),0),fee=rows.reduce((a,r)=>a+Number(r.writer_fee||0),0);
+    const service=groupReport(rows,r=>r.service_name||'未指定客服');
+    const project=groupReport(rows,r=>(r.business_category||'-')+' / '+(r.service_project||'-'));
+    const writer=groupWriter(rows);
+    $('reportBox').innerHTML=`
+      <div class="card" style="box-shadow:none;background:#f9fafb"><h3>财务汇总</h3><div class="grid">${metric('订单数',rows.length)}${metric('成交金额',money(total))}${metric('定金合计',money(deposit))}${metric('尾款合计',money(balance))}${metric('已收尾款',money(receivedBalance))}${metric('未收尾款',money(balance-receivedBalance))}${metric('退款金额',money(refund))}${metric('实际收入',money(income))}${metric('写手稿费',money(fee))}${metric('毛利润',money(income-fee))}</div></div>
+      ${renderSimpleReport('客服接单统计',service)}
+      ${renderSimpleReport('业务项目统计',project)}
+      ${renderWriterReport(writer)}
     `;
   }
+  function metric(k,v){return `<div class="module"><h3>${v}</h3><div class="muted">${k}</div></div>`}
+  function groupReport(rows,keyFn){
+    const m={};rows.forEach(r=>{const k=keyFn(r);m[k]??={name:k,count:0,total:0,deposit:0,balance:0,receivedBalance:0,unpaidBalance:0,refund:0};m[k].count++;m[k].total+=Number(r.total_amount||0);m[k].deposit+=Number(r.deposit_amount||0);m[k].balance+=Number(r.balance_amount||0);if(r.balance_status==='已付')m[k].receivedBalance+=Number(r.balance_amount||0);else m[k].unpaidBalance+=Number(r.balance_amount||0);m[k].refund+=Number(r.refund_amount||0)});return Object.values(m)}
+  function renderSimpleReport(title,rows){return `<h3>${title}</h3><div class="table-wrap"><table><thead><tr><th>名称</th><th>订单数</th><th>成交金额</th><th>定金</th><th>尾款</th><th>已收尾款</th><th>未收尾款</th><th>退款</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.count}</td><td>${money(r.total)}</td><td>${money(r.deposit)}</td><td>${money(r.balance)}</td><td>${money(r.receivedBalance)}</td><td>${money(r.unpaidBalance)}</td><td>${money(r.refund)}</td></tr>`).join('')}</tbody></table></div>`}
+  function groupWriter(rows){const m={};rows.forEach(r=>{const k=r.writer_name||'未安排写手';m[k]??={name:k,count:0,fee:0,settled:0,unsettled:0};if(r.writer_name||r.writer_fee){m[k].count++;m[k].fee+=Number(r.writer_fee||0);m[k].settled+=Number(r.settled_amount||0);m[k].unsettled+=Number(r.writer_fee||0)-Number(r.settled_amount||0)}});return Object.values(m)}
+  function renderWriterReport(rows){return `<h3>写手结算统计</h3><div class="table-wrap"><table><thead><tr><th>写手</th><th>单数</th><th>稿费合计</th><th>已结算</th><th>未结算</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.count}</td><td>${money(r.fee)}</td><td>${money(r.settled)}</td><td>${money(r.unsettled)}</td></tr>`).join('')}</tbody></table></div>`}
 
-  async function renderWritingOrders() {
-    if (!['admin', 'writing'].includes(currentProfile.role)) {
-      showContent('<div class="card"><div class="error">你没有查看写作订单的权限。</div></div>');
-      return;
-    }
-
-    showContent(`<div class="card"><h2>写作订单</h2><div class="muted">正在加载...</div></div>`);
-
-    const { data, error } = await client
-      .from('v_writing_orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);
-      return;
-    }
-
-    const rows = data || [];
-
-    showContent(`
-      <div class="card">
-        <h2>写作订单</h2>
-        <div class="warn">这一页不会显示客户微信、淘宝账号，也不会显示订单成交价格。</div>
-        <button class="ghost" onclick="renderWritingOrders()">刷新</button>
-        <div class="muted" style="margin:10px 0;">共 ${rows.length} 条</div>
-        ${renderWritingTable(rows)}
-      </div>
-    `);
-  }
-
-  function renderWritingTable(rows) {
-    if (!rows.length) return '<div class="warn">暂无写作订单。</div>';
-
-    return `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>订单编号</th>
-              <th>业务项目</th>
-              <th>题目/主题</th>
-              <th>字数</th>
-              <th>客户要求</th>
-              <th>截止时间</th>
-              <th>是否收定金</th>
-              <th>写手</th>
-              <th>稿费</th>
-              <th>写作状态</th>
-              <th>结算状态</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(r => `
-              <tr>
-                <td>${r.order_no || '-'}</td>
-                <td>${r.business_category || '-'} / ${r.service_project || '-'}</td>
-                <td><strong>${r.title || '-'}</strong></td>
-                <td>${r.word_count || '-'}</td>
-                <td>${r.customer_requirements || '-'}</td>
-                <td>${fmtDate(r.due_at)}</td>
-                <td>${r.deposit_paid ? '已付' : '未付/未确认'}</td>
-                <td>${r.writer_name || '-'}</td>
-                <td>${r.writer_fee ? money(r.writer_fee) : '-'}</td>
-                <td>${r.writing_status || '-'}</td>
-                <td>${r.settlement_status || '-'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  async function renderFinanceOrders() {
-    if (!['admin', 'finance'].includes(currentProfile.role)) {
-      showContent('<div class="card"><div class="error">你没有查看财务订单的权限。</div></div>');
-      return;
-    }
-
-    showContent(`<div class="card"><h2>财务订单</h2><div class="muted">正在加载...</div></div>`);
-
-    const { data, error } = await client
-      .from('v_finance_orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);
-      return;
-    }
-
-    const rows = data || [];
-
-    showContent(`
-      <div class="card">
-        <h2>财务订单</h2>
-        <button class="ghost" onclick="renderFinanceOrders()">刷新</button>
-        <div class="muted" style="margin:10px 0;">共 ${rows.length} 条</div>
-        ${renderFinanceTable(rows)}
-      </div>
-    `);
-  }
-
-  function renderFinanceTable(rows) {
-    if (!rows.length) return '<div class="warn">暂无财务订单。</div>';
-
-    return `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>订单编号</th>
-              <th>客服</th>
-              <th>业务项目</th>
-              <th>订单状态</th>
-              <th>总金额</th>
-              <th>定金</th>
-              <th>尾款</th>
-              <th>退款</th>
-              <th>实收</th>
-              <th>写手</th>
-              <th>稿费</th>
-              <th>结算</th>
-              <th>毛利润</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(r => `
-              <tr>
-                <td>${r.order_no || '-'}</td>
-                <td>${r.service_name || '-'}</td>
-                <td>${r.business_category || '-'} / ${r.service_project || '-'}</td>
-                <td>${r.order_status || '-'}</td>
-                <td>${money(r.total_amount)}</td>
-                <td>${money(r.deposit_amount)}<br><span class="muted">${r.deposit_status || '-'}</span></td>
-                <td>${money(r.balance_amount)}<br><span class="muted">${r.balance_status || '-'}</span></td>
-                <td>${money(r.refund_amount)}</td>
-                <td>${money(r.actual_income)}</td>
-                <td>${r.writer_name || '-'}</td>
-                <td>${r.writer_fee ? money(r.writer_fee) : '-'}</td>
-                <td>${r.settlement_status || '-'}</td>
-                <td>${money(r.gross_profit)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  async function renderBusinessView() {
-    if (currentProfile.role !== 'admin') {
-      showContent('<div class="card"><div class="error">只有管理员可以查看业务项目。</div></div>');
-      return;
-    }
-
-    try {
-      await loadBaseData();
-
-      const { data: fields, error } = await client
-        .from('project_fields')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-
-      const html = projects.map(p => {
-        const cat = categories.find(c => c.id === p.category_id);
-        const fs = (fields || []).filter(f => f.project_id === p.id);
-
-        return `
-          <tr>
-            <td>${cat ? cat.name : '-'}</td>
-            <td>${p.name}</td>
-            <td>${p.code}</td>
-            <td>${p.is_active ? '启用' : '停用'}</td>
-            <td>${fs.map(f => f.field_label).join('、') || '-'}</td>
-          </tr>
-        `;
-      }).join('');
-
-      showContent(`
-        <div class="card">
-          <h2>业务项目</h2>
-          <div class="warn">这一版先做查看。下一版再加“管理员新增/删除业务项目、配置字段”的按钮。</div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>业务大类</th>
-                  <th>具体项目</th>
-                  <th>项目编码</th>
-                  <th>状态</th>
-                  <th>项目字段</th>
-                </tr>
-              </thead>
-              <tbody>${html}</tbody>
-            </table>
-          </div>
-        </div>
-      `);
-    } catch (e) {
-      showContent(`<div class="card"><div class="error">加载失败：${e.message}</div></div>`);
-    }
-  }
-
-  async function renderReportView() {
-    if (currentProfile.role !== 'admin') {
-      showContent('<div class="card"><div class="error">只有管理员可以查看报表。</div></div>');
-      return;
-    }
-
-    showContent(`<div class="card"><h2>报表统计</h2><div class="muted">正在加载...</div></div>`);
-
-    const { data, error } = await client
-      .from('v_admin_service_report')
-      .select('*')
-      .order('period_start', { ascending: false });
-
-    if (error) {
-      showContent(`<div class="card"><div class="error">加载失败：${error.message}</div></div>`);
-      return;
-    }
-
-    const rows = data || [];
-
-    showContent(`
-      <div class="card">
-        <h2>客服接单报表</h2>
-        <div class="muted">包含日报、月报、年报。录入订单后这里会自动统计。</div>
-        <button class="ghost" onclick="renderReportView()">刷新</button>
-        ${renderReportTable(rows)}
-      </div>
-    `);
-  }
-
-  function renderReportTable(rows) {
-    if (!rows.length) return '<div class="warn">暂无报表数据。先录一条订单，报表就会出现。</div>';
-
-    return `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>周期</th>
-              <th>开始日期</th>
-              <th>客服</th>
-              <th>订单数</th>
-              <th>成交数</th>
-              <th>成交金额</th>
-              <th>已收定金</th>
-              <th>已收尾款</th>
-              <th>实收合计</th>
-              <th>未收尾款</th>
-              <th>退款</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(r => `
-              <tr>
-                <td>${r.period_type === 'day' ? '日报' : r.period_type === 'month' ? '月报' : '年报'}</td>
-                <td>${r.period_start || '-'}</td>
-                <td>${r.service_name || '-'}</td>
-                <td>${r.order_count || 0}</td>
-                <td>${r.deal_count || 0}</td>
-                <td>${money(r.total_amount)}</td>
-                <td>${money(r.received_deposit)}</td>
-                <td>${money(r.received_balance)}</td>
-                <td>${money(r.received_total)}</td>
-                <td>${money(r.unpaid_balance)}</td>
-                <td>${money(r.refund_amount)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  window.addEventListener('load', loadApp);
+  window.addEventListener('load',loadApp);
 </script>
 </body>
 </html>
