@@ -3,30 +3,166 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>客户录单系统 V6</title>
+  <title>客户录单系统 V7</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937}.login-page{max-width:520px;margin:38px auto;padding:0 16px}.layout{display:flex;min-height:100vh}.sidebar{width:238px;background:#111827;color:#fff;padding:18px 14px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{font-size:20px;font-weight:700;margin:4px 8px 18px}.side-info{font-size:12px;color:#cbd5e1;background:#1f2937;border-radius:12px;padding:10px;margin:0 4px 14px;line-height:1.7}.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#e5e7eb;padding:11px 12px;border-radius:10px;margin:4px 0;font-size:14px;cursor:pointer}.menu button:hover,.menu button.active{background:#2563eb;color:#fff}.main{margin-left:238px;flex:1;padding:24px;max-width:calc(100vw - 238px)}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);margin-bottom:16px}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 14px;font-size:21px}h3{margin:0 0 8px;font-size:17px}.muted{color:#6b7280;font-size:14px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}label{display:block;font-size:14px;margin:12px 0 6px;color:#374151}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;outline:none;background:#fff}textarea{min-height:86px;resize:vertical}button{border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin:6px 4px 6px 0}button.secondary{background:#111827}button.ghost{background:#eef2ff;color:#1f2937}button.danger{background:#dc2626}.tag{display:inline-block;padding:4px 9px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;margin-left:8px}.error{color:#b91c1c;margin-top:12px;font-size:14px}.success{color:#047857;margin-top:12px;font-size:14px}.warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.info{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.table-wrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px;margin-top:10px}table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;vertical-align:top}th{background:#f9fafb;color:#374151;white-space:nowrap}tr.overdue td{background:#fee2e2!important}tr.due-soon td{background:#ffedd5!important}tr.due-warning td{background:#fef9c3!important}tr.closed td{background:#f3f4f6!important;color:#6b7280}.searchbar{display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;margin:12px 0}.module{border:1px solid #e5e7eb;border-radius:14px;background:#fff;padding:18px}.drag-row{cursor:grab}.drag-row.dragging{opacity:.45}.modal-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(15,23,42,.45);z-index:99;display:flex;align-items:center;justify-content:center;padding:18px}.modal{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}.screen{background:radial-gradient(circle at top,#1d4ed8 0,#0f172a 42%,#020617 100%);color:#dbeafe;border-radius:22px;padding:24px;overflow:hidden;box-shadow:0 16px 50px rgba(15,23,42,.28)}.screen-title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.screen-title h2{font-size:28px;color:#fff;margin:0}.screen-title .time{color:#93c5fd}.screen-grid{display:grid;grid-template-columns:1.1fr 1.4fr 1.1fr;gap:16px}.big-num{font-size:32px;font-weight:800;color:#fff;letter-spacing:.5px;text-shadow:0 0 20px rgba(96,165,250,.45)}.screen-card{background:rgba(15,23,42,.72);border:1px solid rgba(147,197,253,.25);border-radius:18px;padding:16px;box-shadow:inset 0 0 28px rgba(37,99,235,.16)}.screen-card h3{color:#bfdbfe;font-size:15px;margin-bottom:12px}.ticker{height:250px;overflow:hidden;position:relative}.ticker-inner{animation:scrollUp 16s linear infinite}.ticker-item{padding:9px 0;border-bottom:1px solid rgba(147,197,253,.15);font-size:14px;color:#e0f2fe}@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}.rank-row{display:grid;grid-template-columns:32px 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid rgba(147,197,253,.14);font-size:14px}.rank-row b{color:#fff}.metric-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.metric-box{background:rgba(37,99,235,.18);border:1px solid rgba(96,165,250,.22);border-radius:14px;padding:12px}.metric-box .label{font-size:12px;color:#93c5fd}.metric-box .num{font-size:22px;color:#fff;font-weight:800;margin-top:4px}.todo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.todo{background:rgba(220,38,38,.15);border:1px solid rgba(248,113,113,.25);border-radius:14px;padding:12px;color:#fecaca}@media(max-width:1050px){.screen-grid,.grid,.form-grid,.searchbar,.todo-grid,.metric-mini{grid-template-columns:1fr}.main{padding:16px}}@media(max-width:900px){.layout{display:block}.sidebar{position:relative;width:100%;height:auto}.main{margin-left:0;max-width:100%;padding:14px}}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937}.login-page{max-width:520px;margin:38px auto;padding:0 16px}.layout{display:flex;min-height:100vh}.sidebar{width:238px;background:#111827;color:#fff;padding:18px 14px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{font-size:20px;font-weight:700;margin:4px 8px 18px}.side-info{font-size:12px;color:#cbd5e1;background:#1f2937;border-radius:12px;padding:10px;margin:0 4px 14px;line-height:1.7}.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#e5e7eb;padding:11px 12px;border-radius:10px;margin:4px 0;font-size:14px;cursor:pointer}.menu button:hover,.menu button.active{background:#2563eb;color:#fff}.main{margin-left:238px;flex:1;padding:24px;max-width:calc(100vw - 238px)}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);margin-bottom:16px}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 14px;font-size:21px}h3{margin:0 0 8px;font-size:17px}.muted{color:#6b7280;font-size:14px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}label{display:block;font-size:14px;margin:12px 0 6px;color:#374151}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;outline:none;background:#fff}textarea{min-height:86px;resize:vertical}button{border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin:6px 4px 6px 0}button.secondary{background:#111827}button.ghost{background:#eef2ff;color:#1f2937}button.danger{background:#dc2626}.tag{display:inline-block;padding:4px 9px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;margin-left:8px}.error{color:#b91c1c;margin-top:12px;font-size:14px}.success{color:#047857;margin-top:12px;font-size:14px}.warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.info{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.table-wrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px;margin-top:10px}table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;vertical-align:top}th{background:#f9fafb;color:#374151;white-space:nowrap}tr.overdue td{background:#fee2e2!important}tr.due-soon td{background:#ffedd5!important}tr.due-warning td{background:#fef9c3!important}tr.closed td{background:#f3f4f6!important;color:#6b7280}.searchbar{display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;margin:12px 0}.module{border:1px solid #e5e7eb;border-radius:14px;background:#fff;padding:18px}.drag-row{cursor:grab}.drag-row.dragging{opacity:.45}.modal-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(15,23,42,.45);z-index:99;display:flex;align-items:center;justify-content:center;padding:18px}.modal{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}.screen{background:radial-gradient(circle at top,#1d4ed8 0,#0f172a 42%,#020617 100%);color:#dbeafe;border-radius:22px;padding:24px;overflow:hidden;box-shadow:0 16px 50px rgba(15,23,42,.28)}.screen-title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.screen-title h2{font-size:28px;color:#fff;margin:0}.screen-title .time{color:#93c5fd}.screen-grid{display:grid;grid-template-columns:1.1fr 1.4fr 1.1fr;gap:16px}.big-num{font-size:32px;font-weight:800;color:#fff;letter-spacing:.5px;text-shadow:0 0 20px rgba(96,165,250,.45)}.screen-card{background:rgba(15,23,42,.72);border:1px solid rgba(147,197,253,.25);border-radius:18px;padding:16px;box-shadow:inset 0 0 28px rgba(37,99,235,.16)}.screen-card h3{color:#bfdbfe;font-size:15px;margin-bottom:12px}.ticker{height:250px;overflow:hidden;position:relative}.ticker-inner{animation:scrollUp 16s linear infinite}.ticker-item{padding:9px 0;border-bottom:1px solid rgba(147,197,253,.15);font-size:14px;color:#e0f2fe}@keyframes scrollUp{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}.rank-row{display:grid;grid-template-columns:32px 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid rgba(147,197,253,.14);font-size:14px}.rank-row b{color:#fff}.metric-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.metric-box{background:rgba(37,99,235,.18);border:1px solid rgba(96,165,250,.22);border-radius:14px;padding:12px}.metric-box .label{font-size:12px;color:#93c5fd}.metric-box .num{font-size:22px;color:#fff;font-weight:800;margin-top:4px}.todo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.todo{background:rgba(220,38,38,.15);border:1px solid rgba(248,113,113,.25);border-radius:14px;padding:12px;color:#fecaca}
+.order-modal{
+  max-width:1380px!important;
+  width:min(1380px,96vw)!important;
+  height:88vh;
+  padding:0!important;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 380px;
+  overflow:hidden!important;
+}
+.order-modal-left{
+  padding:20px 22px;
+  overflow:auto;
+  min-width:0;
+}
+.order-modal-right{
+  border-left:1px solid #e5e7eb;
+  background:#f8fafc;
+  padding:16px 14px;
+  overflow:auto;
+  min-width:0;
+}
+.order-toolbar{
+  position:sticky;
+  top:0;
+  z-index:3;
+  background:#fff;
+  padding:0 0 12px;
+  margin-bottom:8px;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.order-toolbar .title{
+  font-size:20px;
+  font-weight:700;
+  margin-right:auto;
+  color:#111827;
+}
+.section-title{
+  margin:18px 0 10px;
+  padding-bottom:8px;
+  border-bottom:1px solid #cbd5e1;
+  font-weight:700;
+  color:#334155;
+}
+.log-tabs{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#f8fafc;
+  padding-bottom:10px;
+  margin-bottom:10px;
+  border-bottom:1px solid #e5e7eb;
+}
+.log-tab{
+  display:inline-block;
+  color:#0f766e;
+  font-weight:700;
+  padding-bottom:8px;
+  border-bottom:2px solid #14b8a6;
+}
+.log-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 4px 14px rgba(15,23,42,.04);
+}
+.log-card .log-time{
+  text-align:right;
+  color:#6b7280;
+  font-size:12px;
+  margin-bottom:8px;
+}
+.log-card .log-user{
+  font-weight:700;
+  color:#111827;
+  margin-bottom:4px;
+}
+.log-card .log-action{
+  color:#6b7280;
+  font-size:13px;
+  margin-bottom:8px;
+}
+.log-field{
+  border-top:1px solid #edf2f7;
+  padding:8px 0;
+  font-size:13px;
+}
+.log-field-name{
+  color:#475569;
+  font-weight:600;
+  margin-bottom:5px;
+}
+.log-old{
+  display:inline-block;
+  background:#fee2e2;
+  color:#991b1b;
+  border-radius:6px;
+  padding:3px 7px;
+  margin:2px 4px 2px 0;
+  max-width:100%;
+  word-break:break-all;
+}
+.log-new{
+  display:inline-block;
+  background:#dcfce7;
+  color:#166534;
+  border-radius:6px;
+  padding:3px 7px;
+  margin:2px 0;
+  max-width:100%;
+  word-break:break-all;
+}
+@media(max-width:900px){
+  .order-modal{
+    display:block;
+    width:96vw!important;
+    height:90vh;
+    overflow:auto!important;
+  }
+  .order-modal-left,.order-modal-right{
+    overflow:visible;
+    border-left:0;
+  }
+  .order-modal-right{
+    border-top:1px solid #e5e7eb;
+  }
+}
+@media(max-width:1050px){.screen-grid,.grid,.form-grid,.searchbar,.todo-grid,.metric-mini{grid-template-columns:1fr}.main{padding:16px}}@media(max-width:900px){.layout{display:block}.sidebar{position:relative;width:100%;height:auto}.main{margin-left:0;max-width:100%;padding:14px}}
   </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1><div class="muted">V6：弹窗详情 / 右侧数据日志 / 复制订单 / 管理员删除</div></div><div id="loginBox" class="card"><h2>登录系统</h2><label>邮箱</label><input id="email" type="email" placeholder="请输入账号邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderRegister()">员工注册</button><button class="ghost" onclick="renderForgot()">忘记密码</button><div id="loginMsg"></div></div><div id="registerBox" class="card hidden"><h2>员工注册</h2><div class="info">注册后默认为待审核，需要管理员启用并分配部门。</div><label>姓名/内部称呼</label><input id="reg_name" placeholder="如：客服小王、发表部A" /><label>邮箱</label><input id="reg_email" type="email" /><label>密码</label><input id="reg_password" type="password" /><button onclick="registerAccount()">提交注册</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="registerMsg"></div></div><div id="forgotBox" class="card hidden"><h2>忘记密码</h2><label>注册邮箱</label><input id="forgot_email" type="email" /><button onclick="sendResetPassword()">发送重置邮件</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="forgotMsg"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1><div class="muted">V7：右侧日志 / 写手查询 / 管理员写手管理</div></div><div id="loginBox" class="card"><h2>登录系统</h2><label>邮箱</label><input id="email" type="email" placeholder="请输入账号邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderRegister()">员工注册</button><button class="ghost" onclick="renderForgot()">忘记密码</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div id="loginMsg"></div></div><div id="registerBox" class="card hidden"><h2>员工注册</h2><div class="info">注册后默认为待审核，需要管理员启用并分配部门。</div><label>姓名/内部称呼</label><input id="reg_name" placeholder="如：客服小王、发表部A" /><label>邮箱</label><input id="reg_email" type="email" /><label>密码</label><input id="reg_password" type="password" /><button onclick="registerAccount()">提交注册</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="registerMsg"></div></div><div id="forgotBox" class="card hidden"><h2>忘记密码</h2><label>注册邮箱</label><input id="forgot_email" type="email" /><button onclick="sendResetPassword()">发送重置邮件</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="forgotMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号和查询码，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 XS001 或手机号" /><label>查询码</label><input id="writer_query_code_public" placeholder="请输入查询码" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
 <div id="appArea" class="layout hidden"><aside class="sidebar"><div class="brand">录单系统</div><div class="side-info" id="sideUser"></div><div class="menu" id="menuBox"></div><button class="secondary" style="width:100%;margin-top:16px" onclick="logout()">退出登录</button></aside><main class="main"><div id="content"></div></main></div><div id="modalRoot"></div>
 <script>
 const SUPABASE_URL='https://kifnfihqavambwatclle.supabase.co';
-const SUPABASE_KEY='sb_publishable_BZaNc-i9sRnvkwTVjOF_dw_jbUoMFYs';
+const SUPABASE_KEY='这里粘贴你的 sb_publishable_ 开头的完整 key';
 const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null,categories=[],projects=[],customerSources=[],paymentMethods=[],profiles=[],writingUsers=[],publishingUsers=[],journals=[],writers=[],fieldsCache={};
 const roleMap={admin:'管理员',service:'客服部',writing:'写作部',publishing:'发表部',finance:'财务部',pending:'待审核'};
 const closedStatus=['已完成','已取消','退款/异常','已交付'];
 function $(id){return document.getElementById(id)}function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function money(v){return Number(v||0).toFixed(2)}function fmtDate(v){if(!v)return'-';try{return new Date(v).toLocaleString('zh-CN',{hour12:false})}catch(e){return v}}function toISO(v){return v?new Date(v).toISOString():null}function todayISO(){return new Date().toISOString().slice(0,10)}function msg(id,html){const el=$(id);if(el)el.innerHTML=html}function showContent(html){$('content').innerHTML=html;closeModal()}function getDyn(r,k){return r?.dynamic_values?.[k]??''}function mainTitle(r){return r.title||getDyn(r,'project_title')||getDyn(r,'micro_topic')||getDyn(r,'course_topic')||getDyn(r,'article_title')||getDyn(r,'project_name')||'-'}function mainWord(r){return r.word_count||getDyn(r,'word_count_req')||getDyn(r,'page_or_word_req')||''}function rowClass(r){const st=r.order_status||'';if(closedStatus.includes(st))return'closed';const due=r.due_at?new Date(r.due_at).getTime():null;if(!due)return'';const h=(due-Date.now())/36e5;if(h<0)return'overdue';if(h<=24)return'due-soon';if(h<=48)return'due-warning';return''}function isPublishProject(p){return p?.code?.startsWith('FB')||p?.name?.includes('发表')}function publishTypeByProject(p){return p?.name?.includes('写作')?'写作+发表':'只发表'}
-function renderRegister(){$('loginBox').classList.add('hidden');$('forgotBox').classList.add('hidden');$('registerBox').classList.remove('hidden')}function renderForgot(){$('loginBox').classList.add('hidden');$('registerBox').classList.add('hidden');$('forgotBox').classList.remove('hidden')}function showLogin(){$('registerBox').classList.add('hidden');$('forgotBox').classList.add('hidden');$('loginBox').classList.remove('hidden')}
+function renderRegister(){$('loginBox').classList.add('hidden');$('forgotBox').classList.add('hidden');$('writerQueryBox').classList.add('hidden');$('registerBox').classList.remove('hidden')}function renderForgot(){$('loginBox').classList.add('hidden');$('registerBox').classList.add('hidden');$('writerQueryBox').classList.add('hidden');$('forgotBox').classList.remove('hidden')}function showLogin(){$('registerBox').classList.add('hidden');$('forgotBox').classList.add('hidden');$('writerQueryBox').classList.add('hidden');$('loginBox').classList.remove('hidden')}
 async function registerAccount(){msg('registerMsg','');const name=$('reg_name').value.trim(),email=$('reg_email').value.trim(),password=$('reg_password').value;if(!name||!email||!password){msg('registerMsg','<div class="error">请填写完整。</div>');return}const {error}=await client.auth.signUp({email,password,options:{data:{display_name:name}}});if(error){msg('registerMsg','<div class="error">注册失败：'+error.message+'</div>');return}msg('registerMsg','<div class="success">注册成功，请联系管理员启用账号。</div>')}
 async function sendResetPassword(){msg('forgotMsg','');const email=$('forgot_email').value.trim();if(!email){msg('forgotMsg','<div class="error">请输入邮箱。</div>');return}const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error){msg('forgotMsg','<div class="error">'+error.message+'</div>');return}msg('forgotMsg','<div class="success">重置邮件已发送。</div>')}
+function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('registerBox').classList.add('hidden');$('forgotBox').classList.add('hidden');$('writerQueryBox').classList.remove('hidden')}
+async function queryWriterPublic(){msg('writerQueryMsg','');const identity=$('writer_identity').value.trim();const code=$('writer_query_code_public').value.trim();if(!identity||!code){msg('writerQueryMsg','<div class="error">请输入写手编号/手机号/微信号和查询码。</div>');return}const {data,error}=await client.rpc('writer_public_query',{p_identity:identity,p_query_code:code});if(error){msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');return}const rows=data||[];$('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>业务项目</th><th>题目</th><th>字数</th><th>交稿时间</th><th>写作状态</th><th>稿费</th><th>结算</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.order_no||'')}</td><td>${esc(r.business_category||'')}<br>${esc(r.service_project||'')}</td><td>${esc(r.project_title||'')}</td><td>${esc(r.word_count_req||'')}</td><td>${fmtDate(r.due_at)}</td><td>${esc(r.writing_status||'')}</td><td>${money(r.writer_fee)}</td><td>${esc(r.settlement_status||'')}<br>已结：${money(r.settled_amount)}<br>${fmtDate(r.settled_at)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查编号/手机号/微信号和查询码。</div>';}
+
 async function login(){msg('loginMsg','');const email=$('email').value.trim(),password=$('password').value;if(!email||!password){msg('loginMsg','<div class="error">请输入邮箱和密码。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
 async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');$('sideUser').innerHTML=`<strong>${esc(p.display_name)}</strong><br>${esc(p.email||currentUser.email)}<br><span class="tag">${roleMap[p.role]||p.role}</span>`;renderMenu();routeAfterLogin()}
 function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceOrders();return renderHome()}function menuBtn(key,label,fn){return`<button id="m_${key}" onclick="setMenu('${key}');${fn}">${label}</button>`}function setMenu(k){document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
-function renderMenu(){const r=currentProfile.role;let m='';if(['admin','service'].includes(r))m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款方式管理','renderPaymentManage()');m+=menuBtn('biz','业务/字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance')m+=menuBtn('finance','财务订单','renderFinanceOrders()');$('menuBox').innerHTML=m}
+function renderMenu(){const r=currentProfile.role;let m='';if(['admin','service'].includes(r))m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('writers','写手管理','renderWriterManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款方式管理','renderPaymentManage()');m+=menuBtn('biz','业务/字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance')m+=menuBtn('finance','财务订单','renderFinanceOrders()');$('menuBox').innerHTML=m}
 async function loadBase(force=false){if(!force&&categories.length&&projects.length&&customerSources.length&&paymentMethods.length)return;const res=await Promise.all([client.from('business_categories').select('*').eq('is_active',true).order('sort_order',{ascending:true}),client.from('service_projects').select('*').eq('is_active',true).order('sort_order',{ascending:true}),client.from('customer_sources').select('*').eq('is_active',true).order('sort_order',{ascending:true}),client.from('payment_methods').select('*').eq('is_active',true).order('sort_order',{ascending:true}),client.from('profiles').select('id,email,display_name,role,is_active,created_at').order('created_at',{ascending:false})]);res.forEach(x=>{if(x.error)throw x.error});categories=res[0].data||[];projects=res[1].data||[];customerSources=res[2].data||[];paymentMethods=res[3].data||[];profiles=res[4].data||[];writingUsers=profiles.filter(p=>p.role==='writing'&&p.is_active);publishingUsers=profiles.filter(p=>p.role==='publishing'&&p.is_active)}async function getFields(pid){if(!pid)return[];if(fieldsCache[pid])return fieldsCache[pid];const {data,error}=await client.from('project_fields').select('*').eq('project_id',pid).eq('is_active',true).order('sort_order',{ascending:true});if(error)throw error;fieldsCache[pid]=data||[];return fieldsCache[pid]}async function loadJournals(internal=false){const table=internal?'v_journals_internal':'v_journals_service';const {data,error}=await client.from(table).select('*').order('journal_name',{ascending:true});if(error)throw error;return data||[]}async function loadWriters(){const {data,error}=await client.from('writers').select('*').eq('is_active',true).order('created_at',{ascending:false});if(error)throw error;writers=data||[];return writers}
 function isToday(d){return new Date(d).toISOString().slice(0,10)===todayISO()}function isThisMonth(d){const n=new Date(),x=new Date(d);return x.getFullYear()===n.getFullYear()&&x.getMonth()===n.getMonth()}function isThisWeek(d){const now=new Date(),x=new Date(d),start=new Date(now);start.setDate(now.getDate()-now.getDay()+1);start.setHours(0,0,0,0);return x>=start&&x<=now}function stats(rows,filter){const r=rows.filter(filter);return{count:r.length,total:r.reduce((a,x)=>a+Number(x.total_amount||0),0),income:r.reduce((a,x)=>a+Number(x.actual_income||0),0)}}async function fetchDashboardRows(){if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}
 async function renderHome(){setMenu('home');const rows=await fetchDashboardRows();const title=currentProfile.role==='admin'?'经营数据大屏｜全部订单':'我的业绩大屏';showContent(`<div class="screen"><div class="screen-title"><h2>${title}</h2><div class="time" id="dashTime"></div></div>${renderDashboard(rows)}</div>`);animateNums();setInterval(()=>{const t=$('dashTime');if(t)t.innerText=new Date().toLocaleString('zh-CN',{hour12:false})},1000)}
@@ -174,8 +310,9 @@ async function renderReportView(){
     return logs.map(l=>{
       const changes=summarizeLogChanges(l.detail);
       const action=l.action==='INSERT'?'新增':l.action==='UPDATE'?'修改':l.action==='DELETE'?'删除':l.action;
-      const changeHtml=changes.length?changes.slice(0,8).map(c=>`<div class="change-line"><div class="change-label">${esc(c.label)}：</div><span class="old-val">${esc(c.oldVal)}</span> → <span class="new-val">${esc(c.newVal)}</span></div>`).join(''):'<div class="muted">系统记录更新</div>';
-      return `<div class="log-card"><div class="log-head"><span>${fmtDate(l.created_at)}</span><span>${action}</span></div><div class="log-user">${esc(l.user_name||'系统')}</div><div class="muted">有${changes.length||1}处更改</div>${changeHtml}</div>`;
+      const shown=changes.slice(0,10);
+      const changeHtml=shown.length?shown.map(c=>`<div class="log-field"><div class="log-field-name">${esc(c.label)}：</div><span class="log-old">${esc(c.oldVal||'空')}</span><span class="muted"> → </span><span class="log-new">${esc(c.newVal||'空')}</span></div>`).join(''):'<div class="muted">系统记录更新</div>';
+      return `<div class="log-card"><div class="log-time">${fmtDate(l.created_at)}</div><div class="log-user">${esc(l.user_name||'系统')}</div><div class="log-action">${action}｜有${changes.length||1}处更改</div>${changeHtml}</div>`;
     }).join('');
   }
 
