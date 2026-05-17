@@ -633,11 +633,11 @@ async function renderOrderForm(orderId=null, copySeed=null){
   const submitText=isCopyMode?'提交复制订单':(orderId?'保存修改':'提交订单');
   openModal(`<div class="order-form-shell">
     <div class="order-form-header">
-      <div><h2>${titleText}</h2><div class="order-form-tip">${isCopyMode?'当前是复制草稿，还没有生成新订单。请先修改需要变化的字段，再点“提交复制订单”。写手、发表进度、财务结算记录不会复制。':'填写完成后点底部按钮提交。提交过程中按钮会变灰，避免重复创建订单。'}</div></div>
+      <div><h2>${titleText}</h2><div class="order-form-tip">${isCopyMode?'当前是复制草稿，还没有生成新订单。系统只带出基础录单信息，实收金额已清零，订单状态会像新增订单一样重新计算。请先修改需要变化的字段，再点“提交复制订单”。':'填写完成后点底部按钮提交。提交过程中按钮会变灰，避免重复创建订单。'}</div></div>
       <button class="order-form-close" onclick="closeOrderFormModal()" title="关闭">×</button>
     </div>
     <div class="order-form-body">
-      ${isCopyMode?'<div class="info" style="margin-bottom:12px">复制订单会先让你修改字段，不会直接生成订单；确认无误后再提交。</div>':''}
+      ${isCopyMode?'<div class="info" style="margin-bottom:12px">复制订单会先让你修改字段，不会直接生成订单；实收金额默认清零，状态按新增订单重新计算，确认无误后再提交。</div>':''}
       <div class="form-grid">
         <div><label>客户来源</label><select id="customer_source"><option value="">请选择</option>${srcOps}</select></div>
         <div><label>付款方式</label><select id="payment_method_id"><option value="">请选择</option>${payOps}</select></div>
@@ -1671,11 +1671,20 @@ async function renderReportView(){
     delete s.full_paid_confirmed_by;
     delete s.performance_amount;
     delete s.full_paid_notes;
-    // 复制订单只复制录单基础信息，不复制退款、财务确认、写手结算、发表进度等历史结果
+    // 复制订单只复制录单基础信息，不复制原订单的收款结果、退款、财务确认、写手结算、发表进度等历史结果。
+    // 管理员复制已完成/已收全款订单时，不能把“已收全款/等待出刊”等状态带进新单。
+    // 所以复制草稿里的实收金额默认清零，状态按新增订单重新计算。
+    const total=Number(s.total_amount||0);
+    s.deposit_amount=0;
+    s.balance_amount=total;
     s.refund_amount=0;
     s.order_status='';
     s.deposit_status='';
     s.balance_status='';
+    s.full_paid_at=null;
+    s.full_paid_confirmed_by=null;
+    s.performance_amount=null;
+    s.full_paid_notes=null;
     return s;
   }
 
