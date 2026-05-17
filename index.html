@@ -420,6 +420,12 @@ button:disabled{opacity:.58;cursor:not-allowed}
 .warn-tag{background:#fff7ed!important;color:#c2410c!important}
 .ok-tag{background:#dcfce7!important;color:#166534!important}
 
+
+/* V48 发表打款账号按方式显示 */
+#pub_payee_bank_box.hidden{display:none!important}
+#pub_payee_name_box.hidden{display:none!important}
+#pub_payee_account_box.hidden{display:none!important}
+
 </style>
 </head>
 <body>
@@ -449,6 +455,71 @@ function publishPayeeDisplay(r){
   if(bank)html+=`银行：${esc(bank)}<br>`;
   if(note)html+=`备注：${esc(note)}`;
   return html||'-';
+}
+
+
+function togglePublishPayeeFields(){
+  const type=$('pub_payee_type')?.value||'';
+  const nameBox=$('pub_payee_name_box'), accountBox=$('pub_payee_account_box'), bankBox=$('pub_payee_bank_box'), noteBox=$('pub_payee_notes_box');
+  const nameLabel=$('pub_payee_name_label'), accountLabel=$('pub_payee_account_label'), bankLabel=$('pub_payee_bank_label');
+  const account=$('pub_payee_account'), bank=$('pub_payee_bank'), name=$('pub_payee_name');
+
+  if(!nameBox||!accountBox||!bankBox)return;
+
+  nameBox.classList.remove('hidden');
+  accountBox.classList.remove('hidden');
+  bankBox.classList.add('hidden');
+  if(noteBox)noteBox.classList.remove('hidden');
+
+  if(type==='微信'){
+    if(nameLabel)nameLabel.innerText='收款人姓名';
+    if(accountLabel)accountLabel.innerText='微信号 / 微信收款账号';
+    if(bankLabel)bankLabel.innerText='银行信息';
+    if(account)account.placeholder='请输入微信号或微信收款账号';
+    if(name)name.placeholder='例如：张三';
+  }else if(type==='QQ'){
+    if(nameLabel)nameLabel.innerText='收款人姓名';
+    if(accountLabel)accountLabel.innerText='QQ号';
+    if(bankLabel)bankLabel.innerText='银行信息';
+    if(account)account.placeholder='请输入QQ号';
+    if(name)name.placeholder='例如：张三';
+  }else if(type==='支付宝'){
+    if(nameLabel)nameLabel.innerText='支付宝姓名';
+    if(accountLabel)accountLabel.innerText='支付宝账号';
+    if(bankLabel)bankLabel.innerText='银行信息';
+    if(account)account.placeholder='请输入支付宝手机号/邮箱/账号';
+    if(name)name.placeholder='例如：张三';
+  }else if(type==='银行卡'){
+    if(nameLabel)nameLabel.innerText='持卡人姓名';
+    if(accountLabel)accountLabel.innerText='银行卡号';
+    if(bankLabel)bankLabel.innerText='开户行';
+    if(account)account.placeholder='请输入银行卡号';
+    if(bank)bank.placeholder='例如：中国工商银行郑州某某支行';
+    if(name)name.placeholder='例如：张三';
+    bankBox.classList.remove('hidden');
+  }else if(type==='对公转账'){
+    if(nameLabel)nameLabel.innerText='收款单位名称';
+    if(accountLabel)accountLabel.innerText='对公账号';
+    if(bankLabel)bankLabel.innerText='开户行';
+    if(account)account.placeholder='请输入对公账号';
+    if(bank)bank.placeholder='请输入开户行全称';
+    if(name)name.placeholder='例如：某某文化传媒有限公司';
+    bankBox.classList.remove('hidden');
+  }else if(type==='其他'){
+    if(nameLabel)nameLabel.innerText='收款对象';
+    if(accountLabel)accountLabel.innerText='收款信息';
+    if(bankLabel)bankLabel.innerText='补充信息';
+    if(account)account.placeholder='请填写具体收款信息';
+    if(bank)bank.placeholder='如有补充信息可填写';
+    if(name)name.placeholder='收款人/机构名称';
+    bankBox.classList.remove('hidden');
+  }else{
+    if(nameLabel)nameLabel.innerText='收款人/收款单位';
+    if(accountLabel)accountLabel.innerText='打款账号';
+    if(bankLabel)bankLabel.innerText='开户行/银行信息';
+    if(account)account.placeholder='请先选择收款方式';
+    if(name)name.placeholder='例如：张三 / 某某编辑部';
+  }
 }
 
 async function mergePublishingPayeeRows(rows){
@@ -965,18 +1036,19 @@ async function renderPublishingOrders(){setMenu('publishing');await loadAllField
       <h3>财务打款信息</h3>
       <div class="info">这里是给财务看的打款账号。发表部审核通过前，尽量把收款人、账号、银行信息填写完整。</div>
       <div class="form-grid">
-        <div><label>收款人/收款单位</label><input id="pub_payee_name" value="${esc(data?.payee_name||'')}" placeholder="例如：张三 / 某某编辑部"></div>
-        <div><label>收款方式</label><select id="pub_payee_type"><option value="">请选择</option>${payTypeOps}</select></div>
-        <div><label>打款账号</label><input id="pub_payee_account" value="${esc(data?.payee_account||'')}" placeholder="微信号/QQ/支付宝/银行卡号/对公账号"></div>
-        <div><label>开户行/银行信息</label><input id="pub_payee_bank" value="${esc(data?.payee_bank||'')}" placeholder="银行卡或对公转账时填写"></div>
-        <div class="full"><label>打款备注</label><textarea id="pub_payee_notes">${esc(data?.payee_notes||'')}</textarea></div>
+        <div><label>收款方式</label><select id="pub_payee_type" onchange="togglePublishPayeeFields()"><option value="">请选择</option>${payTypeOps}</select></div>
+        <div id="pub_payee_name_box"><label id="pub_payee_name_label">收款人/收款单位</label><input id="pub_payee_name" value="${esc(data?.payee_name||'')}" placeholder="例如：张三 / 某某编辑部"></div>
+        <div id="pub_payee_account_box"><label id="pub_payee_account_label">打款账号</label><input id="pub_payee_account" value="${esc(data?.payee_account||'')}" placeholder="微信号/QQ/支付宝/银行卡号/对公账号"></div>
+        <div id="pub_payee_bank_box"><label id="pub_payee_bank_label">开户行/银行信息</label><input id="pub_payee_bank" value="${esc(data?.payee_bank||'')}" placeholder="银行卡或对公转账时填写"></div>
+        <div class="full" id="pub_payee_notes_box"><label>打款备注</label><textarea id="pub_payee_notes">${esc(data?.payee_notes||'')}</textarea></div>
       </div>
     </div>
     <label>发表备注</label>
     <textarea id="pub_notes">${esc(data?.publishing_notes||'')}</textarea>
     <button onclick="savePublishingEdit('${paId}')">保存</button>
     <button class="ghost" onclick="closeModal()">取消</button>
-    <div id="modalMsg"></div>`)
+    <div id="modalMsg"></div>`);
+  setTimeout(togglePublishPayeeFields,0);
 }
 
 async function savePublishingEdit(paId){
