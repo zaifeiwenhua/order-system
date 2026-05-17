@@ -650,7 +650,7 @@ async function renderOrderForm(orderId=null, copySeed=null){
         <div class="full" id="publishExtraBox"></div>
         <div class="full" id="dynamicFieldsBox"></div>
         <div><label>交稿时间</label><input id="due_at" type="datetime-local" value="${dateTimeLocalValue(existing?.due_at)}" /></div>
-        <div><label>自动订单状态</label><input id="order_status_preview" readonly value="${esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${esc(existing?.order_status||'')}" /></div>
+        <div><label>${isCopyMode?'自动订单状态（复制后重新计算）':'自动订单状态'}</label><input id="order_status_preview" readonly value="${isCopyMode?'':esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${isCopyMode?'':esc(existing?.order_status||'')}" /></div>
         <div><label>订单总金额</label><input id="total_amount" type="number" step="0.01" value="${existing?.total_amount??0}" oninput="updateBalancePreview()" /></div>
         <div><label>实收金额</label><input id="deposit_amount" type="number" step="0.01" value="${existing?.deposit_amount??0}" oninput="updateBalancePreview()" /></div>
         <div><label>尾款金额</label><input id="balance_preview" readonly /></div>
@@ -677,11 +677,14 @@ async function renderOrderForm(orderId=null, copySeed=null){
     if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
     if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
     if($('journal_id'))$('journal_id').value=existing.journal_id||'';
+    if(isCopyMode && $('current_order_status'))$('current_order_status').value='';
     updateBalancePreview();
   }else{
     updateBalancePreview();
   }
   if(isCopyMode){
+    if($('current_order_status'))$('current_order_status').value='';
+    updateBalancePreview();
     orderDraftMode=false;
     orderDraftDirty=false;
   }else{
@@ -1671,6 +1674,8 @@ async function renderReportView(){
     // 复制订单只复制录单基础信息，不复制退款、财务确认、写手结算、发表进度等历史结果
     s.refund_amount=0;
     s.order_status='';
+    s.deposit_status='';
+    s.balance_status='';
     return s;
   }
 
