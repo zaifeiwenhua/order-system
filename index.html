@@ -485,20 +485,21 @@ async function renderOrderForm(orderId=null){
   await loadBase(true);
   let existing=null;
   if(orderId){
-    // 修改订单时必须读取 orders 原表字段。
-    // 之前读取的是展示视图，部分视图没有 category_id、project_id、payment_method_id 等 ID 字段，
-    // 所以打开修改弹窗时会出现“付款方式、业务大类、具体项目、派给写作部为空”的问题。
-    let r=await client.from('orders').select('*').eq('id',orderId).single();
-    if(r.error){
-      const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
-      r=await client.from(view).select('*').eq('id',orderId).single();
+    // V37：修改订单时统一通过安全函数读取 orders 原表完整字段。
+    // 这样能拿到付款方式、业务大类、具体项目、派给写作部/发表部等 ID，用于正确回填下拉框。
+    let r=await client.rpc('get_order_for_edit',{p_order_id:orderId});
+    if(r.error || !r.data){
+      // 兼容旧数据库：如果还没跑 V37 SQL，再尝试直接读取 orders。
+      r=await client.from('orders').select('*').eq('id',orderId).single();
+      if(!r.error && r.data){
+        try{
+          const {data:pa}=await client.from('publishing_assignments').select('journal_id,publish_type').eq('order_id',orderId).maybeSingle();
+          if(pa){r.data.journal_id=pa.journal_id;r.data.publish_type=pa.publish_type}
+        }catch(e){}
+      }
     }
     if(r.error){openModal(`<div class="order-form-shell"><div class="order-form-header"><h2>读取订单失败</h2><button class="order-form-close" onclick="closeModal()">×</button></div><div class="order-form-body"><div class="error">${esc(r.error.message)}</div></div></div>`);return}
     existing=r.data;
-    try{
-      const {data:pa}=await client.from('publishing_assignments').select('journal_id,publish_type').eq('order_id',orderId).maybeSingle();
-      if(pa){existing.journal_id=pa.journal_id;existing.publish_type=pa.publish_type}
-    }catch(e){}
   }
   const internal=currentProfile.role==='admin';
   journals=await loadJournals(internal);
@@ -544,18 +545,17 @@ async function renderOrderForm(orderId=null){
     </div>
   </div>`);
   if(existing){
-    // 再次显式回填关键下拉框，避免动态刷新项目后被清空
-    setTimeout(async()=>{
-      if($('customer_source'))$('customer_source').value=existing.customer_source||'';
-      if($('payment_method_id'))$('payment_method_id').value=existing.payment_method_id||'';
-      if($('category_id'))$('category_id').value=existing.category_id||'';
-      if(existing.category_id){await onCategoryChange(existing.project_id||'')}
-      if($('project_id'))$('project_id').value=existing.project_id||'';
-      if(existing.project_id){await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
-      if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
-      if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
-      updateBalancePreview();
-    },0);
+    // V37：直接按顺序回填，避免 setTimeout 异步导致下拉框被刷新后又变空。
+    if($('customer_source'))$('customer_source').value=existing.customer_source||'';
+    if($('payment_method_id'))$('payment_method_id').value=existing.payment_method_id||'';
+    if($('category_id'))$('category_id').value=existing.category_id||'';
+    if(existing.category_id){await onCategoryChange(existing.project_id||'')}
+    if($('project_id'))$('project_id').value=existing.project_id||'';
+    if(existing.project_id){await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
+    if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
+    if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
+    if($('journal_id'))$('journal_id').value=existing.journal_id||'';
+    updateBalancePreview();
   }else{
     updateBalancePreview();
   }
