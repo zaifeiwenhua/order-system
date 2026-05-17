@@ -415,6 +415,11 @@ button:disabled{opacity:.58;cursor:not-allowed}
   .data-log-label{font-size:14px}
 }
 
+
+/* V43 写作部简化状态 */
+.warn-tag{background:#fff7ed!important;color:#c2410c!important}
+.ok-tag{background:#dcfce7!important;color:#166534!important}
+
 </style>
 </head>
 <body>
@@ -782,8 +787,130 @@ async function loadAllFieldLabels(){
 async function renderAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);window.__adminAllOrderRows=rows;showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderAllOrders','订单编号/微信/淘宝/业务/题目/客服/写作部/发表部/写手/期刊')}<button onclick="renderOrderForm()">新增订单</button><button class="ghost" onclick="exportAdminAllOrders()">导出当前结果</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,true)}</div>`);if(kw)$('search_kw').value=kw}async function renderMyOrders(){setMenu('myorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';let rows=[];if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').eq('created_by',currentUser.id).order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}else{const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}rows=searchRows(rows,kw,orderSearchFields);showContent(`<div class="card"><h2>我的订单</h2>${searchBox('renderMyOrders','订单编号/微信/淘宝/题目/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,currentProfile.role==='admin')}</div>`);if(kw)$('search_kw').value=kw}async function renderServiceAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_service_all_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderServiceAllOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,false)}</div>`);if(kw)$('search_kw').value=kw}
 function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td><button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}')">修改</button></td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
 function exportAdminAllOrders(){const cols=[{label:'订单编号',value:r=>r.order_no},{label:'客服',value:r=>r.service_name},{label:'创建时间',value:r=>fmtDate(r.created_at)},{label:'业务大类',value:r=>r.business_category},{label:'具体项目',value:r=>r.service_project},{label:'微信号',value:r=>r.wechat_account},{label:'淘宝账号',value:r=>r.taobao_account},{label:'订单金额',value:r=>money(r.total_amount)},{label:'实收金额',value:r=>money(r.deposit_amount)},{label:'尾款',value:r=>money(r.balance_amount)},{label:'退款',value:r=>money(r.refund_amount)},{label:'付款方式',value:r=>r.payment_method_name},{label:'订单状态',value:r=>r.order_status},{label:'交稿时间',value:r=>fmtDate(r.due_at)},{label:'写作部',value:r=>r.assigned_writing_name},{label:'写手',value:r=>r.writer_name},{label:'稿费',value:r=>money(r.writer_fee)},{label:'发表部',value:r=>r.assigned_publishing_name},{label:'期刊',value:r=>r.journal_name},{label:'版面费',value:r=>money(r.page_fee)},{label:'利润',value:r=>money(r.gross_profit)}];downloadCSV('全部订单',cols,window.__adminAllOrderRows||[])}
-async function renderWritingOrders(){setMenu('writing');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_writing_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,[r=>r.order_no,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.writer_name,r=>r.writing_status]);showContent(`<div class="card"><h2>写作订单</h2>${searchBox('renderWritingOrders','订单编号/客服/题目/写手/状态')}<button onclick="renderWriterManage()">写手管理</button><div class="muted">共 ${rows.length} 条</div>${writingTable(rows)}</div>`);if(kw)$('search_kw').value=kw}function writingTable(rows){if(!rows.length)return'<div class="warn">暂无写作订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>业务/项目</th><th>核心信息</th><th>交稿时间</th><th>写手</th><th>稿费</th><th>写作状态</th><th>发表类型</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.service_name||'-'}</td><td>${r.business_category}<br>${r.service_project}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.writer_name||'-'}</td><td>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${r.writing_status||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||''}</td><td><button onclick="openWritingEdit('${r.order_id}')">登记</button></td></tr>`).join('')}</tbody></table></div>`}
-async function openWritingEdit(orderId){await loadWriters();const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();const opts=writers.map(w=>`<option value="${w.id}" ${data?.writer_id===w.id?'selected':''}>${esc(w.writer_name)}（${esc(w.writer_code)}）</option>`).join('');openModal(`<h2>登记写作信息</h2><label>写手</label><select id="edit_writer_id"><option value="">请选择写手</option>${opts}</select><label>稿费</label><input id="edit_writer_fee" type="number" step="0.01" value="${data?.writer_fee??0}" /><label>写作状态</label><select id="edit_writing_status">${['待安排','写作中','初稿完成','修改中','已交稿','写作完成','终稿完成','已完成'].map(s=>`<option value="${s}" ${data?.writing_status===s?'selected':''}>${s}</option>`).join('')}</select><label>写作备注</label><textarea id="edit_writing_notes">${esc(data?.writing_notes||'')}</textarea><button onclick="saveWritingEdit('${orderId}')">保存</button><button class="ghost" onclick="closeModal()">取消</button><div id="modalMsg"></div>`)}async function saveWritingEdit(orderId){const writingStatus=$('edit_writing_status').value;const payload={order_id:orderId,writing_manager_id:currentUser.id,writer_id:$('edit_writer_id').value||null,writer_fee:Number($('edit_writer_fee').value||0),writing_status:writingStatus,writing_notes:$('edit_writing_notes').value.trim()};const {error}=await client.from('writing_assignments').upsert(payload,{onConflict:'order_id'});if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}const {data:pa}=await client.from('publishing_assignments').select('publish_type').eq('order_id',orderId).maybeSingle();const done=['已交稿','写作完成','终稿完成','已完成'].includes(writingStatus);const isWritePublish=pa&&['写作+发表','写+发'].includes(pa.publish_type);const nextStatus=(isWritePublish&&done)?'待发表部安排':'写作中';await client.from('orders').update({order_status:nextStatus}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');closeModal();renderWritingOrders()}
+
+async function renderWritingOrders(){
+  setMenu('writing');
+  await loadAllFieldLabels();
+  const kw=$('search_kw')?.value||'';
+  const {data,error}=await client.from('v_writing_orders').select('*').order('created_at',{ascending:false});
+  if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}
+  const rows=searchRows(data||[],kw,[r=>r.order_no,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.writer_name,r=>r.writing_status]);
+  showContent(`<div class="card">
+    <h2>写作订单</h2>
+    <div class="info">写作部只需做两件事：①登记写手和稿费，系统自动进入“写作中”；②稿子线下交给客服后，点“已交给客服”。</div>
+    ${searchBox('renderWritingOrders','订单编号/客服/题目/写手/状态')}
+    <button onclick="renderWriterManage()">写手管理</button>
+    <div class="muted">共 ${rows.length} 条</div>
+    ${writingTable(rows)}
+  </div>`);
+  if(kw)$('search_kw').value=kw
+}
+
+function writingProgressTip(r){
+  if(!r.writer_id)return'<span class="tag warn-tag">未登记写手</span>';
+  const s=r.writing_status||'';
+  if(['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(s))return'<span class="tag ok-tag">已交给客服</span>';
+  return'<span class="tag">写作中</span>';
+}
+
+function writingActionBtns(r){
+  const done=['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(r.writing_status||'');
+  return `<button onclick="openWritingEdit('${r.order_id}')">${r.writer_id?'修改登记':'登记写手'}</button>
+    ${r.writer_id&&!done?`<button class="secondary" onclick="markWritingDelivered('${r.order_id}')">已交给客服</button>`:''}
+    <button class="ghost" onclick="openWritingNote('${r.order_id}')">备注/异常</button>`;
+}
+
+function writingTable(rows){
+  if(!rows.length)return'<div class="warn">暂无写作订单。</div>';
+  return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>业务/项目</th><th>核心信息</th><th>交稿时间</th><th>写手</th><th>稿费</th><th>进度</th><th>发表类型</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.service_name||'-'}</td><td>${r.business_category}<br>${r.service_project}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.writer_name||'-'}</td><td>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${writingProgressTip(r)}<br><span class="muted">${esc(r.writing_status||'待安排')}</span></td><td>${r.publish_type||'-'}<br>${r.publish_status||''}</td><td>${writingActionBtns(r)}</td></tr>`).join('')}</tbody></table></div>`
+}
+
+async function openWritingEdit(orderId){
+  await loadWriters();
+  const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();
+  const opts=writers.map(w=>`<option value="${w.id}" ${data?.writer_id===w.id?'selected':''}>${esc(w.writer_name)}（${esc(w.writer_code)}）</option>`).join('');
+  openModal(`<h2>登记写作信息</h2>
+    <div class="info">保存后系统会自动把写作进度改为“写作中”，客服那边也会同步看到“写作中”。</div>
+    <label>写手</label>
+    <select id="edit_writer_id"><option value="">请选择写手</option>${opts}</select>
+    <label>稿费</label>
+    <input id="edit_writer_fee" type="number" step="0.01" value="${data?.writer_fee??0}" />
+    <label>写作备注</label>
+    <textarea id="edit_writing_notes">${esc(data?.writing_notes||'')}</textarea>
+    <button onclick="saveWritingEdit('${orderId}')">保存登记</button>
+    <button class="ghost" onclick="closeModal()">取消</button>
+    <div id="modalMsg"></div>`)
+}
+
+async function saveWritingEdit(orderId){
+  const writerId=$('edit_writer_id').value||null;
+  const writerFee=Number($('edit_writer_fee').value||0);
+  if(!writerId){msg('modalMsg','<div class="error">请选择写手。</div>');return}
+  if(writerFee<=0){msg('modalMsg','<div class="error">请填写稿费。</div>');return}
+  const payload={
+    order_id:orderId,
+    writing_manager_id:currentUser.id,
+    writer_id:writerId,
+    writer_fee:writerFee,
+    writing_status:'写作中',
+    writing_notes:$('edit_writing_notes').value.trim()
+  };
+  const {error}=await client.from('writing_assignments').upsert(payload,{onConflict:'order_id'});
+  if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}
+  await client.from('orders').update({order_status:'写作中'}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+  closeModal();
+  renderWritingOrders();
+}
+
+async function markWritingDelivered(orderId){
+  if(!confirm('确认这份稿子已经线下交给客服了吗？'))return;
+  const {data:pa}=await client.from('publishing_assignments').select('publish_type').eq('order_id',orderId).maybeSingle();
+  const isWritePublish=pa&&['写作+发表','写+发'].includes(pa.publish_type);
+  const writingUpdate={
+    order_id:orderId,
+    writing_manager_id:currentUser.id,
+    writing_status:'已交给客服'
+  };
+  const {error}=await client.from('writing_assignments').upsert(writingUpdate,{onConflict:'order_id'});
+  if(error){alert(error.message);return}
+
+  const nextStatus=isWritePublish?'待发表部安排':'待收尾款';
+  await client.from('orders').update({order_status:nextStatus}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+
+  if(isWritePublish){
+    await client.from('publishing_assignments').update({publish_status:'待审核'}).eq('order_id',orderId);
+  }
+
+  renderWritingOrders();
+}
+
+async function openWritingNote(orderId){
+  const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();
+  openModal(`<h2>写作备注 / 异常</h2>
+    <label>备注</label>
+    <textarea id="edit_writing_notes">${esc(data?.writing_notes||'')}</textarea>
+    <button onclick="saveWritingNote('${orderId}','${esc(data?.writing_status||'写作中')}')">保存备注</button>
+    <button class="secondary" onclick="saveWritingNote('${orderId}','异常')">标记异常</button>
+    <button class="ghost" onclick="closeModal()">取消</button>
+    <div id="modalMsg"></div>`)
+}
+
+async function saveWritingNote(orderId,status){
+  const payload={
+    order_id:orderId,
+    writing_manager_id:currentUser.id,
+    writing_status:status||'写作中',
+    writing_notes:$('edit_writing_notes').value.trim()
+  };
+  const {error}=await client.from('writing_assignments').upsert(payload,{onConflict:'order_id'});
+  if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}
+  if(status==='异常'){
+    await client.from('orders').update({order_status:'写作异常'}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+  }
+  closeModal();
+  renderWritingOrders();
+}
+
 async function renderPublishingOrders(){setMenu('publishing');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_publishing_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,[r=>r.order_no,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.journal_name,r=>r.publish_status]);showContent(`<div class="card"><h2>发表订单</h2><div class="info">代发/只发表订单会直接进入发表部；写+发订单需写作部标记“已交稿/写作完成”后进入发表部。</div>${searchBox('renderPublishingOrders','订单编号/客服/题目/期刊/状态')}<div class="muted">共 ${rows.length} 条</div>${publishingTable(rows)}</div>`);if(kw)$('search_kw').value=kw}function publishingTable(rows){if(!rows.length)return'<div class="warn">暂无发表订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>类型</th><th>业务/项目</th><th>文章信息</th><th>期刊</th><th>客户价/版面费</th><th>编辑联系方式</th><th>发表状态</th><th>财务打款</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${r.service_name||'-'}</td><td>${r.publish_type}</td><td>${r.business_category}<br>${r.service_project}</td><td>${renderDynSummary(r)}</td><td>${r.journal_name||'-'}<br>${r.journal_level||''}<br>${r.publish_cycle||''}</td><td>客户价：${r.customer_price?money(r.customer_price):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}</td><td>${esc(r.editor_contact||'-')}</td><td>${r.publish_status}</td><td>${r.finance_payment_status}<br>${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td><button onclick="openPublishingEdit('${r.publishing_assignment_id}')">处理</button></td></tr>`).join('')}</tbody></table></div>`}async function openPublishingEdit(paId){const {data}=await client.from('v_publishing_orders').select('*').eq('publishing_assignment_id',paId).single();const js=await loadJournals(true);const ops=js.map(j=>`<option value="${j.id}" ${data?.journal_id===j.id?'selected':''}>${esc(j.journal_name)}｜客户价${money(j.customer_price)}｜版面费${money(j.page_fee)}</option>`).join('');openModal(`<h2>处理发表订单</h2><label>选择期刊</label><select id="pub_journal_id"><option value="">请选择期刊</option>${ops}</select><label>发表状态</label><select id="pub_status">${['待审核','审核中','审核通过','审核不通过','待打款','已打款','已完成'].map(s=>`<option value="${s}" ${data?.publish_status===s?'selected':''}>${s}</option>`).join('')}</select><label>发表备注</label><textarea id="pub_notes">${esc(data?.publishing_notes||'')}</textarea><button onclick="savePublishingEdit('${paId}')">保存</button><button class="ghost" onclick="closeModal()">取消</button><div id="modalMsg"></div>`)}async function savePublishingEdit(paId){let st=$('pub_status').value;if(st==='审核通过')st='待打款';const payload={journal_id:$('pub_journal_id').value||null,publishing_user_id:currentUser.id,publish_status:st,publishing_notes:$('pub_notes').value.trim()};const {data:paRow}=await client.from('publishing_assignments').select('order_id').eq('id',paId).single();const {error}=await client.from('publishing_assignments').update(payload).eq('id',paId);if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}if(paRow?.order_id){await client.from('orders').update({order_status:'发表中'}).eq('id',paRow.order_id).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常')}closeModal();renderPublishingOrders()}
 async function renderFinanceOrders(){setMenu('finance_all');const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_finance_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}let rows=searchRows(data||[],kw,[r=>r.order_no,r=>r.service_name,r=>r.assigned_writing_name,r=>r.assigned_publishing_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.writer_name,r=>r.writer_code,r=>r.writer_payment_account,r=>r.journal_name,r=>r.publish_status,r=>r.settlement_status]);window.__financeOrderRows=rows;showContent(`<div class="card"><h2>财务订单</h2><div class="info">这里主要用于查看订单财务信息。写手打款请走“结算核对 → 写手结算汇总 → 结算批次记录”。</div>${searchBox('renderFinanceOrders','订单编号/客服/业务/写手姓名/写手编号/收款账号/期刊')}<button class="ghost" onclick="exportFinanceOrders()">导出当前结果</button><div class="muted">共 ${rows.length} 条</div>${financeTable(rows)}</div>`);if(kw)$('search_kw').value=kw}
 function financeTable(rows){if(!rows.length)return'<div class="warn">暂无财务订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>部门</th><th>业务/项目</th><th>金额</th><th>写手信息</th><th>写手结算</th><th>发表打款</th><th>期刊内部信息</th><th>利润</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Number(r.writer_balance_amount??Math.max(fee-settled,0));return `<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.writer_name||'-'}<br>编号：${r.writer_code||'-'}<br>收款：${writerPaymentDisplay(r)}</td><td>稿费：${fee?money(fee):'-'}<br>状态：${r.settlement_status||'未结算'}<br>已结：${money(settled)}<br>余额：${money(balance)}</td><td>${r.publish_status||'-'}<br>${r.finance_payment_status||'-'} ${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td>${r.journal_name||'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>${esc(r.editor_contact||'')}</td><td>${money(r.gross_profit)}</td></tr>`}).join('')}</tbody></table></div>`}
