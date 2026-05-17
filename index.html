@@ -1347,8 +1347,8 @@ function renderLogTimeline(logs){
       const shown=changes.slice(0,24);
       const targetHtml=targets.length?`<div class="data-log-tagrow">${targets.map(t=>`<span class="data-log-tag">${esc(t)}</span>`).join('')}</div>`:'';
       const changesHtml = shown.length ? shown.map(c=>{
-        const oldHtml = (c.oldVal!==undefined && c.oldVal!==null && String(c.oldVal)!=='')
-          ? `<span class="data-log-old">${esc(String(c.oldVal))}</span>` : '';
+        const oldHtml = (action==='创建') ? '' : ((c.oldVal!==undefined && c.oldVal!==null && String(c.oldVal)!=='')
+          ? `<span class="data-log-old">${esc(String(c.oldVal))}</span>` : '');
         const newHtml = (c.newVal!==undefined && c.newVal!==null && String(c.newVal)!=='')
           ? `<span class="data-log-new">${esc(String(c.newVal))}</span>` : '';
         return `<div class="data-log-line">
@@ -1405,7 +1405,49 @@ function logValuesSame(key,ov,nv){
     return false;
   }
 
+  
+function isUuidLikeLogValue(v){
+    const s=String(v??'').trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+  }
+
+  function isPureInternalLogKey(k){
+    k=String(k||'');
+    const hidden=new Set([
+      'id','order_id','order_no','created_by','updated_by','deleted_by',
+      'category_id','project_id','payment_method_id',
+      'assigned_writing_user_id','assigned_publishing_user_id',
+      'journal_id','writer_id','publishing_user_id','writing_user_id',
+      'full_paid_confirmed_by','reviewed_by',
+      'deposit_status','balance_status','contact_platform',
+      'created_at','updated_at','deleted_at'
+    ]);
+    if(hidden.has(k))return true;
+    if(k.endsWith('_id'))return true;
+    return false;
+  }
+
+  function isUsefulLogChange(c){
+    if(!c)return false;
+    const key=String(c.key||'');
+    const label=String(c.label||'');
+    if(isPureInternalLogKey(key))return false;
+    if((c.oldVal==='空'||c.oldVal===''||c.oldVal==null)&&(c.newVal==='空'||c.newVal===''||c.newVal==null))return false;
+
+    // 没有中文字段名的技术字段不展示，避免 order_no / UUID 这类内容污染日志
+    if(label==='自定义字段'||label==='字段'){
+      return false;
+    }
+
+    // UUID 一般是业务大类、具体项目、人员、期刊等内部 ID，不直接展示给客服/管理员看
+    if(isUuidLikeLogValue(c.oldVal)||isUuidLikeLogValue(c.newVal))return false;
+
+    return true;
+  }
+
   function normalizeLogChanges(out){
+    out=(out||[]).filter(isUsefulLogChange);
+
     const grouped={};
     out.forEach(c=>{
       const key=(c.oldVal||'空')+'→'+(c.newVal||'空');
@@ -1414,12 +1456,10 @@ function logValuesSame(key,ov,nv){
     const res=[];
     Object.values(grouped).forEach(list=>{
       if(list.length===1){res.push(list[0]);return}
-      const nonGeneric=list.filter(x=>x.label!=='自定义字段');
+      const nonGeneric=list.filter(x=>x.label!=='自定义字段'&&x.label!=='字段');
       if(nonGeneric.length){
-        const priority=nonGeneric.find(x=>x.key==='word_count'||x.label==='字数')||nonGeneric[0];
+        const priority=nonGeneric.find(x=>x.key==='word_count'||x.label==='字数'||x.label==='字数要求')||nonGeneric[0];
         res.push(priority);
-      }else{
-        res.push(list[0]);
       }
     });
     const seen=new Set();
@@ -1460,7 +1500,7 @@ function logValuesSame(key,ov,nv){
   }
 
   function fieldLabel(k){
-    const map={order_status:'订单状态',due_at:'交稿时间',total_amount:'订单总金额',deposit_amount:'实收金额',balance_amount:'尾款金额',refund_amount:'退款金额',word_count:'字数',title:'题目/主题',wechat_account:'微信号',taobao_account:'淘宝账号',customer_source:'客户来源',service_notes:'客服备注',payment_method_id:'付款方式',assigned_writing_user_id:'派给写作部',assigned_publishing_user_id:'派给发表部',writer_fee:'稿费',writing_status:'写作状态',writer_id:'写手',settlement_status:'结算状态',settled_amount:'已结算金额',publish_status:'发表状态',finance_payment_status:'财务打款状态',finance_payment_amount:'打款金额',journal_id:'期刊',publishing_notes:'发表备注',finance_notes:'财务备注',article_title:'文章题目',project_title:'课题题目',word_count_req:'字数要求',major_direction:'专业方向',publish_requirement:'发表要求',approval_status:'是否立项',project_level:'课题级别',subject_stage:'学段学科',course_topic:'微课主题',micro_topic:'微课主题',project_name:'项目名称',page_or_word_req:'页数/字数要求',format_requirement:'格式要求',customer_requirement:'客户要求'};
+    const map={order_status:'订单状态',due_at:'交稿时间',total_amount:'订单总金额',order_no:'订单编号',deposit_amount:'实收金额',balance_amount:'尾款金额',refund_amount:'退款金额',word_count:'字数',title:'题目/主题',wechat_account:'微信号',taobao_account:'淘宝账号',customer_source:'客户来源',service_notes:'客服备注',payment_method_id:'付款方式',assigned_writing_user_id:'派给写作部',assigned_publishing_user_id:'派给发表部',writer_fee:'稿费',writing_status:'写作状态',writer_id:'写手',settlement_status:'结算状态',settled_amount:'已结算金额',publish_status:'发表状态',finance_payment_status:'财务打款状态',finance_payment_amount:'打款金额',journal_id:'期刊',publishing_notes:'发表备注',finance_notes:'财务备注',article_title:'文章题目',project_title:'课题题目',word_count_req:'字数要求',major_direction:'专业方向',publish_requirement:'发表要求',approval_status:'是否立项',project_level:'课题级别',subject_stage:'学段学科',course_topic:'微课主题',micro_topic:'微课主题',project_name:'项目名称',page_or_word_req:'页数/字数要求',format_requirement:'格式要求',customer_requirement:'客户要求'};
     return map[k]||k;
   }
 
