@@ -873,9 +873,28 @@ async function saveOrder(orderId=null){
     else{payload.created_by=currentUser.id;const r=await client.from('orders').insert(payload).select('id,order_no').single();orderData=r.data;err=r.error}
     if(err){msg('orderFormMsg','<div class="error">'+esc(err.message)+'</div>');return}
     if(isPublishProject(project,categoryId)){
-      const pa={order_id:orderData.id,publishing_user_id:$('assigned_publishing_user_id').value||null,journal_id:$('journal_id')?.value||null,publish_type:publishTypeByProject(project,categoryId),publish_status:'待审核'};
-      const {error:paErr}=await client.from('publishing_assignments').upsert(pa,{onConflict:'order_id'});
-      if(paErr){msg('orderFormMsg','<div class="error">订单已保存，但发表任务保存失败：'+esc(paErr.message)+'</div>');return}
+      const basePa={
+        order_id:orderData.id,
+        publishing_user_id:$('assigned_publishing_user_id').value||null,
+        journal_id:$('journal_id')?.value||null,
+        publish_type:publishTypeByProject(project,categoryId)
+      };
+
+      if(orderId){
+        // V54：客服修改订单、更新实收金额时，不能把发表状态重置成“待审核”。
+        // 如果发表部已经审核通过，这里只同步期刊/发表部/类型，不动 publish_status。
+        const {data:oldPa}=await client.from('publishing_assignments').select('id,publish_status').eq('order_id',orderData.id).maybeSingle();
+        if(oldPa?.id){
+          const {error:paErr}=await client.from('publishing_assignments').update(basePa).eq('id',oldPa.id);
+          if(paErr){msg('orderFormMsg','<div class="error">订单已保存，但发表任务保存失败：'+esc(paErr.message)+'</div>');return}
+        }else{
+          const {error:paErr}=await client.from('publishing_assignments').insert(Object.assign({},basePa,{publish_status:'待审核'}));
+          if(paErr){msg('orderFormMsg','<div class="error">订单已保存，但发表任务保存失败：'+esc(paErr.message)+'</div>');return}
+        }
+      }else{
+        const {error:paErr}=await client.from('publishing_assignments').insert(Object.assign({},basePa,{publish_status:'待审核'}));
+        if(paErr){msg('orderFormMsg','<div class="error">订单已保存，但发表任务保存失败：'+esc(paErr.message)+'</div>');return}
+      }
     }
     if(!orderId)clearOrderDraft();
     msg('orderFormMsg',`<div class="success">保存成功，订单编号：${esc(orderData.order_no)}，正在刷新列表...</div>`);
