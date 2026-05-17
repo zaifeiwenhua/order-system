@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>客户录单系统 V32 手机适配版</title>
+  <title>客户录单系统 V33 草稿保护版</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937}.login-page{max-width:520px;margin:38px auto;padding:0 16px}.layout{display:flex;min-height:100vh}.sidebar{width:238px;background:#111827;color:#fff;padding:18px 14px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{font-size:20px;font-weight:700;margin:4px 8px 18px}.side-info{font-size:12px;color:#cbd5e1;background:#1f2937;border-radius:12px;padding:10px;margin:0 4px 14px;line-height:1.7}.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#e5e7eb;padding:11px 12px;border-radius:10px;margin:4px 0;font-size:14px;cursor:pointer}.menu button:hover,.menu button.active{background:#2563eb;color:#fff}.main{margin-left:238px;flex:1;padding:24px;max-width:calc(100vw - 238px)}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);margin-bottom:16px}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 14px;font-size:21px}h3{margin:0 0 8px;font-size:17px}.muted{color:#6b7280;font-size:14px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}label{display:block;font-size:14px;margin:12px 0 6px;color:#374151}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;outline:none;background:#fff}textarea{min-height:86px;resize:vertical}button{border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin:6px 4px 6px 0}button.secondary{background:#111827}button.ghost{background:#eef2ff;color:#1f2937}button.danger{background:#dc2626}.tag{display:inline-block;padding:4px 9px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;margin-left:8px}.error{color:#b91c1c;margin-top:12px;font-size:14px}.success{color:#047857;margin-top:12px;font-size:14px}.warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.info{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.table-wrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px;margin-top:10px}table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;vertical-align:top}th{background:#f9fafb;color:#374151;white-space:nowrap}tr.overdue td{background:#fee2e2!important}tr.due-soon td{background:#ffedd5!important}tr.due-warning td{background:#fef9c3!important}tr.closed td{background:#f3f4f6!important;color:#6b7280}.searchbar{display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;margin:12px 0}.module{border:1px solid #e5e7eb;border-radius:14px;background:#fff;padding:18px}.drag-row{cursor:grab}.drag-row.dragging{opacity:.45}.modal-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(15,23,42,.45);z-index:99;display:flex;align-items:center;justify-content:center;padding:18px}.modal{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
@@ -308,10 +308,13 @@ button:disabled{opacity:.58;cursor:not-allowed}
   .ticker{height:190px}
 }
 
+  
+.draft-notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px 12px;font-size:14px;margin-top:8px}
+
   </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1><div class="muted">V32：手机端适配版</div></div><div id="loginBox" class="card"><h2>登录系统</h2><label>手机号 / 管理员邮箱</label><input id="phone" type="text" placeholder="员工输入手机号；旧管理员账号可输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div class="info">员工账号请先在 Supabase 后台 Add user 创建，再由管理员在系统账号管理里填写姓名、角色并启用。</div><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1><div class="muted">V33：订单草稿保护版</div></div><div id="loginBox" class="card"><h2>登录系统</h2><label>手机号 / 管理员邮箱</label><input id="phone" type="text" placeholder="员工输入手机号；旧管理员账号可输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div class="info">员工账号请先在 Supabase 后台 Add user 创建，再由管理员在系统账号管理里填写姓名、角色并启用。</div><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
 <div id="appArea" class="layout hidden"><div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ 菜单</button><div class="mobile-title">录单系统</div></div><div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div><aside class="sidebar" id="sidebar"><div class="brand">录单系统</div><div class="side-info" id="sideUser"></div><div class="menu" id="menuBox"></div><button class="secondary" style="width:100%;margin-top:16px" onclick="logout()">退出登录</button></aside><main class="main"><div id="content"></div></main></div><div id="modalRoot"></div>
 <script>
 const SUPABASE_URL='https://kifnfihqavambwatclle.supabase.co';
@@ -395,7 +398,7 @@ async function renderOrderForm(orderId=null){
   openModal(`<div class="order-form-shell">
     <div class="order-form-header">
       <div><h2>${titleText}</h2><div class="order-form-tip">填写完成后点底部按钮提交。提交过程中按钮会变灰，避免重复创建订单。</div></div>
-      <button class="order-form-close" onclick="closeModal()" title="关闭">×</button>
+      <button class="order-form-close" onclick="closeOrderFormModal()" title="关闭">×</button>
     </div>
     <div class="order-form-body">
       <div class="form-grid">
@@ -421,13 +424,143 @@ async function renderOrderForm(orderId=null){
     </div>
     <div class="order-form-footer">
       <button id="submitOrderBtn" data-label="${submitText}" onclick="saveOrder(${orderId?`'${orderId}'`:'null'})">${submitText}</button>
-      <button class="ghost" onclick="closeModal()">关闭</button>
+      ${!orderId?`<button class="ghost" onclick="manualSaveOrderDraft()">保存草稿</button>`:''}
+      <button class="ghost" onclick="closeOrderFormModal()">关闭</button>
       <div id="orderFormMsg" class="footer-msg"></div>
     </div>
   </div>`);
   if(existing?.category_id){await onCategoryChange(existing.project_id);await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
   updateBalancePreview();
-}function updateBalancePreview(){const t=Number($('total_amount')?.value||0),r=Number($('deposit_amount')?.value||0);const bal=Math.max(t-r,0);if($('balance_preview'))$('balance_preview').value=bal.toFixed(2);if($('order_status_preview'))$('order_status_preview').value=computedAutoOrderStatus()}async function onCategoryChange(selected=''){const cid=$('category_id').value,list=projects.filter(p=>p.category_id===cid);$('project_id').innerHTML='<option value="">请选择</option>'+list.map(p=>`<option value="${p.id}" ${selected===p.id?'selected':''}>${esc(p.name)}</option>`).join('');$('dynamicFieldsBox').innerHTML='';$('publishExtraBox').innerHTML=''}async function onProjectChange(selected='',vals={},selectedJournal=''){const pid=selected||$('project_id').value,box=$('dynamicFieldsBox'),p=projects.find(x=>x.id===pid);if(!pid){box.innerHTML='';return}if(isPublishProject(p,$('category_id')?.value)){const ops=journals.map(j=>`<option value="${j.id}" ${selectedJournal===j.id?'selected':''}>${esc(j.journal_name)}｜${esc(j.journal_level||'')}｜客户价¥${money(j.customer_price)}</option>`).join('');$('publishExtraBox').innerHTML=`<div class="card" style="box-shadow:none;background:#f9fafb"><h3>发表信息</h3><label>选择期刊</label><select id="journal_id"><option value="">请选择期刊</option>${ops}</select><div class="muted">期刊来自“期刊管理”，客服可先在期刊管理里搜索。</div></div>`}else{$('publishExtraBox').innerHTML=''}const fields=await getFields(pid);box.innerHTML=fields.length?`<div class="card" style="box-shadow:none;background:#f9fafb"><h3>项目专属字段</h3><div class="form-grid">${fields.map(f=>dynField(f,vals[f.field_key])).join('')}</div></div>`:'<div class="warn">该项目暂无专属字段。</div>'}function dynField(f,val=''){const label=esc(f.field_label)+(f.is_required?' *':''),id='dyn_'+f.field_key;if(f.field_type==='textarea')return`<div class="full"><label>${label}</label><textarea id="${id}">${esc(val||'')}</textarea></div>`;if(f.field_type==='select'){const opts=Array.isArray(f.options)?f.options:[];return`<div><label>${label}</label><select id="${id}"><option value="">请选择</option>${opts.map(o=>`<option value="${esc(o)}" ${val===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`}const type=f.field_type==='number'?'number':f.field_type==='date'?'date':f.field_type==='datetime'?'datetime-local':'text';return`<div><label>${label}</label><input id="${id}" type="${type}" value="${esc(val||'')}" /></div>`}
+  initOrderDraftProtection(orderId);
+}
+const ORDER_DRAFT_KEY='order_form_draft_v33';
+let orderDraftMode=false,orderDraftDirty=false,orderDraftRestoring=false,orderDraftTimer=null;
+
+function readOrderDraft(){
+  try{return JSON.parse(localStorage.getItem(ORDER_DRAFT_KEY)||'null')}catch(e){return null}
+}
+function clearOrderDraft(){
+  try{localStorage.removeItem(ORDER_DRAFT_KEY)}catch(e){}
+  orderDraftDirty=false;
+}
+function setOrderField(id,val){
+  const el=$(id);
+  if(el)el.value=val??'';
+}
+function formatDraftTime(t){
+  if(!t)return '';
+  try{return new Date(t).toLocaleString('zh-CN',{hour12:false})}catch(e){return t}
+}
+function collectOrderFormDraft(){
+  const dynamic_values={};
+  document.querySelectorAll('[id^="dyn_"]').forEach(el=>{
+    const k=el.id.replace(/^dyn_/,'');
+    dynamic_values[k]=el.value;
+  });
+  const values={
+    customer_source:$('customer_source')?.value||'',
+    payment_method_id:$('payment_method_id')?.value||'',
+    wechat_account:$('wechat_account')?.value||'',
+    taobao_account:$('taobao_account')?.value||'',
+    category_id:$('category_id')?.value||'',
+    project_id:$('project_id')?.value||'',
+    assigned_writing_user_id:$('assigned_writing_user_id')?.value||'',
+    assigned_publishing_user_id:$('assigned_publishing_user_id')?.value||'',
+    journal_id:$('journal_id')?.value||'',
+    due_at:$('due_at')?.value||'',
+    total_amount:$('total_amount')?.value||'',
+    deposit_amount:$('deposit_amount')?.value||'',
+    refund_amount:$('refund_amount')?.value||'',
+    service_notes:$('service_notes')?.value||''
+  };
+  return {user_id:currentUser?.id||'',saved_at:new Date().toISOString(),values,dynamic_values};
+}
+function orderDraftHasContent(d){
+  if(!d)return false;
+  const v=d.values||{};
+  const textKeys=['customer_source','payment_method_id','wechat_account','taobao_account','category_id','project_id','assigned_writing_user_id','assigned_publishing_user_id','journal_id','due_at','service_notes'];
+  if(textKeys.some(k=>String(v[k]||'').trim()))return true;
+  if(Number(v.total_amount||0)>0||Number(v.deposit_amount||0)>0||Number(v.refund_amount||0)>0)return true;
+  return Object.values(d.dynamic_values||{}).some(x=>String(x||'').trim());
+}
+function autoSaveOrderDraft(){
+  if(!orderDraftMode||orderDraftRestoring)return;
+  const d=collectOrderFormDraft();
+  if(orderDraftHasContent(d)){
+    try{localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(d));orderDraftDirty=true}catch(e){}
+  }
+}
+function scheduleOrderDraftSave(){
+  if(!orderDraftMode||orderDraftRestoring)return;
+  clearTimeout(orderDraftTimer);
+  orderDraftTimer=setTimeout(autoSaveOrderDraft,250);
+}
+function setupOrderDraftListeners(){
+  const box=document.querySelector('.order-form-shell');
+  if(!box||box.dataset.draftReady==='1')return;
+  box.dataset.draftReady='1';
+  box.addEventListener('input',scheduleOrderDraftSave,true);
+  box.addEventListener('change',scheduleOrderDraftSave,true);
+}
+async function restoreOrderFormDraft(d){
+  if(!d||!d.values)return;
+  orderDraftRestoring=true;
+  const v=d.values||{};
+  setOrderField('customer_source',v.customer_source);
+  setOrderField('payment_method_id',v.payment_method_id);
+  setOrderField('wechat_account',v.wechat_account);
+  setOrderField('taobao_account',v.taobao_account);
+  setOrderField('category_id',v.category_id);
+  if(v.category_id){await onCategoryChange(v.project_id||'')}
+  setOrderField('project_id',v.project_id);
+  if(v.project_id){await onProjectChange(v.project_id,d.dynamic_values||{},v.journal_id||'')}
+  setOrderField('assigned_writing_user_id',v.assigned_writing_user_id);
+  setOrderField('assigned_publishing_user_id',v.assigned_publishing_user_id);
+  setOrderField('journal_id',v.journal_id);
+  setOrderField('due_at',v.due_at);
+  setOrderField('total_amount',v.total_amount);
+  setOrderField('deposit_amount',v.deposit_amount);
+  setOrderField('refund_amount',v.refund_amount);
+  setOrderField('service_notes',v.service_notes);
+  Object.entries(d.dynamic_values||{}).forEach(([k,val])=>setOrderField('dyn_'+k,val));
+  updateBalancePreview();
+  orderDraftRestoring=false;
+  orderDraftDirty=true;
+}
+function manualSaveOrderDraft(){
+  const d=collectOrderFormDraft();
+  if(!orderDraftHasContent(d)){msg('orderFormMsg','<div class="warn">当前没有可保存的草稿内容。</div>');return}
+  try{localStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(d));orderDraftDirty=true;msg('orderFormMsg','<div class="success">草稿已保存到本机，下次点击新增订单可继续填写。</div>')}
+  catch(e){msg('orderFormMsg','<div class="error">草稿保存失败：'+esc(e?.message||e)+'</div>')}
+}
+function closeOrderFormModal(){
+  if(orderDraftMode){
+    autoSaveOrderDraft();
+    const d=readOrderDraft();
+    if(orderDraftHasContent(d)){
+      const ok=confirm('当前订单还没有提交，内容已自动保存为本机草稿。确定关闭吗？');
+      if(!ok)return;
+    }
+  }
+  closeModal();
+}
+function initOrderDraftProtection(orderId){
+  orderDraftMode=!orderId;
+  orderDraftDirty=false;
+  setupOrderDraftListeners();
+  if(!orderDraftMode)return;
+  const d=readOrderDraft();
+  if(d&&d.user_id===currentUser?.id&&orderDraftHasContent(d)){
+    setTimeout(async()=>{
+      const ok=confirm('检测到一条未提交的订单草稿（保存于 '+formatDraftTime(d.saved_at)+'），是否继续填写？');
+      if(ok){await restoreOrderFormDraft(d);msg('orderFormMsg','<div class="draft-notice">已恢复本机草稿。提交成功后草稿会自动清除。</div>')}
+      else{clearOrderDraft();msg('orderFormMsg','<div class="warn">已放弃本机草稿。</div>')}
+      setupOrderDraftListeners();
+    },80);
+  }
+}
+
+function updateBalancePreview(){const t=Number($('total_amount')?.value||0),r=Number($('deposit_amount')?.value||0);const bal=Math.max(t-r,0);if($('balance_preview'))$('balance_preview').value=bal.toFixed(2);if($('order_status_preview'))$('order_status_preview').value=computedAutoOrderStatus()}async function onCategoryChange(selected=''){const cid=$('category_id').value,list=projects.filter(p=>p.category_id===cid);$('project_id').innerHTML='<option value="">请选择</option>'+list.map(p=>`<option value="${p.id}" ${selected===p.id?'selected':''}>${esc(p.name)}</option>`).join('');$('dynamicFieldsBox').innerHTML='';$('publishExtraBox').innerHTML=''}async function onProjectChange(selected='',vals={},selectedJournal=''){const pid=selected||$('project_id').value,box=$('dynamicFieldsBox'),p=projects.find(x=>x.id===pid);if(!pid){box.innerHTML='';return}if(isPublishProject(p,$('category_id')?.value)){const ops=journals.map(j=>`<option value="${j.id}" ${selectedJournal===j.id?'selected':''}>${esc(j.journal_name)}｜${esc(j.journal_level||'')}｜客户价¥${money(j.customer_price)}</option>`).join('');$('publishExtraBox').innerHTML=`<div class="card" style="box-shadow:none;background:#f9fafb"><h3>发表信息</h3><label>选择期刊</label><select id="journal_id"><option value="">请选择期刊</option>${ops}</select><div class="muted">期刊来自“期刊管理”，客服可先在期刊管理里搜索。</div></div>`}else{$('publishExtraBox').innerHTML=''}const fields=await getFields(pid);box.innerHTML=fields.length?`<div class="card" style="box-shadow:none;background:#f9fafb"><h3>项目专属字段</h3><div class="form-grid">${fields.map(f=>dynField(f,vals[f.field_key])).join('')}</div></div>`:'<div class="warn">该项目暂无专属字段。</div>'}function dynField(f,val=''){const label=esc(f.field_label)+(f.is_required?' *':''),id='dyn_'+f.field_key;if(f.field_type==='textarea')return`<div class="full"><label>${label}</label><textarea id="${id}">${esc(val||'')}</textarea></div>`;if(f.field_type==='select'){const opts=Array.isArray(f.options)?f.options:[];return`<div><label>${label}</label><select id="${id}"><option value="">请选择</option>${opts.map(o=>`<option value="${esc(o)}" ${val===o?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`}const type=f.field_type==='number'?'number':f.field_type==='date'?'date':f.field_type==='datetime'?'datetime-local':'text';return`<div><label>${label}</label><input id="${id}" type="${type}" value="${esc(val||'')}" /></div>`}
 function setOrderSubmitState(on){
   orderSaving=on;
   const btn=$('submitOrderBtn');
@@ -486,6 +619,7 @@ async function saveOrder(orderId=null){
       const {error:paErr}=await client.from('publishing_assignments').upsert(pa,{onConflict:'order_id'});
       if(paErr){msg('orderFormMsg','<div class="error">订单已保存，但发表任务保存失败：'+esc(paErr.message)+'</div>');return}
     }
+    if(!orderId)clearOrderDraft();
     msg('orderFormMsg',`<div class="success">保存成功，订单编号：${esc(orderData.order_no)}，正在刷新列表...</div>`);
     setTimeout(()=>{closeModal();refreshOrderListAfterSave()},650);
   }catch(e){
@@ -1024,5 +1158,5 @@ async function renderReportView(){
     await loadOrderLogsPanel(orderId);
   }
 
-function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal">${html}</div></div>`;setTimeout(decorateTables,0)}function closeModal(){$('modalRoot').innerHTML=''}window.addEventListener('resize',()=>{if(window.innerWidth>768)toggleMobileMenu(false)});window.addEventListener('load',loadApp);
+function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal">${html}</div></div>`;setTimeout(decorateTables,0)}function closeModal(){$('modalRoot').innerHTML=''}window.addEventListener('resize',()=>{if(window.innerWidth>768)toggleMobileMenu(false)});window.addEventListener('beforeunload',(e)=>{if(orderDraftMode&&orderDraftHasContent(collectOrderFormDraft())){autoSaveOrderDraft();e.preventDefault();e.returnValue=''}});window.addEventListener('load',loadApp);
 </script></body></html>
