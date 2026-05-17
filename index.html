@@ -471,87 +471,6 @@ async function loadJournals(internal=false){
   if(error)throw error;
   return data||[];
 }
-
-function addIfMissingOption(list,id,label,type='name',extra={}){
-  if(!id || !Array.isArray(list)) return;
-  if(list.some(x=>String(x.id)===String(id))) return;
-  const row=Object.assign({id},extra);
-  if(type==='display_name') row.display_name=label||'原账号';
-  else row.name=label||'原选项';
-  row.is_active=false;
-  list.push(row);
-}
-function findByName(list,name,field='name'){
-  name=String(name||'').trim();
-  if(!name) return null;
-  return (list||[]).find(x=>String(x[field]||'').trim()===name) || null;
-}
-function setSelectValueSafe(id,value,label){
-  const el=$(id);
-  if(!el) return;
-  if(value && ![...el.options].some(o=>String(o.value)===String(value))){
-    const op=document.createElement('option');
-    op.value=value;
-    op.textContent=label||'原选项';
-    el.appendChild(op);
-  }
-  el.value=value||'';
-}
-async function normalizeOrderEditData(orderId,existing){
-  existing=existing||{};
-  const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
-  let v=null;
-  try{
-    let r=await client.from(view).select('*').eq('id',orderId).maybeSingle();
-    if((r.error||!r.data)) r=await client.from(view).select('*').eq('order_id',orderId).maybeSingle();
-    if(!r.error&&r.data) v=r.data;
-  }catch(e){}
-  if(v){
-    // 把展示视图里的中文名称也合并进来，用于反查 ID 和补充下拉选项
-    ['business_category','service_project','payment_method_name','assigned_writing_name','assigned_publishing_name','journal_name','customer_source'].forEach(k=>{
-      if(existing[k]===undefined||existing[k]===null||existing[k]==='') existing[k]=v[k];
-    });
-    // 如果视图里刚好有 ID 字段，也一并补上
-    ['category_id','project_id','payment_method_id','assigned_writing_user_id','assigned_publishing_user_id','journal_id'].forEach(k=>{
-      if((existing[k]===undefined||existing[k]===null||existing[k]==='') && v[k]) existing[k]=v[k];
-    });
-  }
-
-  // 如果原表 ID 没拿到，就用展示名称反查当前基础数据
-  if(!existing.payment_method_id && existing.payment_method_name){
-    const m=findByName(paymentMethods,existing.payment_method_name,'name');
-    if(m) existing.payment_method_id=m.id;
-  }
-  if(!existing.category_id && existing.business_category){
-    const c=findByName(categories,existing.business_category,'name');
-    if(c) existing.category_id=c.id;
-  }
-  if(!existing.project_id && existing.service_project){
-    let ps=projects.filter(p=>!existing.category_id||String(p.category_id)===String(existing.category_id));
-    let p=findByName(ps,existing.service_project,'name') || findByName(projects,existing.service_project,'name');
-    if(p){existing.project_id=p.id;if(!existing.category_id)existing.category_id=p.category_id}
-  }
-  if(!existing.assigned_writing_user_id && existing.assigned_writing_name){
-    const u=findByName(writingUsers,existing.assigned_writing_name,'display_name');
-    if(u) existing.assigned_writing_user_id=u.id;
-  }
-  if(!existing.assigned_publishing_user_id && existing.assigned_publishing_name){
-    const u=findByName(publishingUsers,existing.assigned_publishing_name,'display_name');
-    if(u) existing.assigned_publishing_user_id=u.id;
-  }
-  if(!existing.customer_source && v?.customer_source) existing.customer_source=v.customer_source;
-
-  // 如果对应选项已被停用/删除，也临时补进下拉框，避免显示“请选择”
-  addIfMissingOption(categories,existing.category_id,existing.business_category,'name');
-  addIfMissingOption(projects,existing.project_id,existing.service_project,'name',{category_id:existing.category_id});
-  addIfMissingOption(paymentMethods,existing.payment_method_id,existing.payment_method_name,'name');
-  addIfMissingOption(writingUsers,existing.assigned_writing_user_id,existing.assigned_writing_name,'display_name',{role:'writing'});
-  addIfMissingOption(publishingUsers,existing.assigned_publishing_user_id,existing.assigned_publishing_name,'display_name',{role:'publishing'});
-  if(existing.customer_source && !customerSources.some(s=>s.name===existing.customer_source)){
-    customerSources.push({id:'old_'+existing.customer_source,name:existing.customer_source,is_active:false});
-  }
-  return existing;
-}
 async function loadWriters(){
   const {data,error}=await client.from('writers').select('*').eq('is_active',true).order('created_at',{ascending:false});
   if(error)throw error;
@@ -584,7 +503,6 @@ async function renderOrderForm(orderId=null){
   }
   const internal=currentProfile.role==='admin';
   journals=await loadJournals(internal);
-  if(existing) existing=await normalizeOrderEditData(orderId,existing);
   const catOps=categories.map(c=>`<option value="${c.id}" ${existing?.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join(''),
     srcOps=customerSources.map(s=>`<option value="${s.name}" ${existing?.customer_source===s.name?'selected':''}>${esc(s.name)}</option>`).join(''),
     payOps=paymentMethods.map(p=>`<option value="${p.id}" ${existing?.payment_method_id===p.id?'selected':''}>${esc(p.name)}</option>`).join(''),
@@ -627,16 +545,16 @@ async function renderOrderForm(orderId=null){
     </div>
   </div>`);
   if(existing){
-    // V38：安全回填。即使选项被停用、视图只返回中文名称，也不会显示成“请选择”。
-    setSelectValueSafe('customer_source',existing.customer_source,existing.customer_source);
-    setSelectValueSafe('payment_method_id',existing.payment_method_id,existing.payment_method_name);
-    setSelectValueSafe('category_id',existing.category_id,existing.business_category);
+    // V37：直接按顺序回填，避免 setTimeout 异步导致下拉框被刷新后又变空。
+    if($('customer_source'))$('customer_source').value=existing.customer_source||'';
+    if($('payment_method_id'))$('payment_method_id').value=existing.payment_method_id||'';
+    if($('category_id'))$('category_id').value=existing.category_id||'';
     if(existing.category_id){await onCategoryChange(existing.project_id||'')}
-    setSelectValueSafe('project_id',existing.project_id,existing.service_project);
+    if($('project_id'))$('project_id').value=existing.project_id||'';
     if(existing.project_id){await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
-    setSelectValueSafe('assigned_writing_user_id',existing.assigned_writing_user_id,existing.assigned_writing_name);
-    setSelectValueSafe('assigned_publishing_user_id',existing.assigned_publishing_user_id,existing.assigned_publishing_name);
-    setSelectValueSafe('journal_id',existing.journal_id,existing.journal_name);
+    if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
+    if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
+    if($('journal_id'))$('journal_id').value=existing.journal_id||'';
     updateBalancePreview();
   }else{
     updateBalancePreview();
@@ -1234,9 +1152,18 @@ async function renderReportView(){
   async function openOrderDetail(orderId){
     if(!['admin','service'].includes(currentProfile.role)){alert('当前角色暂不支持在这里编辑订单');return}
     await loadBase(true);
-    const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_all_orders';
-    const {data:existing,error}=await client.from(view).select('*').eq('id',orderId).single();
-    if(error){alert(error.message);return}
+
+    // V39 修复：客服点“修改”时，不能再从展示视图读取。
+    // 展示视图缺少 category_id、project_id、payment_method_id、assigned_writing_user_id 等真实 ID，
+    // 所以客服账号会看到业务大类、具体项目、付款方式、派给写作部为空。
+    let existing=null;
+    let r=await client.rpc('get_order_for_edit',{p_order_id:orderId});
+    if(r.error || !r.data){
+      const fallbackView=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_all_orders';
+      r=await client.from(fallbackView).select('*').eq('id',orderId).single();
+    }
+    if(r.error){alert(r.error.message);return}
+    existing=r.data||{};
     const internal=currentProfile.role==='admin';
     journals=await loadJournals(internal);
     const catOps=categories.map(c=>`<option value="${c.id}" ${existing?.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
@@ -1288,9 +1215,26 @@ async function renderReportView(){
         <div id="logPanel"><div class="muted">正在加载日志...</div></div>
       </div>
     </div></div>`;
-    if(existing?.category_id){await onCategoryChange(existing.project_id);await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
-    updateBalancePreview();
-    await loadOrderLogsPanel(orderId);
+    // V39：按顺序回填下拉框，避免项目列表刷新后把已选项清空。
+    try{
+      if($('customer_source'))$('customer_source').value=existing.customer_source||'';
+      if($('payment_method_id'))$('payment_method_id').value=existing.payment_method_id||'';
+      if($('category_id'))$('category_id').value=existing.category_id||'';
+      if(existing?.category_id){await onCategoryChange(existing.project_id||'')}
+      if($('project_id'))$('project_id').value=existing.project_id||'';
+      if(existing?.project_id){await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
+      if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
+      if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
+      if($('journal_id'))$('journal_id').value=existing.journal_id||'';
+      updateBalancePreview();
+    }catch(e){
+      const m=$('orderFormMsg');
+      if(m)m.innerHTML='<div class="error">订单字段回填失败：'+esc(e?.message||e)+'</div>';
+    }
+    loadOrderLogsPanel(orderId).catch(e=>{
+      const panel=$('logPanel');
+      if(panel)panel.innerHTML='<div class="error">日志加载失败：'+esc(e?.message||e)+'</div>';
+    });
   }
 
   async function copyOrder(orderId){
@@ -1312,12 +1256,21 @@ async function renderReportView(){
     renderAllOrders();
   }
 
-  async function loadOrderLogsPanel(orderId){await loadAllFieldLabels();
+  async function loadOrderLogsPanel(orderId){
     const panel=$('logPanel');
     if(!panel)return;
-    const {data,error}=await client.rpc('get_order_logs',{p_order_id:orderId});
-    if(error){panel.innerHTML='<div class="error">日志加载失败：'+esc(error.message)+'</div>';return}
-    panel.innerHTML=renderLogTimeline(data||[]);
+    panel.innerHTML='<div class="muted">正在加载日志...</div>';
+    let slowTimer=setTimeout(()=>{if(panel)panel.innerHTML='<div class="warn">日志加载较慢，请稍候。如果一直不出来，请刷新页面。</div>'},8000);
+    try{
+      await loadAllFieldLabels();
+      const {data,error}=await client.rpc('get_order_logs',{p_order_id:orderId});
+      clearTimeout(slowTimer);
+      if(error){panel.innerHTML='<div class="error">日志加载失败：'+esc(error.message)+'</div>';return}
+      panel.innerHTML=renderLogTimeline(data||[]);
+    }catch(e){
+      clearTimeout(slowTimer);
+      panel.innerHTML='<div class="error">日志加载失败：'+esc(e?.message||e)+'</div>';
+    }
   }
 
   function groupLogsBySubmit(logs){
