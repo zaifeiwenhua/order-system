@@ -594,13 +594,17 @@ async function loadWriters(){
   writers=data||[];
   return writers;
 }
-async function renderOrderForm(orderId=null){
+async function renderOrderForm(orderId=null, copySeed=null){
   if(!['admin','service'].includes(currentProfile.role)){
     openModal('<div class="order-form-shell"><div class="order-form-header"><h2>无权限</h2><button class="order-form-close" onclick="closeModal()">×</button></div><div class="order-form-body"><div class="error">当前账号没有录单权限。</div></div></div>');
     return;
   }
   await loadBase(true);
   let existing=null;
+  const isCopyMode=!!copySeed&&!orderId;
+  if(isCopyMode){
+    existing=copySeed;
+  }
   if(orderId){
     // V37：修改订单时统一通过安全函数读取 orders 原表完整字段。
     // 这样能拿到付款方式、业务大类、具体项目、派给写作部/发表部等 ID，用于正确回填下拉框。
@@ -625,14 +629,15 @@ async function renderOrderForm(orderId=null){
     payOps=paymentMethods.map(p=>`<option value="${p.id}" ${existing?.payment_method_id===p.id?'selected':''}>${esc(p.name)}</option>`).join(''),
     wOps=writingUsers.map(u=>`<option value="${u.id}" ${existing?.assigned_writing_user_id===u.id?'selected':''}>${esc(u.display_name)}</option>`).join(''),
     pOps=publishingUsers.map(u=>`<option value="${u.id}" ${existing?.assigned_publishing_user_id===u.id?'selected':''}>${esc(u.display_name)}</option>`).join('');
-  const titleText=orderId?'修改订单':'新增订单';
-  const submitText=orderId?'保存修改':'提交订单';
+  const titleText=isCopyMode?'复制订单':(orderId?'修改订单':'新增订单');
+  const submitText=isCopyMode?'提交复制订单':(orderId?'保存修改':'提交订单');
   openModal(`<div class="order-form-shell">
     <div class="order-form-header">
-      <div><h2>${titleText}</h2><div class="order-form-tip">填写完成后点底部按钮提交。提交过程中按钮会变灰，避免重复创建订单。</div></div>
+      <div><h2>${titleText}</h2><div class="order-form-tip">${isCopyMode?'当前是复制草稿，还没有生成新订单。请先修改需要变化的字段，再点“提交复制订单”。写手、发表进度、财务结算记录不会复制。':'填写完成后点底部按钮提交。提交过程中按钮会变灰，避免重复创建订单。'}</div></div>
       <button class="order-form-close" onclick="closeOrderFormModal()" title="关闭">×</button>
     </div>
     <div class="order-form-body">
+      ${isCopyMode?'<div class="info" style="margin-bottom:12px">复制订单会先让你修改字段，不会直接生成订单；确认无误后再提交。</div>':''}
       <div class="form-grid">
         <div><label>客户来源</label><select id="customer_source"><option value="">请选择</option>${srcOps}</select></div>
         <div><label>付款方式</label><select id="payment_method_id"><option value="">请选择</option>${payOps}</select></div>
@@ -656,7 +661,7 @@ async function renderOrderForm(orderId=null){
     </div>
     <div class="order-form-footer">
       <button id="submitOrderBtn" data-label="${submitText}" onclick="saveOrder(${orderId?`'${orderId}'`:'null'})">${submitText}</button>
-      ${!orderId?`<button class="ghost" onclick="manualSaveOrderDraft()">保存草稿</button>`:''}
+      ${(!orderId&&!isCopyMode)?`<button class="ghost" onclick="manualSaveOrderDraft()">保存草稿</button>`:''}
       <button class="ghost" onclick="closeOrderFormModal()">关闭</button>
       <div id="orderFormMsg" class="footer-msg"></div>
     </div>
@@ -676,7 +681,12 @@ async function renderOrderForm(orderId=null){
   }else{
     updateBalancePreview();
   }
-  initOrderDraftProtection(orderId);
+  if(isCopyMode){
+    orderDraftMode=false;
+    orderDraftDirty=false;
+  }else{
+    initOrderDraftProtection(orderId);
+  }
 }
 const ORDER_DRAFT_KEY='order_form_draft_v33';
 let orderDraftMode=false,orderDraftDirty=false,orderDraftRestoring=false,orderDraftTimer=null;
@@ -1646,14 +1656,41 @@ async function renderReportView(){
     });
   }
 
+  function prepareCopyOrderSeed(o){
+    const s=Object.assign({},o||{});
+    delete s.id;
+    delete s.order_no;
+    delete s.created_at;
+    delete s.updated_at;
+    delete s.deleted_at;
+    delete s.deleted_by;
+    delete s.full_paid_at;
+    delete s.full_paid_confirmed_by;
+    delete s.performance_amount;
+    delete s.full_paid_notes;
+    // 复制订单只复制录单基础信息，不复制退款、财务确认、写手结算、发表进度等历史结果
+    s.refund_amount=0;
+    s.order_status='';
+    return s;
+  }
+
   async function copyOrder(orderId){
-    if(!confirm('确定复制这条订单吗？系统会生成新的订单编号。'))return;
-    const {data,error}=await client.rpc('copy_order',{p_order_id:orderId});
-    if(error){alert(error.message);return}
-    const no=data&&data[0]?data[0].new_order_no:'';
-    alert('复制成功，新订单编号：'+no);
+    if(!['admin','service'].includes(currentProfile.role)){alert('当前账号没有复制订单权限');return}
+    await loadBase(true);
+    let r=await client.rpc('get_order_for_edit',{p_order_id:orderId});
+    if(r.error || !r.data){
+      r=await client.from('orders').select('*').eq('id',orderId).single();
+      if(!r.error && r.data){
+        try{
+          const {data:pa}=await client.from('publishing_assignments').select('journal_id,publish_type').eq('order_id',orderId).maybeSingle();
+          if(pa){r.data.journal_id=pa.journal_id;r.data.publish_type=pa.publish_type}
+        }catch(e){}
+      }
+    }
+    if(r.error){alert('读取原订单失败：'+r.error.message);return}
+    const seed=prepareCopyOrderSeed(r.data);
     closeModal();
-    if(currentProfile.role==='admin')renderAllOrders();else renderMyOrders();
+    await renderOrderForm(null,seed);
   }
 
   async function deleteOrder(orderId){
