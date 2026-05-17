@@ -1065,34 +1065,21 @@ async function renderPublishingOrders(){setMenu('publishing');await loadAllField
 }
 
 async function savePublishingEdit(paId){
-  let st=$('pub_status').value;
-  // 审核通过先让客服看到“审核通过待收款”；客户已收全款后，财务才看到待打款提醒。
-  const payload={
-    journal_id:$('pub_journal_id').value||null,
-    publishing_user_id:currentUser.id,
-    publish_status:st,
-    publishing_notes:$('pub_notes').value.trim(),
-    payee_name:$('pub_payee_name').value.trim(),
-    payee_account_type:$('pub_payee_type').value||null,
-    payee_account:$('pub_payee_account').value.trim(),
-    payee_bank:$('pub_payee_bank').value.trim(),
-    payee_notes:$('pub_payee_notes').value.trim()
-  };
-  const {data:paRow}=await client.from('publishing_assignments').select('order_id').eq('id',paId).single();
-  const {error}=await client.from('publishing_assignments').update(payload).eq('id',paId);
-  if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}
-  if(paRow?.order_id){
-    const {data:o}=await client.from('orders').select('total_amount,deposit_amount,refund_amount,order_status').eq('id',paRow.order_id).single();
-    const total=Number(o?.total_amount||0),received=Number(o?.deposit_amount||0),refund=Number(o?.refund_amount||0);
-    let nextStatus='发表中';
-    if(st==='审核通过'||st==='待打款'||st==='待财务打款'){
-      nextStatus=(refund<=0 && total>0 && received>=total)?'已收全款':'审核通过待收款';
-    }
-    await client.from('orders').update({order_status:nextStatus}).eq('id',paRow.order_id)
-      .neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
-  }
-  closeModal();
-  renderPublishingOrders()
+  const st=$('pub_status').value;
+  const {error}=await client.rpc('update_publishing_flow',{
+    p_assignment_id:paId,
+    p_journal_id:$('pub_journal_id').value||null,
+    p_publish_status:st,
+    p_publishing_notes:$('pub_notes').value.trim(),
+    p_payee_name:$('pub_payee_name')?.value.trim()||'',
+    p_payee_account_type:$('pub_payee_type')?.value||null,
+    p_payee_account:$('pub_payee_account')?.value.trim()||'',
+    p_payee_bank:$('pub_payee_bank')?.value.trim()||'',
+    p_payee_notes:$('pub_payee_notes')?.value.trim()||''
+  });
+  if(error){msg('modalMsg','<div class="error">'+esc(error.message)+'</div>');return}
+  msg('modalMsg','<div class="success">保存成功，正在刷新...</div>');
+  setTimeout(()=>{closeModal();renderPublishingOrders()},450);
 }
 
 function isOrderFullPaidForPublish(r){
@@ -1288,26 +1275,43 @@ async function renderPublishingPayment(){
 
 function publishingPaymentTable(rows){
   if(!rows.length)return'<div class="warn">暂无发表打款记录。</div>';
-  return`<div class="table-wrap"><table><thead><tr><th>订单</th><th>期刊</th><th>版面费</th><th>发表部提供打款账号</th><th>发表状态</th><th>打款状态</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${isPublishPaymentPending(r)?'due-warning':''}"><td><strong>${r.order_no}</strong><br>${r.service_name||''}</td><td>${r.journal_name||'-'}</td><td>${r.page_fee?money(r.page_fee):'-'}</td><td>${publishPayeeDisplay(r)}</td><td>${r.publish_status||'-'}</td><td>${r.finance_payment_status||'-'}<br>${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td><button onclick="openPublishPayEdit('${r.publishing_assignment_id}',${Number(r.page_fee||0)})">${isPublishPaymentPending(r)?'处理打款':'查看/修改'}</button></td></tr>`).join('')}</tbody></table></div>`
+  return`<div class="table-wrap"><table><thead><tr><th>订单</th><th>期刊</th><th>版面费</th><th>发表部提供打款账号</th><th>发表状态</th><th>打款状态</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${isPublishPaymentPending(r)?'due-warning':''}"><td><strong>${r.order_no}</strong><br>${r.service_name||''}</td><td>${r.journal_name||'-'}</td><td>${r.page_fee?money(r.page_fee):'-'}</td><td>${publishPayeeDisplay(r)}</td><td>${r.publish_status||'-'}</td><td>${r.finance_payment_status||'-'}<br>${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td><button onclick="openPublishPayEdit('${r.publishing_assignment_id}',${Number(r.page_fee||0)},'${esc(r.finance_payment_status||'未打款')}',${Number(r.finance_payment_amount||r.page_fee||0)},'${esc(r.finance_notes||'')}')">${isPublishPaymentPending(r)?'处理打款':'查看/修改'}</button></td></tr>`).join('')}</tbody></table></div>`
 }
-function openPublishPayEdit(paId,amount){openModal(`<h2>发表打款处理</h2><label>打款状态</label><select id="pubpay_status"><option value="未打款">未打款</option><option value="已打款">已打款</option></select><label>打款金额</label><input id="pubpay_amount" type="number" step="0.01" value="${amount}"><label>备注</label><textarea id="pubpay_notes"></textarea><button onclick="savePublishPay('${paId}')">保存</button><button class="ghost" onclick="closeModal()">取消</button><div id="modalMsg"></div>`)}
+function openPublishPayEdit(paId,amount,status='未打款',paidAmount=0,notes=''){
+  const st=esc(status||'未打款');
+  const amt=Number(paidAmount||amount||0);
+  openModal(`<h2>发表打款处理</h2>
+    <label>打款状态</label>
+    <select id="pubpay_status">
+      <option value="未打款" ${st==='未打款'?'selected':''}>未打款</option>
+      <option value="已打款" ${st==='已打款'?'selected':''}>已打款</option>
+    </select>
+    <label>打款金额</label>
+    <input id="pubpay_amount" type="number" step="0.01" value="${amt}">
+    <label>备注</label>
+    <textarea id="pubpay_notes">${esc(notes||'')}</textarea>
+    <button id="pubpaySaveBtn" onclick="savePublishPay('${paId}')">保存</button>
+    <button class="ghost" onclick="closeModal()">取消</button>
+    <div id="modalMsg"></div>`)
+}
+
 async function savePublishPay(paId){
+  const btn=$('pubpaySaveBtn');
+  if(btn){btn.disabled=true;btn.innerText='保存中...'}
   const st=$('pubpay_status').value;
-  const {data:paRow}=await client.from('publishing_assignments').select('order_id').eq('id',paId).single();
-  const {error}=await client.from('publishing_assignments').update({
-    finance_payment_status:st,
-    finance_payment_amount:Number($('pubpay_amount').value||0),
-    finance_paid_at:st==='已打款'?new Date().toISOString():null,
-    publish_status:st==='已打款'?'已打款':undefined,
-    finance_notes:$('pubpay_notes').value.trim()
-  }).eq('id',paId);
-  if(error){msg('modalMsg','<div class="error">'+esc(error.message)+'</div>');return}
-  if(st==='已打款' && paRow?.order_id){
-    await client.from('orders').update({order_status:'等待出刊'}).eq('id',paRow.order_id)
-      .neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+  const {error}=await client.rpc('confirm_publishing_payment',{
+    p_assignment_id:paId,
+    p_status:st,
+    p_amount:Number($('pubpay_amount').value||0),
+    p_notes:$('pubpay_notes').value.trim()
+  });
+  if(error){
+    if(btn){btn.disabled=false;btn.innerText='保存'}
+    msg('modalMsg','<div class="error">'+esc(error.message)+'</div>');
+    return;
   }
-  closeModal();
-  renderPublishingPayment()
+  msg('modalMsg','<div class="success">保存成功，正在刷新...</div>');
+  setTimeout(()=>{closeModal();renderPublishingPayment()},450);
 }
 
 
