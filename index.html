@@ -485,10 +485,20 @@ async function renderOrderForm(orderId=null){
   await loadBase(true);
   let existing=null;
   if(orderId){
-    const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
-    const {data,error}=await client.from(view).select('*').eq('id',orderId).single();
-    if(error){openModal(`<div class="order-form-shell"><div class="order-form-header"><h2>读取订单失败</h2><button class="order-form-close" onclick="closeModal()">×</button></div><div class="order-form-body"><div class="error">${esc(error.message)}</div></div></div>`);return}
-    existing=data;
+    // 修改订单时必须读取 orders 原表字段。
+    // 之前读取的是展示视图，部分视图没有 category_id、project_id、payment_method_id 等 ID 字段，
+    // 所以打开修改弹窗时会出现“付款方式、业务大类、具体项目、派给写作部为空”的问题。
+    let r=await client.from('orders').select('*').eq('id',orderId).single();
+    if(r.error){
+      const view=currentProfile.role==='admin'?'v_admin_orders_full':'v_service_orders';
+      r=await client.from(view).select('*').eq('id',orderId).single();
+    }
+    if(r.error){openModal(`<div class="order-form-shell"><div class="order-form-header"><h2>读取订单失败</h2><button class="order-form-close" onclick="closeModal()">×</button></div><div class="order-form-body"><div class="error">${esc(r.error.message)}</div></div></div>`);return}
+    existing=r.data;
+    try{
+      const {data:pa}=await client.from('publishing_assignments').select('journal_id,publish_type').eq('order_id',orderId).maybeSingle();
+      if(pa){existing.journal_id=pa.journal_id;existing.publish_type=pa.publish_type}
+    }catch(e){}
   }
   const internal=currentProfile.role==='admin';
   journals=await loadJournals(internal);
@@ -533,8 +543,22 @@ async function renderOrderForm(orderId=null){
       <div id="orderFormMsg" class="footer-msg"></div>
     </div>
   </div>`);
-  if(existing?.category_id){await onCategoryChange(existing.project_id);await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
-  updateBalancePreview();
+  if(existing){
+    // 再次显式回填关键下拉框，避免动态刷新项目后被清空
+    setTimeout(async()=>{
+      if($('customer_source'))$('customer_source').value=existing.customer_source||'';
+      if($('payment_method_id'))$('payment_method_id').value=existing.payment_method_id||'';
+      if($('category_id'))$('category_id').value=existing.category_id||'';
+      if(existing.category_id){await onCategoryChange(existing.project_id||'')}
+      if($('project_id'))$('project_id').value=existing.project_id||'';
+      if(existing.project_id){await onProjectChange(existing.project_id,existing.dynamic_values||{},existing.journal_id)}
+      if($('assigned_writing_user_id'))$('assigned_writing_user_id').value=existing.assigned_writing_user_id||'';
+      if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
+      updateBalancePreview();
+    },0);
+  }else{
+    updateBalancePreview();
+  }
   initOrderDraftProtection(orderId);
 }
 const ORDER_DRAFT_KEY='order_form_draft_v33';
@@ -704,7 +728,7 @@ async function saveOrder(orderId=null){
     const word=pickDynByLabel(fields,dv,['字数','页数'])||dv.word_count_req||dv.page_or_word_req||'';
     const total=Number($('total_amount').value||0),received=Number($('deposit_amount').value||0),refund=Number($('refund_amount').value||0);
     const payload={
-      created_by:currentUser.id,category_id:categoryId,project_id:projectId,
+      category_id:categoryId,project_id:projectId,
       assigned_writing_user_id:$('assigned_writing_user_id').value||null,
       assigned_publishing_user_id:$('assigned_publishing_user_id').value||null,
       payment_method_id:$('payment_method_id').value||null,
@@ -716,7 +740,7 @@ async function saveOrder(orderId=null){
     };
     let orderData,err;
     if(orderId){const r=await client.from('orders').update(payload).eq('id',orderId).select('id,order_no').single();orderData=r.data;err=r.error}
-    else{const r=await client.from('orders').insert(payload).select('id,order_no').single();orderData=r.data;err=r.error}
+    else{payload.created_by=currentUser.id;const r=await client.from('orders').insert(payload).select('id,order_no').single();orderData=r.data;err=r.error}
     if(err){msg('orderFormMsg','<div class="error">'+esc(err.message)+'</div>');return}
     if(isPublishProject(project,categoryId)){
       const pa={order_id:orderData.id,publishing_user_id:$('assigned_publishing_user_id').value||null,journal_id:$('journal_id')?.value||null,publish_type:publishTypeByProject(project,categoryId),publish_status:'待审核'};
