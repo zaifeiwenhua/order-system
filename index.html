@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V92：查询链接按钮优化版 */
+/* V93：登录保持与自动刷新版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3959,6 +3959,14 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   }
 }
 
+
+/* V93 登录保持与订单自动刷新 */
+.auto-refresh-note{
+  color:#98a2b3;
+  font-size:12px;
+  margin-left:8px;
+}
+
 </style>
 </head>
 <body>
@@ -4005,7 +4013,14 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 <script>
 const SUPABASE_URL='https://kifnfihqavambwatclle.supabase.co';
 const SUPABASE_KEY='sb_publishable_BZaNc-i9sRnvkwTVjOF_dw_jbUoMFYs';
-const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{
+    persistSession:true,
+    autoRefreshToken:true,
+    detectSessionInUrl:true,
+    storageKey:'srx-order-system-auth'
+  }
+});
 let currentUser=null,currentProfile=null,activeMenu='',orderSaving=false,categories=[],projects=[],customerSources=[],paymentMethods=[],profiles=[],writingUsers=[],publishingUsers=[],journals=[],writers=[],fieldsCache={},projectFieldLabels={};
 const roleMap={admin:'管理员',service:'客服部',writing:'写作部',publishing:'发表部',finance:'财务部',pending:'待审核'};
 const closedStatus=['已完成','已取消','退款/异常','已交付'];
@@ -4326,7 +4341,14 @@ async function queryWriterInternal(){
 }
 
 
-async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入邮箱/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
+async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入邮箱/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){
+  try{localStorage.removeItem('srx_active_menu')}catch(e){}
+  await client.auth.signOut();
+  currentUser=null;currentProfile=null;
+  $('appArea').classList.add('hidden');
+  $('loginArea').classList.remove('hidden');
+  showLogin()
+}
 async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');const qs=new URLSearchParams(location.search);if(qs.get('writer')==='1'){renderWriterPublicQuery()}else{showLogin()}return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
 const displayName=p.display_name||'未命名';
 const roleName=roleMap[p.role]||p.role;
@@ -4334,8 +4356,56 @@ if($('sideUser'))$('sideUser').innerHTML='';
 if($('topUserName'))$('topUserName').innerText=displayName;
 if($('topUserRole'))$('topUserRole').innerText=roleName;
 if($('topUserAvatar'))$('topUserAvatar').innerText=displayName.slice(0,1);
-renderMenu();routeAfterLogin()}
-function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceWorkbench();if(currentProfile.role==='service')return renderMyOrders();return renderHome()}const menuIconMap={
+renderMenu();routeAfterLogin();startAutoRefresh()}
+function routeAfterLogin(){
+  let saved='';
+  try{saved=localStorage.getItem('srx_active_menu')||''}catch(e){}
+
+  const allow={
+    admin:['home','allorders','myorders','writing','publishing','journals','writers','writer_query','sources','payments','biz','accounts','reports'],
+    service:['myorders','allorders','journals'],
+    writing:['writing','writers'],
+    publishing:['publishing','journals'],
+    finance:['finance_home','finance_all','payment_confirm','publish_payment','service_perf','settlement_review','settlement_summary','writer_query','settlement_batches']
+  };
+
+  if(saved && allow[currentProfile.role]?.includes(saved)){
+    return runMenuByKey(saved);
+  }
+
+  if(currentProfile.role==='writing')return renderWritingOrders();
+  if(currentProfile.role==='publishing')return renderPublishingOrders();
+  if(currentProfile.role==='finance')return renderFinanceWorkbench();
+  if(currentProfile.role==='service')return renderMyOrders();
+  return renderHome();
+}
+
+function runMenuByKey(k){
+  const map={
+    home:renderHome,
+    allorders:()=>currentProfile.role==='service'?renderServiceAllOrders():renderAllOrders(),
+    myorders:renderMyOrders,
+    writing:renderWritingOrders,
+    publishing:renderPublishingOrders,
+    journals:renderJournalManage,
+    writers:renderWriterManage,
+    writer_query:renderWriterInternalQuery,
+    sources:renderSourceManage,
+    payments:renderPaymentManage,
+    biz:renderBusinessManage,
+    accounts:renderAccountManage,
+    reports:renderReportView,
+    finance_home:renderFinanceWorkbench,
+    finance_all:renderFinanceOrders,
+    payment_confirm:renderPaymentConfirmation,
+    publish_payment:renderPublishingPayment,
+    service_perf:renderServicePerformance,
+    settlement_review:renderSettlementReview,
+    settlement_summary:renderWriterSettlementSummary,
+    settlement_batches:renderSettlementBatches
+  };
+  return (map[k]||renderHome)();
+}const menuIconMap={
   home:'⌂',allorders:'▦',myorders:'▤',writing:'✎',publishing:'▣',journals:'◫',writers:'☷',
   sources:'⌖',payments:'￥',biz:'⚙',accounts:'◎',reports:'◉',
   finance_home:'⌁',finance_all:'▦',payment_confirm:'✓',service_perf:'◍',
@@ -4347,7 +4417,12 @@ function menuBtn(key,label,fn){
   const icon=menuIconMap[key]||'•';
   return `<button id="m_${key}" title="${label}" onclick="setMenu('${key}');setPageTitle('${label}');toggleMobileMenu(false);Promise.resolve((async()=>{${fn}})()).catch(e=>showContent('<div class=&quot;card&quot;><div class=&quot;error&quot;>页面打开失败：'+esc(e&&e.message?e.message:e)+'</div></div>'))"><span class="menu-ico">${icon}</span><span class="menu-label">${label}</span></button>`
 }
-function setMenu(k){activeMenu=k;document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
+function setMenu(k){
+  activeMenu=k;
+  try{localStorage.setItem('srx_active_menu',k)}catch(e){}
+  document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));
+  const el=$('m_'+k);if(el)el.classList.add('active')
+}
 function toggleUserDropdown(e){
   if(e)e.stopPropagation();
   const el=$('userDropdown');
@@ -6074,5 +6149,47 @@ function isUuidLikeLogValue(v){
     await loadOrderLogsPanel(orderId);
   }
 
-function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal">${html}</div></div>`;setTimeout(decorateTables,0)}function closeModal(){$('modalRoot').innerHTML=''}window.addEventListener('resize',()=>{if(window.innerWidth>768)toggleMobileMenu(false)});window.addEventListener('beforeunload',(e)=>{if(orderDraftMode&&orderDraftHasContent(collectOrderFormDraft())){autoSaveOrderDraft();e.preventDefault();e.returnValue=''}});window.addEventListener('load',loadApp);
+function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal">${html}</div></div>`;setTimeout(decorateTables,0)}function closeModal(){$('modalRoot').innerHTML=''}
+let autoRefreshTimer=null;
+let autoRefreshRunning=false;
+const AUTO_REFRESH_MENUS=[
+  'allorders','myorders','writing','publishing',
+  'finance_home','finance_all','payment_confirm','publish_payment',
+  'service_perf','settlement_review','settlement_summary','settlement_batches'
+];
+
+function hasOpenModalOrEditing(){
+  const root=$('modalRoot');
+  if(root && root.innerHTML.trim())return true;
+  if(document.querySelector('.modal,.order-modal,.drawer,.action-modal'))return true;
+  if(orderSaving)return true;
+  return false;
+}
+
+async function refreshCurrentView(reason='auto'){
+  if(!currentUser||!currentProfile)return;
+  if(document.hidden)return;
+  if(autoRefreshRunning)return;
+  if(hasOpenModalOrEditing())return;
+  if(!AUTO_REFRESH_MENUS.includes(activeMenu))return;
+
+  autoRefreshRunning=true;
+  try{
+    await runMenuByKey(activeMenu);
+  }catch(e){
+    console.warn('自动刷新失败',e);
+  }finally{
+    autoRefreshRunning=false;
+  }
+}
+
+function startAutoRefresh(){
+  if(autoRefreshTimer)clearInterval(autoRefreshTimer);
+  autoRefreshTimer=setInterval(()=>refreshCurrentView('timer'),15000);
+}
+
+window.addEventListener('focus',()=>refreshCurrentView('focus'));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCurrentView('visible')});
+
+window.addEventListener('resize',()=>{if(window.innerWidth>768)toggleMobileMenu(false)});window.addEventListener('beforeunload',(e)=>{if(orderDraftMode&&orderDraftHasContent(collectOrderFormDraft())){autoSaveOrderDraft();e.preventDefault();e.returnValue=''}});window.addEventListener('load',loadApp);
 </script></body></html>
