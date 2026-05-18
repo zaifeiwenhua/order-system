@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V87：写作交稿同步修复版 */
+/* V88：报表利润率版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -5105,18 +5105,101 @@ async function renderReportView(){
     const {data,error}=await client.from('v_admin_orders_full').select('*').gte('created_at',s).lte('created_at',e);
     if(error){$('reportBox').innerHTML='<div class="error">'+error.message+'</div>';return;}
     const rows=data||[];
-    const total=sum(rows,'total_amount'),dep=sum(rows,'deposit_amount'),bal=sum(rows,'balance_amount'),refund=sum(rows,'refund_amount'),income=sum(rows,'actual_income'),fee=sum(rows,'writer_fee'),page=sum(rows,'page_fee');
-    $('reportBox').innerHTML=`<div class="card" style="box-shadow:none;background:#f9fafb"><h3>汇总</h3><div class="grid">${metric('订单数',rows.length)}${metric('成交金额',money(total))}${metric('实收金额',money(dep))}${metric('尾款',money(bal))}${metric('退款',money(refund))}${metric('实际收入',money(income))}${metric('稿费',money(fee))}${metric('版面费',money(page))}${metric('毛利润',money(income-fee-page))}</div></div>${groupTable('客服统计',group(rows,r=>r.service_name||'未指定'))}${groupTable('业务统计',group(rows,r=>(r.business_category||'-')+' / '+(r.service_project||'-')))}${groupTable('期刊统计',group(rows,r=>r.journal_name||'无期刊'))}`;
+
+    const total=sum(rows,'total_amount');
+    const dep=sum(rows,'deposit_amount');
+    const bal=sum(rows,'balance_amount');
+    const refund=sum(rows,'refund_amount');
+    const income=sumIncome(rows);
+    const fee=sum(rows,'writer_fee');
+    const page=sum(rows,'page_fee');
+    const gross=grossProfit(rows);
+
+    $('reportBox').innerHTML=`
+      <div class="card report-summary-card" style="box-shadow:none;background:#f9fafb">
+        <h3>汇总</h3>
+        <div class="grid">
+          ${metric('订单数',rows.length)}
+          ${metric('成交金额',money(total))}
+          ${metric('实收金额',money(dep))}
+          ${metric('尾款',money(bal))}
+          ${metric('退款',money(refund))}
+          ${metric('实际收入',money(income))}
+          ${metric('稿费',money(fee))}
+          ${metric('版面费',money(page))}
+          ${metric('毛利润',money(gross))}
+          ${metric('毛利润率',pct(gross,income))}
+          ${metric('稿费占比',pct(fee,income))}
+          ${metric('版面费占比',pct(page,income))}
+        </div>
+        <div class="muted" style="margin-top:10px;line-height:1.7">
+          说明：毛利润 = 实际收入 - 稿费 - 版面费；毛利润率 = 毛利润 ÷ 实际收入；稿费占比 = 稿费 ÷ 实际收入。
+          净利润率需要等财务把客服提成、平台扣点、推广费、其他人工/杂费等完整成本录入后才能准确统计。
+        </div>
+      </div>
+      ${groupTable('客服统计',group(rows,r=>r.service_name||'未指定'))}
+      ${groupTable('业务统计',group(rows,r=>(r.business_category||'-')+' / '+(r.service_project||'-')))}
+      ${groupTable('期刊统计',group(rows,r=>r.journal_name||'无期刊'))}`;
   }
+
   function sum(rows,k){return rows.reduce((a,r)=>a+Number(r[k]||0),0);}
+  function rowIncome(r){return Number((r.actual_income??r.deposit_amount)||0);}
+  function sumIncome(rows){return rows.reduce((a,r)=>a+rowIncome(r),0);}
+  function rowGrossProfit(r){return rowIncome(r)-Number(r.writer_fee||0)-Number(r.page_fee||0);}
+  function grossProfit(rows){return rows.reduce((a,r)=>a+rowGrossProfit(r),0);}
+  function pct(part,base){return Number(base||0)>0?(Number(part||0)/Number(base||0)*100).toFixed(1)+'%':'-';}
   function metric(k,v){return `<div class="module"><h3>${v}</h3><div class="muted">${k}</div></div>`;}
+
   function group(rows,kf){
     const m={};
-    rows.forEach(r=>{const k=kf(r);m[k]??={name:k,count:0,total:0,dep:0,fee:0,page:0};m[k].count++;m[k].total+=Number(r.total_amount||0);m[k].dep+=Number(r.deposit_amount||0);m[k].fee+=Number(r.writer_fee||0);m[k].page+=Number(r.page_fee||0);});
-    return Object.values(m);
+    rows.forEach(r=>{
+      const k=kf(r);
+      m[k]??={name:k,count:0,total:0,dep:0,income:0,fee:0,page:0,gross:0};
+      m[k].count++;
+      m[k].total+=Number(r.total_amount||0);
+      m[k].dep+=Number(r.deposit_amount||0);
+      m[k].income+=rowIncome(r);
+      m[k].fee+=Number(r.writer_fee||0);
+      m[k].page+=Number(r.page_fee||0);
+      m[k].gross+=rowGrossProfit(r);
+    });
+    return Object.values(m).sort((a,b)=>b.income-a.income);
   }
+
   function groupTable(title,rows){
-    return `<h3>${title}</h3><div class="table-wrap"><table><thead><tr><th>名称</th><th>订单数</th><th>成交金额</th><th>实收金额</th><th>稿费</th><th>版面费</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td><td>${money(r.total)}</td><td>${money(r.dep)}</td><td>${money(r.fee)}</td><td>${money(r.page)}</td></tr>`).join('')}</tbody></table></div>`;
+    return `<h3>${title}</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>订单数</th>
+              <th>成交金额</th>
+              <th>实收金额</th>
+              <th>实际收入</th>
+              <th>稿费</th>
+              <th>稿费占比</th>
+              <th>版面费</th>
+              <th>毛利润</th>
+              <th>毛利润率</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r=>`<tr>
+              <td>${esc(r.name)}</td>
+              <td>${r.count}</td>
+              <td>${money(r.total)}</td>
+              <td>${money(r.dep)}</td>
+              <td>${money(r.income)}</td>
+              <td>${money(r.fee)}</td>
+              <td>${pct(r.fee,r.income)}</td>
+              <td>${money(r.page)}</td>
+              <td>${money(r.gross)}</td>
+              <td>${pct(r.gross,r.income)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
   }
 
   
