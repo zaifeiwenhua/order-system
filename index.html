@@ -1942,6 +1942,146 @@ body{
   display:grid!important;
 }
 
+
+/* V72 登录页修复：恢复登录框，去掉大图错位
+   采用居中登录卡片，稳定、不乱、不挤出屏幕 */
+#loginArea.hidden,
+.login-page.hidden{
+  display:none!important;
+}
+
+#loginArea.login-page:not(.hidden){
+  min-height:100vh!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:32px 18px!important;
+  background:
+    radial-gradient(circle at 18% 12%,rgba(37,99,235,.35),transparent 30%),
+    radial-gradient(circle at 88% 18%,rgba(14,165,233,.22),transparent 28%),
+    linear-gradient(135deg,#020617 0%,#08214a 52%,#020617 100%)!important;
+  overflow:auto!important;
+}
+
+/* 隐藏之前那块大宣传图，避免把登录框挤没 */
+#loginArea.login-page:not(.hidden) > .card:first-child{
+  display:none!important;
+}
+
+/* 登录卡片重新居中 */
+#loginBox,
+#writerQueryBox{
+  position:relative!important;
+  z-index:2!important;
+  display:block;
+  width:min(460px,92vw)!important;
+  max-width:460px!important;
+  margin:0 auto!important;
+  padding:34px 34px 30px!important;
+  border-radius:24px!important;
+  background:rgba(255,255,255,.97)!important;
+  border:1px solid rgba(219,234,254,.75)!important;
+  box-shadow:0 26px 80px rgba(2,8,23,.38)!important;
+  backdrop-filter:blur(16px);
+}
+
+/* 被隐藏的写手查询仍然必须隐藏 */
+#writerQueryBox.hidden,
+#loginBox.hidden{
+  display:none!important;
+}
+
+#loginBox:before{
+  content:"客户录单系统";
+  display:block;
+  font-size:30px;
+  font-weight:900;
+  color:#0b2a59;
+  letter-spacing:.5px;
+  margin-bottom:6px;
+}
+
+#loginBox:after{
+  content:"内部订单协同 · 写作 · 发表 · 财务结算";
+  display:block;
+  color:#667085;
+  font-size:14px;
+  margin-bottom:22px;
+}
+
+#loginBox h2,
+#writerQueryBox h2{
+  font-size:20px!important;
+  color:#101828!important;
+  margin:0 0 18px!important;
+  font-weight:800!important;
+}
+
+#loginBox h2:before,
+#writerQueryBox h2:before{
+  display:none!important;
+}
+
+#loginBox label,
+#writerQueryBox label{
+  color:#344054!important;
+  font-weight:700!important;
+  margin-top:14px!important;
+}
+
+#loginBox input,
+#writerQueryBox input{
+  height:48px!important;
+  border-radius:13px!important;
+  border:1px solid #cbd5e1!important;
+  background:#f8fbff!important;
+  font-size:15px!important;
+  padding:0 14px!important;
+}
+
+#loginBox input:focus,
+#writerQueryBox input:focus{
+  background:#fff!important;
+  border-color:#2563eb!important;
+  box-shadow:0 0 0 4px rgba(37,99,235,.12)!important;
+}
+
+#loginBox > button:not(.ghost),
+#writerQueryBox > button:not(.ghost){
+  width:100%!important;
+  height:50px!important;
+  margin:22px 0 8px!important;
+  border-radius:13px!important;
+  background:linear-gradient(135deg,#2563eb,#0ea5e9)!important;
+  color:#fff!important;
+  font-size:16px!important;
+  font-weight:800!important;
+  box-shadow:0 14px 32px rgba(37,99,235,.25)!important;
+}
+
+#loginBox > button.ghost,
+#writerQueryBox > button.ghost{
+  width:100%!important;
+  height:44px!important;
+  margin:8px 0 0!important;
+  border-radius:13px!important;
+  background:#f2f4f7!important;
+  color:#344054!important;
+  border:1px solid #e4e7ec!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:600px){
+  #loginBox,
+  #writerQueryBox{
+    padding:28px 22px 24px!important;
+    border-radius:20px!important;
+  }
+  #loginBox:before{
+    font-size:26px;
+  }
+}
+
 </style>
 </head>
 <body>
