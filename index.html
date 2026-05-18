@@ -3012,6 +3012,213 @@ body:has(#loginArea:not(.hidden)){
   font-size:13px;
 }
 
+
+/* V79 轻后台界面统一版：飞书式浅色办公后台 */
+:root{
+  --side-w:184px;
+  --top-h:58px;
+  --blue:#2f6bff;
+  --blue2:#1aa7ff;
+  --text:#1f2937;
+  --muted:#7b8798;
+  --line:#e7edf3;
+  --bg:#f4f7fb;
+  --panel:#ffffff;
+}
+
+/* 登录页：全屏、居中、浅蓝色块 */
+html:has(#loginArea:not(.hidden)),
+body:has(#loginArea:not(.hidden)){
+  margin:0!important;
+  width:100%!important;
+  height:100%!important;
+  overflow:hidden!important;
+  background:#eef6ff!important;
+}
+#loginArea.hidden,.login-page.hidden,#appArea.hidden,.layout.hidden{display:none!important}
+#loginArea.login-page:not(.hidden){
+  position:fixed!important; inset:0!important;
+  width:100vw!important; height:100vh!important;
+  display:block!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 16% 12%,rgba(92,151,255,.23),transparent 32%),
+    radial-gradient(circle at 88% 84%,rgba(109,215,255,.21),transparent 34%),
+    linear-gradient(135deg,#f8fbff 0%,#edf6ff 52%,#fbfdff 100%)!important;
+}
+#loginArea.login-page:not(.hidden)::before{
+  content:""; position:absolute; left:-150px; top:-160px; width:520px; height:520px;
+  border-radius:48%; background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(125,211,252,.08));
+}
+#loginArea.login-page:not(.hidden)::after{
+  content:""; position:absolute; right:-190px; bottom:-220px; width:620px; height:620px;
+  border-radius:50%; background:linear-gradient(135deg,rgba(147,197,253,.22),rgba(34,211,238,.10));
+}
+#loginArea.login-page:not(.hidden)> .card:first-child{display:none!important}
+#loginArea:not(.hidden) #loginBox:not(.hidden),
+#loginArea:not(.hidden) #writerQueryBox:not(.hidden){
+  position:fixed!important; left:50vw!important; top:50vh!important; transform:translate(-50%,-50%)!important;
+  width:450px!important; max-width:calc(100vw - 40px)!important;
+  margin:0!important; padding:42px 44px 36px!important;
+  border-radius:24px!important; background:rgba(255,255,255,.94)!important;
+  border:1px solid rgba(255,255,255,.90)!important;
+  box-shadow:0 28px 90px rgba(47,107,255,.16)!important;
+  backdrop-filter:blur(18px);
+}
+#loginBox.hidden,#writerQueryBox.hidden{display:none!important}
+#loginBox::before{
+  content:"用户登录"; display:block; text-align:center; font-size:30px; font-weight:900;
+  color:#111827; margin-bottom:30px; letter-spacing:.2px;
+}
+#writerQueryBox::before{
+  content:"写手查询"; display:block; text-align:center; font-size:30px; font-weight:900;
+  color:#111827; margin-bottom:24px; letter-spacing:.2px;
+}
+#loginBox::after{
+  content:"客户录单系统 · 内部协同管理"; display:block; text-align:center; margin-top:14px;
+  color:#98a2b3; font-size:13px;
+}
+#loginBox h1,#loginBox h2,#writerQueryBox h2,#loginBox label,#writerQueryBox label{display:none!important}
+#loginBox input,#writerQueryBox input{
+  height:48px!important; border-radius:10px!important; border:1px solid #e5eaf2!important;
+  background:#fff!important; font-size:15px!important; padding:0 16px!important; margin:0 0 16px!important;
+  box-shadow:none!important;
+}
+#loginBox input:focus,#writerQueryBox input:focus{
+  border-color:#3b82f6!important; box-shadow:0 0 0 4px rgba(59,130,246,.10)!important;
+}
+#loginBox>button:not(.ghost),#writerQueryBox>button:not(.ghost){
+  width:100%!important; height:50px!important; margin:12px 0 10px!important; border-radius:10px!important;
+  background:linear-gradient(90deg,#2f6bff,#268bff)!important; font-size:17px!important; font-weight:900!important;
+  box-shadow:0 16px 32px rgba(47,107,255,.22)!important;
+}
+#loginBox>button.ghost,#writerQueryBox>button.ghost{display:none!important}
+
+/* 总体背景 */
+body{background:var(--bg)!important;color:var(--text)!important}
+.layout{min-height:100vh;background:var(--bg)!important}
+
+/* 左侧栏：轻量、清晰、分组 */
+.sidebar{
+  width:var(--side-w)!important; position:fixed!important; left:0!important; top:0!important; bottom:0!important;
+  background:#fff!important; border-right:1px solid var(--line)!important;
+  box-shadow:8px 0 24px rgba(30,64,175,.04)!important; padding:0!important; overflow:hidden!important; z-index:30;
+}
+.brand{
+  height:64px!important; margin:0!important; padding:0 16px!important; display:flex!important; align-items:center!important; gap:10px!important;
+  border-bottom:1px solid var(--line)!important; color:#1f3b72!important; font-size:17px!important; font-weight:900!important;
+}
+.brand-logo{
+  width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#2f6bff,#1aa7ff);color:#fff;font-weight:900;box-shadow:0 8px 18px rgba(47,107,255,.20);
+}
+.brand-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-info{display:none!important}
+.menu{
+  height:calc(100vh - 64px)!important; overflow-y:auto!important; padding:12px 10px 18px!important;
+}
+.menu::-webkit-scrollbar{width:4px}.menu::-webkit-scrollbar-thumb{background:#d7e1ef;border-radius:999px}
+.menu-group-title{
+  padding:13px 8px 7px!important; color:#a1adbd!important; font-size:12px!important; font-weight:800!important;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+.menu button{
+  width:100%!important; height:40px!important; min-height:40px!important; margin:0 0 6px!important; padding:0 11px!important;
+  display:flex!important; align-items:center!important; gap:10px!important; border-radius:9px!important;
+  background:transparent!important; border:0!important; color:#5f6f86!important;
+  font-size:14px!important; font-weight:800!important; text-align:left!important; box-shadow:none!important; transform:none!important;
+}
+.menu button:hover{background:#f2f7ff!important;color:var(--blue)!important}
+.menu button.active{background:linear-gradient(90deg,#2f6bff,#1aa7ff)!important;color:#fff!important;box-shadow:0 8px 18px rgba(47,107,255,.18)!important}
+.menu-ico{
+  width:18px;height:18px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:12px;background:#eff4fb;color:#6b7b94;flex:0 0 18px;
+}
+.menu button.active .menu-ico{background:rgba(255,255,255,.22);color:#fff}
+.menu-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-logout,.sidebar>button.secondary{display:none!important}
+
+/* 顶部栏 + 右上角账号 */
+.app-header{
+  position:fixed!important; left:var(--side-w)!important; right:0!important; top:0!important; height:var(--top-h)!important;
+  display:flex!important; align-items:center!important; justify-content:space-between!important;
+  padding:0 22px!important; background:rgba(255,255,255,.96)!important; border-bottom:1px solid var(--line)!important;
+  box-shadow:0 6px 22px rgba(30,64,175,.04)!important; backdrop-filter:blur(12px); z-index:25;
+}
+.header-title{font-size:17px!important;font-weight:900!important;color:#1f2937!important}
+.header-actions{display:flex;align-items:center;gap:10px}
+.header-icon{
+  width:34px!important;height:34px!important;padding:0!important;margin:0!important;border-radius:50%!important;
+  background:#f6f9fe!important;color:#5e6b80!important;border:1px solid #e5ebf4!important;box-shadow:none!important;
+}
+.top-user{position:relative;display:flex;align-items:center;gap:8px;padding:5px 8px 5px 5px;border-radius:999px;cursor:pointer}
+.top-user:hover{background:#f5f8ff}
+.top-avatar{
+  width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#2f6bff,#1aa7ff);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;box-shadow:0 8px 18px rgba(47,107,255,.18);
+}
+.top-user-name{font-size:13px;font-weight:900;color:#1f2937;line-height:1.1}
+.top-user-role{font-size:12px;color:#8a95a6;margin-top:3px}
+.top-user-arrow{color:#98a2b3;font-size:13px}
+.user-dropdown{
+  display:none;position:absolute;right:0;top:46px;min-width:146px;padding:8px;background:#fff;border:1px solid #e5ebf4;
+  border-radius:12px;box-shadow:0 18px 46px rgba(15,23,42,.12);z-index:100;
+}
+.user-dropdown.show{display:block}
+.user-dropdown button{
+  width:100%!important;height:38px!important;margin:0!important;padding:0 12px!important;border-radius:9px!important;background:#fff!important;
+  color:#344054!important;box-shadow:none!important;text-align:left!important;font-weight:800!important;
+}
+.user-dropdown button:hover{background:#f5f8ff!important;color:var(--blue)!important;transform:none!important}
+
+/* 主内容 */
+.main{
+  margin-left:var(--side-w)!important; max-width:calc(100vw - var(--side-w))!important;
+  min-height:100vh!important; padding:calc(var(--top-h) + 18px) 22px 24px!important; background:var(--bg)!important;
+}
+.card{
+  border:1px solid #e7edf7!important;border-radius:14px!important;background:#fff!important;
+  box-shadow:0 12px 28px rgba(30,64,175,.045)!important;padding:18px!important;margin-bottom:16px!important;
+}
+.card h2{font-size:18px!important;margin:0 0 14px!important;color:#1f2937!important}
+.card h2:before{display:none!important}
+
+/* 页面工具与搜索 */
+.compact-searchbar{
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;
+  margin:-44px 0 14px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.compact-search{
+  width:240px!important;height:34px!important;border:1px solid #dbe3ef!important;border-radius:8px!important;background:#fff!important;
+  display:flex!important;align-items:center!important;gap:7px!important;padding:0 8px 0 11px!important;box-shadow:none!important;
+}
+.compact-search input{height:30px!important;min-height:30px!important;font-size:13px!important;background:transparent!important}
+.compact-clear{height:34px!important;border-radius:8px!important;background:#f6f8fc!important;color:#5f6f86!important;border:1px solid #e5ebf4!important;box-shadow:none!important}
+.compact-search-action{height:24px!important;width:24px!important;background:#f6f8fc!important;color:#64748b!important;box-shadow:none!important}
+
+/* 表格：多维表格感 */
+.table-wrap{
+  border:1px solid #e5ebf4!important;border-radius:12px!important;overflow:auto!important;background:#fff!important;margin-top:10px!important;
+}
+table{border-collapse:separate!important;border-spacing:0!important;font-size:13px!important}
+th,td{border-bottom:1px solid #edf1f6!important;border-right:1px solid #edf1f6!important;padding:9px 10px!important}
+th{background:#f7f9fc!important;color:#465469!important;font-weight:800!important;position:sticky;top:0;z-index:2}
+tr:hover td{background:#f8fbff!important}
+button{box-shadow:none!important}
+.card > button:not(.ghost):not(.danger), .module button:not(.ghost):not(.danger){background:#2f6bff!important;border-radius:8px!important}
+button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px solid #dfe8f6!important}
+
+/* 手机端 */
+@media(max-width:900px){
+  .app-header{display:none!important}
+  .sidebar{width:280px!important;transform:translateX(-100%);transition:.2s ease}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important;max-width:100vw!important;padding:70px 14px 18px!important}
+  .mobile-topbar{background:#fff!important;color:#1f2937!important;border-bottom:1px solid var(--line)!important}
+  .compact-searchbar{margin:0 0 12px!important;justify-content:flex-start!important}
+  .compact-search{width:100%!important}
+}
+
 </style>
 </head>
 <body>
@@ -3026,7 +3233,7 @@ body:has(#loginArea:not(.hidden)){
     <button class="secondary sidebar-logout" onclick="logout()">退出登录</button>
   </aside>
   <header class="app-header">
-    <div class="header-title">订单管理</div>
+    <div class="header-title" id="headerTitle">订单管理</div>
     <div class="header-actions">
       <button class="header-icon" title="消息">🔔</button>
       <div class="top-user" onclick="toggleUserDropdown(event)">
@@ -3173,7 +3380,19 @@ if($('topUserName'))$('topUserName').innerText=displayName;
 if($('topUserRole'))$('topUserRole').innerText=roleName;
 if($('topUserAvatar'))$('topUserAvatar').innerText=displayName.slice(0,1);
 renderMenu();routeAfterLogin()}
-function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceWorkbench();if(currentProfile.role==='service')return renderMyOrders();return renderHome()}function menuBtn(key,label,fn){return`<button id="m_${key}" onclick="setMenu('${key}');toggleMobileMenu(false);Promise.resolve((async()=>{${fn}})()).catch(e=>showContent('<div class=&quot;card&quot;><div class=&quot;error&quot;>页面打开失败：'+esc(e&&e.message?e.message:e)+'</div></div>'))">${label}</button>`}function setMenu(k){activeMenu=k;document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
+function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceWorkbench();if(currentProfile.role==='service')return renderMyOrders();return renderHome()}const menuIconMap={
+  home:'⌂',allorders:'▦',myorders:'▤',writing:'✎',publishing:'▣',journals:'◫',writers:'☷',
+  sources:'⌖',payments:'￥',biz:'⚙',accounts:'◎',reports:'◉',
+  finance_home:'⌁',finance_all:'▦',payment_confirm:'✓',service_perf:'◍',
+  settlement_review:'☑',settlement_summary:'Σ',settlement_batches:'≡',publish_payment:'↗'
+};
+function menuGroup(label){return `<div class="menu-group-title">${label}</div>`}
+function setPageTitle(label){const t=$('headerTitle');if(t)t.innerText=label||'订单管理'}
+function menuBtn(key,label,fn){
+  const icon=menuIconMap[key]||'•';
+  return `<button id="m_${key}" title="${label}" onclick="setMenu('${key}');setPageTitle('${label}');toggleMobileMenu(false);Promise.resolve((async()=>{${fn}})()).catch(e=>showContent('<div class=&quot;card&quot;><div class=&quot;error&quot;>页面打开失败：'+esc(e&&e.message?e.message:e)+'</div></div>'))"><span class="menu-ico">${icon}</span><span class="menu-label">${label}</span></button>`
+}
+function setMenu(k){activeMenu=k;document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
 function toggleUserDropdown(e){
   if(e)e.stopPropagation();
   const el=$('userDropdown');
@@ -3185,7 +3404,58 @@ document.addEventListener('click',function(e){
   if(el&&box&&!box.contains(e.target))el.classList.remove('show');
 });
 
-function renderMenu(){const r=currentProfile.role;let m='';if(r==='admin')m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('writers','写手管理','renderWriterManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款管理','renderPaymentManage()');m+=menuBtn('biz','字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance'){m+=menuBtn('finance_home','财务工作台','renderFinanceWorkbench()');m+=menuBtn('finance_all','财务订单','renderFinanceOrders()');m+=menuBtn('payment_confirm','收款确认','renderPaymentConfirmation()');m+=menuBtn('service_perf','客服业绩统计','renderServicePerformance()');m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');m+=menuBtn('settlement_summary','写手结算汇总','renderWriterSettlementSummary()');m+=menuBtn('settlement_batches','结算批次记录','renderSettlementBatches()');m+=menuBtn('publish_payment','发表打款','renderPublishingPayment()')}$('menuBox').innerHTML=m}
+function renderMenu(){
+  const r=currentProfile.role;
+  let m='';
+  if(r==='admin'){
+    m+=menuGroup('订单中心');
+    m+=menuBtn('home','首页','renderHome()');
+    m+=menuBtn('allorders','全部订单','renderAllOrders()');
+    m+=menuBtn('myorders','我的订单','renderMyOrders()');
+    m+=menuGroup('业务处理');
+    m+=menuBtn('writing','写作订单','renderWritingOrders()');
+    m+=menuBtn('publishing','发表订单','renderPublishingOrders()');
+    m+=menuGroup('基础资料');
+    m+=menuBtn('journals','期刊管理','renderJournalManage()');
+    m+=menuBtn('writers','写手管理','renderWriterManage()');
+    m+=menuBtn('sources','来源管理','renderSourceManage()');
+    m+=menuBtn('payments','付款管理','renderPaymentManage()');
+    m+=menuBtn('biz','字段管理','renderBusinessManage()');
+    m+=menuGroup('系统设置');
+    m+=menuBtn('accounts','账号管理','renderAccountManage()');
+    m+=menuBtn('reports','统计报表','renderReportView()');
+  }
+  if(r==='service'){
+    m+=menuGroup('订单中心');
+    m+=menuBtn('myorders','我的订单','renderMyOrders()');
+    m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');
+    m+=menuGroup('查询资料');
+    m+=menuBtn('journals','期刊管理','renderJournalManage()');
+  }
+  if(r==='writing'){
+    m+=menuGroup('写作中心');
+    m+=menuBtn('writing','写作订单','renderWritingOrders()');
+    m+=menuBtn('writers','写手管理','renderWriterManage()');
+  }
+  if(r==='publishing'){
+    m+=menuGroup('发表中心');
+    m+=menuBtn('publishing','发表订单','renderPublishingOrders()');
+    m+=menuBtn('journals','期刊管理','renderJournalManage()');
+  }
+  if(r==='finance'){
+    m+=menuGroup('财务中心');
+    m+=menuBtn('finance_home','财务工作台','renderFinanceWorkbench()');
+    m+=menuBtn('finance_all','财务订单','renderFinanceOrders()');
+    m+=menuBtn('payment_confirm','收款确认','renderPaymentConfirmation()');
+    m+=menuBtn('publish_payment','发表打款','renderPublishingPayment()');
+    m+=menuGroup('结算统计');
+    m+=menuBtn('service_perf','客服业绩','renderServicePerformance()');
+    m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');
+    m+=menuBtn('settlement_summary','写手结算','renderWriterSettlementSummary()');
+    m+=menuBtn('settlement_batches','结算批次','renderSettlementBatches()');
+  }
+  $('menuBox').innerHTML=m
+}
 async function fetchDashboardRows(){if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}
 async function renderHome(){setMenu('home');const rows=await fetchDashboardRows();const title=currentProfile.role==='admin'?'经营数据大屏｜全部订单':'我的业绩大屏';showContent(`<div class="screen"><div class="screen-title"><h2>${title}</h2><div class="time" id="dashTime"></div></div>${renderDashboard(rows)}</div>`);animateNums();setInterval(()=>{const t=$('dashTime');if(t)t.innerText=new Date().toLocaleString('zh-CN',{hour12:false})},1000)}
 function renderDashboard(rows){const today=stats(rows,r=>isToday(r.created_at)),week=stats(rows,r=>isThisWeek(r.created_at)),month=stats(rows,r=>isThisMonth(r.created_at));const rank=groupRows(rows.filter(r=>isThisMonth(r.created_at)),r=>r.service_name||'未指定客服');const biz=groupRows(rows.filter(r=>isThisMonth(r.created_at)),r=>(r.business_category||'-')+' / '+(r.service_project||'-'));const recent=rows.slice(0,12);const overdue=rows.filter(r=>rowClass(r)==='overdue').length,dueSoon=rows.filter(r=>['due-soon','due-warning'].includes(rowClass(r))).length,unfinished=rows.filter(r=>!closedStatus.includes(r.order_status||'')).length;const ticker=(recent.length?recent:rows).concat(recent.length?recent:rows).map(r=>`<div class="ticker-item"><strong>${r.order_no}</strong>｜${esc(r.service_name||'')}｜${esc(r.service_project||'')}｜¥${money(r.total_amount)}｜${esc(mainTitle(r))}</div>`).join('');return`<div class="metric-mini">${bigMetric('今日订单',today.count)}${bigMetric('今日成交额','¥'+money(today.total))}${bigMetric('本周订单',week.count)}${bigMetric('本月成交额','¥'+money(month.total))}</div><div class="screen-grid"><div class="screen-card"><h3>本月客服排行榜</h3>${rank.slice(0,8).map((x,i)=>rankRow(i+1,x.name,x.count+'单 / ¥'+money(x.total))).join('')||'<div class="muted">暂无数据</div>'}</div><div class="screen-card"><h3>实时订单滚动</h3><div class="ticker"><div class="ticker-inner">${ticker||'<div class="ticker-item">暂无订单</div>'}</div></div></div><div class="screen-card"><h3>本月业务排行榜</h3>${biz.slice(0,8).map((x,i)=>rankRow(i+1,x.name,x.count+'单 / ¥'+money(x.total))).join('')||'<div class="muted">暂无数据</div>'}</div></div><div class="todo-grid"><div class="todo">快到期订单<br><span class="big-num" data-num="${dueSoon}">0</span></div><div class="todo">逾期未完成<br><span class="big-num" data-num="${overdue}">0</span></div><div class="todo">未完成订单<br><span class="big-num" data-num="${unfinished}">0</span></div></div>`}function bigMetric(label,val){return`<div class="metric-box"><div class="label">${label}</div><div class="num big-num" data-num="${String(val).replace(/[^\d.]/g,'')}" data-prefix="${String(val).startsWith('¥')?'¥':''}">0</div></div>`}function rankRow(i,n,v){return`<div class="rank-row"><b>${i}</b><span>${esc(n)}</span><b>${esc(v)}</b></div>`}function groupRows(rows,kf){const m={};rows.forEach(r=>{const k=kf(r);m[k]??={name:k,count:0,total:0};m[k].count++;m[k].total+=Number(r.total_amount||0)});return Object.values(m).sort((a,b)=>b.total-a.total)}function animateNums(){document.querySelectorAll('.big-num').forEach(el=>{const target=Number(el.dataset.num||0),prefix=el.dataset.prefix||'';let n=0,step=Math.max(target/30,1);const t=setInterval(()=>{n+=step;if(n>=target){n=target;clearInterval(t)}el.innerText=prefix+(prefix?money(n):Math.floor(n))},22)})}
