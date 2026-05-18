@@ -1467,6 +1467,96 @@ body{
   cursor:not-allowed!important;
 }
 
+
+/* V68 紧凑搜索框：左侧小搜索框 + 回车查询 */
+.compact-searchbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  padding:0!important;
+  margin:10px 0 16px!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  grid-template-columns:none!important;
+}
+.compact-search{
+  width:260px;
+  max-width:100%;
+  height:38px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #d0d7e2;
+  border-radius:9px;
+  background:#fff;
+  padding:0 8px 0 12px;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);
+}
+.compact-search:focus-within{
+  border-color:#60a5fa;
+  box-shadow:0 0 0 3px rgba(37,99,235,.10);
+}
+.compact-search-icon{
+  color:#667085;
+  font-size:18px;
+  line-height:1;
+  transform:rotate(-12deg);
+}
+.compact-search input{
+  flex:1;
+  min-width:0;
+  border:0!important;
+  padding:0!important;
+  height:34px!important;
+  min-height:34px!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  font-size:14px!important;
+}
+.compact-search input:focus{
+  box-shadow:none!important;
+  border:0!important;
+}
+.compact-search-action{
+  width:26px!important;
+  height:26px!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:7px!important;
+  background:#f8fafc!important;
+  color:#475467!important;
+  box-shadow:none!important;
+  font-size:14px!important;
+  line-height:1!important;
+}
+.compact-search-action:hover{
+  background:#eef6ff!important;
+  color:#1d4ed8!important;
+  transform:none!important;
+}
+.compact-clear{
+  height:38px!important;
+  padding:0 13px!important;
+  margin:0!important;
+  border-radius:9px!important;
+  background:#f2f4f7!important;
+  color:#475467!important;
+  box-shadow:none!important;
+  border:1px solid #e4e7ec!important;
+}
+.compact-clear:hover{
+  background:#e9eef6!important;
+  transform:none!important;
+}
+@media(max-width:768px){
+  .compact-searchbar{width:100%!important}
+  .compact-search{width:100%!important}
+  .compact-clear{display:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -1951,7 +2041,17 @@ async function saveOrder(orderId=null){
     setOrderSubmitState(false);
   }
 }
-function searchRows(rows,kw,fields){kw=(kw||'').trim().toLowerCase();if(!kw)return rows;return rows.filter(r=>fields.some(f=>String(f(r)??'').toLowerCase().includes(kw)))}function searchBox(fn,ph){return`<div class="searchbar"><div><label>查询关键词</label><input id="search_kw" placeholder="${ph}" /></div><div></div><button onclick="${fn}()">查询</button><button class="ghost" onclick="$('search_kw').value='';${fn}()">清空</button></div>`}
+function searchRows(rows,kw,fields){kw=(kw||'').trim().toLowerCase();if(!kw)return rows;return rows.filter(r=>fields.some(f=>String(f(r)??'').toLowerCase().includes(kw)))}function searchBox(fn,ph){
+  return `<div class="searchbar compact-searchbar">
+    <div class="compact-search" title="${ph}">
+      <span class="compact-search-icon">⌕</span>
+      <input id="search_kw" placeholder="搜索数据" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){${fn}()}else if(event.key==='Escape'){this.value='';${fn}()}" />
+      <button type="button" class="compact-search-action" onclick="${fn}()" title="查询">⌄</button>
+    </div>
+    <button class="compact-clear" onclick="$('search_kw').value='';${fn}()">清空</button>
+  </div>`
+}
 function csvCell(v){if(v===null||v===undefined)return'';let s=String(v).replace(/\r?\n/g,' ');if(/[",\n]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s}
 function downloadCSV(filename,columns,rows){if(!['admin','finance'].includes(currentProfile?.role)){alert('当前账号没有导出权限');return}const header=columns.map(c=>csvCell(c.label)).join(',');const body=(rows||[]).map(r=>columns.map(c=>csvCell(typeof c.value==='function'?c.value(r):r[c.value])).join(',')).join('\n');const csv='\ufeff'+header+'\n'+body;const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename+'_'+todayISO()+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)}
 const orderSearchFields=[r=>r.order_no,r=>r.wechat_account,r=>r.taobao_account,r=>r.customer_source,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>mainWord(r),r=>r.service_name,r=>r.assigned_writing_name,r=>r.assigned_publishing_name,r=>r.writer_name,r=>r.journal_name];
