@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V94：写作交稿提醒版 */
+/* V95：写作在线巡检提醒版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4087,6 +4087,14 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   color:#b45309;
 }
 
+
+/* V95 写作提醒巡检增强 */
+.reminder-sub{
+  margin-top:4px!important;
+  color:#98a2b3!important;
+  font-size:12px!important;
+}
+
 </style>
 </head>
 <body>
@@ -4476,7 +4484,7 @@ if($('sideUser'))$('sideUser').innerHTML='';
 if($('topUserName'))$('topUserName').innerText=displayName;
 if($('topUserRole'))$('topUserRole').innerText=roleName;
 if($('topUserAvatar'))$('topUserAvatar').innerText=displayName.slice(0,1);
-renderMenu();routeAfterLogin();startAutoRefresh();setTimeout(checkWritingDueReminder,600)}
+renderMenu();routeAfterLogin();startAutoRefresh();startWritingReminderWatcher();setTimeout(()=>checkWritingDueReminder('login'),600)}
 function routeAfterLogin(){
   let saved='';
   try{saved=localStorage.getItem('srx_active_menu')||''}catch(e){}
@@ -6308,7 +6316,7 @@ function writingReminderKey(rows){
   return `srx_writing_due_reminder_${uid}_${todayISO()}_${ids}`;
 }
 
-async function checkWritingDueReminder(){
+async function checkWritingDueReminder(reason='manual'){
   if(currentProfile?.role!=='writing')return;
   if(hasOpenModalOrEditing())return;
   try{
@@ -6342,7 +6350,7 @@ function showWritingDueReminder(rows,key){
     <div class="writing-reminder-head">
       <div>
         <h2>写作交稿提醒</h2>
-        <p>有 ${rows.length} 个订单需要关注：${overdue?`<span class="danger-text">${overdue} 个已逾期</span>`:''}${overdue&&soon?'，':''}${soon?`<span class="warn-text">${soon} 个24小时内到期</span>`:''}</p>
+        <p>有 ${rows.length} 个订单需要关注：${overdue?`<span class="danger-text">${overdue} 个已逾期</span>`:''}${overdue&&soon?'，':''}${soon?`<span class="warn-text">${soon} 个24小时内到期</span>`:''}</p><p class="reminder-sub">系统会定时检查，即使电脑不关、账号一直在线，也会提醒。</p>
       </div>
       <button class="order-form-close" onclick="dismissWritingReminder('${key}')" title="关闭">×</button>
     </div>
@@ -6395,15 +6403,39 @@ async function refreshCurrentView(reason='auto'){
   }finally{
     autoRefreshRunning=false;
   }
+  if(currentProfile?.role==='writing')checkWritingDueReminderSafe('after-refresh');
 }
 
 function startAutoRefresh(){
   if(autoRefreshTimer)clearInterval(autoRefreshTimer);
   autoRefreshTimer=setInterval(()=>refreshCurrentView('timer'),15000);
 }
+let writingReminderTimer=null;
+let writingReminderChecking=false;
 
-window.addEventListener('focus',()=>refreshCurrentView('focus'));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCurrentView('visible')});
+function startWritingReminderWatcher(){
+  if(writingReminderTimer)clearInterval(writingReminderTimer);
+  if(currentProfile?.role!=='writing')return;
+
+  // 写作部电脑长期不关、不重新登录，所以不能只靠登录提醒。
+  // 这里每30分钟检查一次，切回页面也检查一次；有弹窗/正在编辑时不打扰。
+  writingReminderTimer=setInterval(()=>checkWritingDueReminder('timer'),30*60*1000);
+}
+
+async function checkWritingDueReminderSafe(reason='manual'){
+  if(currentProfile?.role!=='writing')return;
+  if(writingReminderChecking)return;
+  writingReminderChecking=true;
+  try{
+    await checkWritingDueReminder(reason);
+  }finally{
+    writingReminderChecking=false;
+  }
+}
+
+
+window.addEventListener('focus',()=>{refreshCurrentView('focus');checkWritingDueReminderSafe('focus')});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshCurrentView('visible');checkWritingDueReminderSafe('visible')}});
 
 window.addEventListener('resize',()=>{if(window.innerWidth>768)toggleMobileMenu(false)});window.addEventListener('beforeunload',(e)=>{if(orderDraftMode&&orderDraftHasContent(collectOrderFormDraft())){autoSaveOrderDraft();e.preventDefault();e.returnValue=''}});window.addEventListener('load',loadApp);
 </script></body></html>
