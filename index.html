@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V93：登录保持与自动刷新版 */
+/* V94：写作交稿提醒版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3967,6 +3967,126 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   margin-left:8px;
 }
 
+
+/* V94 写作部交稿提醒 */
+.writing-reminder-modal{
+  width:min(720px,92vw);
+}
+.writing-reminder-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:14px;
+}
+.writing-reminder-head h2{
+  margin:0 0 6px!important;
+  font-size:22px!important;
+  color:#111827!important;
+}
+.writing-reminder-head p{
+  margin:0;
+  color:#667085;
+  font-size:14px;
+  line-height:1.6;
+}
+.danger-text{color:#b42318;font-weight:800}
+.warn-text{color:#b45309;font-weight:800}
+.writing-reminder-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:52vh;
+  overflow:auto;
+  padding-right:4px;
+}
+.writing-reminder-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid #e6ebf2;
+  background:#fff;
+}
+.writing-reminder-item.danger{
+  border-color:#fecdd3;
+  background:#fff7f7;
+}
+.writing-reminder-item.warning{
+  border-color:#fed7aa;
+  background:#fffaf3;
+}
+.reminder-main{
+  min-width:0;
+}
+.reminder-order{
+  font-weight:900;
+  color:#111827;
+  margin-bottom:4px;
+}
+.reminder-order span{
+  margin-left:6px;
+  color:#667085;
+  font-size:12px;
+  font-weight:600;
+}
+.reminder-title{
+  color:#344054;
+  font-size:13px;
+  line-height:1.55;
+  max-width:520px;
+}
+.reminder-meta{
+  margin-top:6px;
+  color:#667085;
+  font-size:12px;
+}
+.reminder-status{
+  flex:0 0 auto;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.writing-reminder-item.danger .reminder-status{
+  background:#fee2e2;
+  color:#b42318;
+}
+.writing-reminder-item.warning .reminder-status{
+  background:#ffedd5;
+  color:#b45309;
+}
+.writing-reminder-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:16px;
+}
+.writing-reminder-actions button{
+  height:38px!important;
+  border-radius:9px!important;
+}
+.due-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-top:4px;
+  padding:2px 7px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+.due-badge-danger{
+  background:#fee2e2;
+  color:#b42318;
+}
+.due-badge-warning{
+  background:#ffedd5;
+  color:#b45309;
+}
+
 </style>
 </head>
 <body>
@@ -4356,7 +4476,7 @@ if($('sideUser'))$('sideUser').innerHTML='';
 if($('topUserName'))$('topUserName').innerText=displayName;
 if($('topUserRole'))$('topUserRole').innerText=roleName;
 if($('topUserAvatar'))$('topUserAvatar').innerText=displayName.slice(0,1);
-renderMenu();routeAfterLogin();startAutoRefresh()}
+renderMenu();routeAfterLogin();startAutoRefresh();setTimeout(checkWritingDueReminder,600)}
 function routeAfterLogin(){
   let saved='';
   try{saved=localStorage.getItem('srx_active_menu')||''}catch(e){}
@@ -4956,9 +5076,18 @@ function writingActionBtns(r){
     <button class="ghost" onclick="openWritingNote('${r.order_id}')">备注/异常</button>`;
 }
 
+
+function writingDueCell(r){
+  const base=fmtDateOnly(r.due_at);
+  const info=writingDueInfo(r);
+  if(!info || writingReminderDone(r))return base;
+  const cls=info.level==='danger'?'due-badge-danger':'due-badge-warning';
+  return `${base}<br><span class="due-badge ${cls}">${esc(info.text)}</span>`;
+}
+
 function writingTable(rows){
   if(!rows.length)return'<div class="warn">暂无写作订单。</div>';
-  return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>业务/项目</th><th>核心信息</th><th>交稿时间</th><th>写手</th><th>稿费</th><th>进度</th><th>发表类型</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td>${orderNoCell(r.order_no)}</td><td>${r.service_name||'-'}</td><td>${r.business_category}<br>${r.service_project}</td><td>${renderDynSummary(r)}</td><td>${fmtDateOnly(r.due_at)}</td><td>${r.writer_name||'-'}</td><td>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${writingProgressTip(r)}<br><span class="muted">${esc(r.writing_status||'待安排')}</span></td><td>${r.publish_type||'-'}<br>${r.publish_status||''}</td><td>${writingActionBtns(r)}</td></tr>`).join('')}</tbody></table></div>`
+  return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>客服</th><th>业务/项目</th><th>核心信息</th><th>交稿时间</th><th>写手</th><th>稿费</th><th>进度</th><th>发表类型</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td>${orderNoCell(r.order_no)}</td><td>${r.service_name||'-'}</td><td>${r.business_category}<br>${r.service_project}</td><td>${renderDynSummary(r)}</td><td>${writingDueCell(r)}</td><td>${r.writer_name||'-'}</td><td>${r.writer_fee?money(r.writer_fee):'-'}</td><td>${writingProgressTip(r)}<br><span class="muted">${esc(r.writing_status||'待安排')}</span></td><td>${r.publish_type||'-'}<br>${r.publish_status||''}</td><td>${writingActionBtns(r)}</td></tr>`).join('')}</tbody></table></div>`
 }
 
 async function openWritingEdit(orderId){
@@ -6148,6 +6277,91 @@ function isUuidLikeLogValue(v){
   async function openOrderLogs(orderId){
     await loadOrderLogsPanel(orderId);
   }
+
+
+function writingReminderDone(r){
+  const s=r?.writing_status||'';
+  return ['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(s);
+}
+
+function writingDueInfo(r){
+  if(!r?.due_at)return null;
+  const due=new Date(r.due_at);
+  if(isNaN(due.getTime()))return null;
+  const diff=due.getTime()-Date.now();
+  const hours=diff/36e5;
+  if(hours<0){
+    const overdueHours=Math.abs(hours);
+    const text=overdueHours>=24?`已逾期 ${Math.ceil(overdueHours/24)} 天`:`已逾期 ${Math.ceil(overdueHours)} 小时`;
+    return {level:'danger',sort:-999999+diff,text};
+  }
+  if(hours<=24){
+    const text=hours<=1?'1小时内到期':`剩余 ${Math.ceil(hours)} 小时`;
+    return {level:'warning',sort:diff,text};
+  }
+  return null;
+}
+
+function writingReminderKey(rows){
+  const ids=(rows||[]).map(r=>`${r.order_id||r.id}:${r.due_at}:${r.writing_status||''}`).sort().join('|');
+  const uid=currentUser?.id||'unknown';
+  return `srx_writing_due_reminder_${uid}_${todayISO()}_${ids}`;
+}
+
+async function checkWritingDueReminder(){
+  if(currentProfile?.role!=='writing')return;
+  if(hasOpenModalOrEditing())return;
+  try{
+    const {data,error}=await client.from('v_writing_orders').select('*').order('due_at',{ascending:true});
+    if(error)return;
+    const rows=(data||[])
+      .filter(r=>!writingReminderDone(r))
+      .map(r=>({ ...r, __dueInfo: writingDueInfo(r) }))
+      .filter(r=>r.__dueInfo)
+      .sort((a,b)=>a.__dueInfo.sort-b.__dueInfo.sort)
+      .slice(0,8);
+
+    if(!rows.length)return;
+    const key=writingReminderKey(rows);
+    if(localStorage.getItem(key)==='1')return;
+    showWritingDueReminder(rows,key);
+  }catch(e){
+    console.warn('写作提醒加载失败',e);
+  }
+}
+
+function dismissWritingReminder(key){
+  try{localStorage.setItem(key,'1')}catch(e){}
+  closeModal();
+}
+
+function showWritingDueReminder(rows,key){
+  const overdue=rows.filter(r=>r.__dueInfo.level==='danger').length;
+  const soon=rows.filter(r=>r.__dueInfo.level==='warning').length;
+  openModal(`<div class="writing-reminder-modal">
+    <div class="writing-reminder-head">
+      <div>
+        <h2>写作交稿提醒</h2>
+        <p>有 ${rows.length} 个订单需要关注：${overdue?`<span class="danger-text">${overdue} 个已逾期</span>`:''}${overdue&&soon?'，':''}${soon?`<span class="warn-text">${soon} 个24小时内到期</span>`:''}</p>
+      </div>
+      <button class="order-form-close" onclick="dismissWritingReminder('${key}')" title="关闭">×</button>
+    </div>
+    <div class="writing-reminder-list">
+      ${rows.map(r=>`<div class="writing-reminder-item ${r.__dueInfo.level}">
+        <div class="reminder-main">
+          <div class="reminder-order">${esc(r.order_no||'-')} <span>${esc(r.business_category||'')}</span></div>
+          <div class="reminder-title">${renderDynSummary(r)}</div>
+          <div class="reminder-meta">交稿时间：${fmtDate(r.due_at)}｜客服：${esc(r.service_name||'-')}</div>
+        </div>
+        <div class="reminder-status">${esc(r.__dueInfo.text)}</div>
+      </div>`).join('')}
+    </div>
+    <div class="writing-reminder-actions">
+      <button onclick="dismissWritingReminder('${key}');renderWritingOrders()">查看写作订单</button>
+      <button class="ghost" onclick="dismissWritingReminder('${key}')">我知道了</button>
+    </div>
+  </div>`);
+}
 
 function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal">${html}</div></div>`;setTimeout(decorateTables,0)}function closeModal(){$('modalRoot').innerHTML=''}
 let autoRefreshTimer=null;
