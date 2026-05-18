@@ -431,6 +431,17 @@ button:disabled{opacity:.58;cursor:not-allowed}
 .log-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
 .log-modal-head h2{margin:0}
 
+
+/* V60 处理弹窗右侧数据日志 */
+.log-split-layout{display:grid;grid-template-columns:minmax(420px,1fr) 360px;gap:18px;max-height:82vh;min-width:min(1100px,92vw)}
+.log-split-main,.log-split-side{overflow:auto;max-height:80vh;padding-right:6px}
+.log-split-side{border-left:1px solid #e5e7eb;padding-left:16px;background:#f8fafc;border-radius:14px;padding-top:10px}
+@media(max-width:900px){
+  .log-split-layout{display:block;min-width:0;max-height:86vh}
+  .log-split-main,.log-split-side{max-height:none;overflow:visible}
+  .log-split-side{border-left:0;border-top:1px solid #e5e7eb;margin-top:16px;padding-left:0}
+}
+
 </style>
 </head>
 <body>
@@ -959,8 +970,7 @@ function writingActionBtns(r){
   const done=['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(r.writing_status||'');
   return `<button onclick="openWritingEdit('${r.order_id}')">${r.writer_id?'修改登记':'登记写手'}</button>
     ${r.writer_id&&!done?`<button class="secondary" onclick="markWritingDelivered('${r.order_id}')">已交给客服</button>`:''}
-    <button class="ghost" onclick="openWritingNote('${r.order_id}')">备注/异常</button>
-    <button class="ghost" onclick="openWritingLogsModal('${r.order_id}','${esc(r.order_no||'')}')">数据日志</button>`;
+    <button class="ghost" onclick="openWritingNote('${r.order_id}')">备注/异常</button>`;
 }
 
 function writingTable(rows){
@@ -972,8 +982,7 @@ async function openWritingEdit(orderId){
   await loadWriters();
   const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();
   const opts=writers.map(w=>`<option value="${w.id}" ${data?.writer_id===w.id?'selected':''}>${esc(w.writer_name)}（${esc(w.writer_code)}）</option>`).join('');
-  openModal(`<h2>登记写作信息</h2>
-    <div class="info">保存后系统会自动把写作进度改为“写作中”，客服那边也会同步看到“写作中”。</div>
+  const mainHtml = `<div class="info">保存后系统会自动把写作进度改为“写作中”，客服那边也会同步看到“写作中”。</div>
     <label>写手</label>
     <select id="edit_writer_id"><option value="">请选择写手</option>${opts}</select>
     <label>稿费</label>
@@ -982,7 +991,8 @@ async function openWritingEdit(orderId){
     <textarea id="edit_writing_notes">${esc(data?.writing_notes||'')}</textarea>
     <button onclick="saveWritingEdit('${orderId}')">保存登记</button>
     <button class="ghost" onclick="closeModal()">取消</button>
-    <div id="modalMsg"></div>`)
+    <div id="modalMsg"></div>`;
+  openActionModalWithLogs('登记写作信息', mainHtml, orderId, data?.order_no||'');
 }
 
 async function saveWritingEdit(orderId){
@@ -1029,13 +1039,13 @@ async function markWritingDelivered(orderId){
 
 async function openWritingNote(orderId){
   const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();
-  openModal(`<h2>写作备注 / 异常</h2>
-    <label>备注</label>
+  const mainHtml = `<label>备注</label>
     <textarea id="edit_writing_notes">${esc(data?.writing_notes||'')}</textarea>
     <button onclick="saveWritingNote('${orderId}','${esc(data?.writing_status||'写作中')}')">保存备注</button>
     <button class="secondary" onclick="saveWritingNote('${orderId}','异常')">标记异常</button>
     <button class="ghost" onclick="closeModal()">取消</button>
-    <div id="modalMsg"></div>`)
+    <div id="modalMsg"></div>`;
+  openActionModalWithLogs('写作备注 / 异常', mainHtml, orderId, data?.order_no||'');
 }
 
 async function saveWritingNote(orderId,status){
@@ -1065,8 +1075,7 @@ async function renderPublishingOrders(){setMenu('publishing');await loadAllField
   const js=await loadJournals(true);
   const ops=js.map(j=>`<option value="${j.id}" ${data?.journal_id===j.id?'selected':''}>${esc(j.journal_name)}｜客户价${money(j.customer_price)}｜版面费${money(j.page_fee)}</option>`).join('');
   const payTypeOps=['微信','QQ','支付宝','银行卡','对公转账','其他'].map(x=>`<option value="${x}" ${(data?.payee_account_type||'')===x?'selected':''}>${x}</option>`).join('');
-  openModal(`<h2>处理发表订单</h2>
-    <label>选择期刊</label>
+  const mainHtml = `<label>选择期刊</label>
     <select id="pub_journal_id"><option value="">请选择期刊</option>${ops}</select>
     <label>发表状态</label>
     <select id="pub_status">${['待审核','审核中','审核通过','审核不通过','待打款','已打款','已完成'].map(s=>`<option value="${s}" ${data?.publish_status===s?'selected':''}>${s}</option>`).join('')}</select>
@@ -1085,7 +1094,8 @@ async function renderPublishingOrders(){setMenu('publishing');await loadAllField
     <textarea id="pub_notes">${esc(data?.publishing_notes||'')}</textarea>
     <button onclick="savePublishingEdit('${paId}')">保存</button>
     <button class="ghost" onclick="closeModal()">取消</button>
-    <div id="modalMsg"></div>`);
+    <div id="modalMsg"></div>`;
+  openActionModalWithLogs('处理发表订单', mainHtml, data?.order_id, data?.order_no||'');
   setTimeout(togglePublishPayeeFields,0);
 }
 
@@ -1180,7 +1190,7 @@ async function renderFinanceOrders(){
   if(kw)$('search_kw').value=kw
 }
 
-function financeTable(rows){if(!rows.length)return'<div class="warn">暂无财务订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>部门</th><th>业务/项目</th><th>金额</th><th>写手信息</th><th>写手结算</th><th>发表打款</th><th>期刊内部信息</th><th>利润</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Number(r.writer_balance_amount??Math.max(fee-settled,0));return `<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${fmtDate(r.created_at)}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.writer_name||'-'}<br>编号：${r.writer_code||'-'}<br>收款：${writerPaymentDisplay(r)}</td><td>稿费：${fee?money(fee):'-'}<br>状态：${r.settlement_status||'未结算'}<br>已结：${money(settled)}<br>余额：${money(balance)}<br><button class="ghost" onclick="openWritingLogsModal('${r.id||r.order_id}','${esc(r.order_no||'')}')">写作日志</button></td><td>${r.publish_status||'-'}<br>${r.finance_payment_status||'-'} ${r.finance_payment_amount?money(r.finance_payment_amount):''}<br>打款时间：${fmtDate(r.finance_paid_at)}</td><td>${r.journal_name||'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>${publishPayeeDisplay(r)}</td><td>${money(r.gross_profit)}</td></tr>`}).join('')}</tbody></table></div>`}
+function financeTable(rows){if(!rows.length)return'<div class="warn">暂无财务订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>部门</th><th>业务/项目</th><th>金额</th><th>写手信息</th><th>写手结算</th><th>发表打款</th><th>期刊内部信息</th><th>利润</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Number(r.writer_balance_amount??Math.max(fee-settled,0));return `<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${fmtDate(r.created_at)}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.writer_name||'-'}<br>编号：${r.writer_code||'-'}<br>收款：${writerPaymentDisplay(r)}</td><td>稿费：${fee?money(fee):'-'}<br>状态：${r.settlement_status||'未结算'}<br>已结：${money(settled)}<br>余额：${money(balance)}</td><td>${r.publish_status||'-'}<br>${r.finance_payment_status||'-'} ${r.finance_payment_amount?money(r.finance_payment_amount):''}<br>打款时间：${fmtDate(r.finance_paid_at)}</td><td>${r.journal_name||'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>${publishPayeeDisplay(r)}</td><td>${money(r.gross_profit)}</td></tr>`}).join('')}</tbody></table></div>`}
 
 
 function exportFinanceOrders(){const cols=[{label:'订单编号',value:r=>r.order_no},{label:'提交时间',value:r=>fmtDate(r.created_at)},{label:'客服',value:r=>r.service_name},{label:'业务大类',value:r=>r.business_category},{label:'具体项目',value:r=>r.service_project},{label:'订单金额',value:r=>money(r.total_amount)},{label:'实收金额',value:r=>money(r.deposit_amount)},{label:'尾款',value:r=>money(r.balance_amount)},{label:'退款',value:r=>money(r.refund_amount)},{label:'写手姓名',value:r=>r.writer_name},{label:'写手编号',value:r=>r.writer_code},{label:'收款方式',value:r=>r.writer_payment_method},{label:'所属银行',value:r=>r.writer_payment_bank_name},{label:'收款账号',value:r=>r.writer_payment_account},{label:'稿费',value:r=>money(r.writer_fee)},{label:'已结算',value:r=>money(r.settled_amount)},{label:'余额',value:r=>money(r.writer_balance_amount)},{label:'结算状态',value:r=>r.settlement_status},{label:'期刊',value:r=>r.journal_name},{label:'版面费',value:r=>money(r.page_fee)},{label:'利润',value:r=>money(r.gross_profit)}];downloadCSV('财务订单',cols,window.__financeOrderRows||[])}
@@ -1267,10 +1277,22 @@ function exportServicePerformanceDetails(){const serviceName=$('perf_service_id'
 
 
 async function renderSettlementReview(){setMenu('settlement_review');const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_settlement_review_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}let rows=searchRows(data||[],kw,[r=>r.order_no,r=>r.writer_code,r=>r.writer_name,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.settlement_review_status,r=>r.writing_status]);showContent(`<div class="card"><h2>结算核对</h2><div class="info">先逐单核对能不能结、这次结多少。只有“可结算/部分可结算”且本次可结金额大于0的订单，才会进入写手结算汇总。</div>${searchBox('renderSettlementReview','订单编号/客服/写手编号/写手姓名/业务/状态')}<div><button onclick="bulkReview('可结算')">批量设为可结算（全结余额）</button><button class="ghost" onclick="bulkReview('暂不结算')">批量暂不结算</button><button class="ghost" onclick="bulkReview('结算异常')">批量异常</button></div><div class="muted">共 ${rows.length} 条</div>${settlementReviewTable(rows)}</div>`);if(kw)$('search_kw').value=kw}
-function settlementReviewTable(rows){if(!rows.length)return'<div class="warn">暂无需要核对的订单。</div>';return`<div class="table-wrap"><table><thead><tr><th><input type="checkbox" onchange="toggleChecks('review_ck',this.checked)"></th><th>订单</th><th>客服</th><th>写手</th><th>业务/项目</th><th>稿费</th><th>已结/余额</th><th>核对状态</th><th>本次可结</th><th>备注</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr><td><input class="review_ck" type="checkbox" data-id="${r.assignment_id}" data-remaining="${Number(r.remaining_amount||0)}"></td><td><strong>${r.order_no}</strong><br>${r.order_status||''}</td><td>${r.service_name||'-'}</td><td>${r.writer_name||'-'}<br>编号：${r.writer_code||'-'}<br>收款：${writerPaymentDisplay(r)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}<br>${renderDynSummary(r)}</td><td>${money(r.writer_fee)}</td><td>已结：${money(r.settled_amount)}<br>余额：${money(r.remaining_amount)}</td><td>${r.settlement_review_status||'待核对'}<br><span class="muted">${r.reviewed_by_name||''} ${r.reviewed_at?fmtDate(r.reviewed_at):''}</span></td><td>${money(r.current_payable_amount)}</td><td>${esc(r.settlement_review_notes||'')}</td><td><button onclick="openSettlementReview('${r.assignment_id}',${Number(r.remaining_amount||0)})">核对</button><br><button class="ghost" onclick="openWritingLogsModal('${r.order_id}','${esc(r.order_no||'')}')">写作日志</button></td></tr>`).join('')}</tbody></table></div>`}
+function settlementReviewTable(rows){if(!rows.length)return'<div class="warn">暂无需要核对的订单。</div>';return`<div class="table-wrap"><table><thead><tr><th><input type="checkbox" onchange="toggleChecks('review_ck',this.checked)"></th><th>订单</th><th>客服</th><th>写手</th><th>业务/项目</th><th>稿费</th><th>已结/余额</th><th>核对状态</th><th>本次可结</th><th>备注</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr><td><input class="review_ck" type="checkbox" data-id="${r.assignment_id}" data-remaining="${Number(r.remaining_amount||0)}"></td><td><strong>${r.order_no}</strong><br>${r.order_status||''}</td><td>${r.service_name||'-'}</td><td>${r.writer_name||'-'}<br>编号：${r.writer_code||'-'}<br>收款：${writerPaymentDisplay(r)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}<br>${renderDynSummary(r)}</td><td>${money(r.writer_fee)}</td><td>已结：${money(r.settled_amount)}<br>余额：${money(r.remaining_amount)}</td><td>${r.settlement_review_status||'待核对'}<br><span class="muted">${r.reviewed_by_name||''} ${r.reviewed_at?fmtDate(r.reviewed_at):''}</span></td><td>${money(r.current_payable_amount)}</td><td>${esc(r.settlement_review_notes||'')}</td><td><button onclick="openSettlementReview('${r.assignment_id}',${Number(r.remaining_amount||0)},'${r.order_id}','${esc(r.order_no||'')}')">核对</button></td></tr>`).join('')}</tbody></table></div>`}
 function toggleChecks(cls,checked){document.querySelectorAll('.'+cls).forEach(x=>x.checked=checked)}
 async function bulkReview(status){const items=[...document.querySelectorAll('.review_ck:checked')];if(!items.length){alert('请先勾选订单');return}const notes=prompt('请输入批量备注，可留空','')||'';for(const el of items){const amount=status==='可结算'?Number(el.dataset.remaining||0):0;const {error}=await client.rpc('review_writing_settlement',{p_assignment_id:el.dataset.id,p_review_status:status,p_payable_amount:amount,p_notes:notes});if(error){alert(error.message);return}}renderSettlementReview()}
-function openSettlementReview(assignmentId,remaining){openModal(`<h2>结算核对</h2><div class="info">剩余未结金额：${money(remaining)}。如果只能结一半，就选择“部分可结算”，并填写本次可结金额。</div><label>核对状态</label><select id="review_status" onchange="onReviewStatusChange(${remaining})">${['待核对','可结算','部分可结算','暂不结算','结算异常','已结清'].map(s=>`<option value="${s}">${s}</option>`).join('')}</select><label>本次可结金额</label><input id="review_amount" type="number" step="0.01" value="0"><label>核对备注/暂不结原因</label><textarea id="review_notes"></textarea><button onclick="saveSettlementReview('${assignmentId}')">保存核对</button><button class="ghost" onclick="closeModal()">取消</button><div id="modalMsg"></div>`);onReviewStatusChange(remaining)}
+function openSettlementReview(assignmentId,remaining,orderId='',orderNo=''){
+  const mainHtml = `<div class="info">剩余未结金额：${money(remaining)}。如果只能结一半，就选择“部分可结算”，并填写本次可结金额。</div>
+    <label>核对状态</label>
+    <select id="review_status" onchange="onReviewStatusChange(${remaining})">${['待核对','可结算','部分可结算','暂不结算','结算异常','已结清'].map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
+    <label>本次可结金额</label>
+    <input id="review_amount" type="number" step="0.01" value="0">
+    <label>核对备注/暂不结原因</label>
+    <textarea id="review_notes"></textarea>
+    <button onclick="saveSettlementReview('${assignmentId}')">保存核对</button>
+    <button class="ghost" onclick="closeModal()">取消</button>
+    <div id="modalMsg"></div>`;
+  openActionModalWithLogs('结算核对', mainHtml, orderId, orderNo);
+}
 function onReviewStatusChange(remaining){const st=$('review_status')?.value;if(!$('review_amount'))return;if(st==='可结算')$('review_amount').value=money(remaining);if(['待核对','暂不结算','结算异常','已结清'].includes(st))$('review_amount').value='0.00'}
 async function saveSettlementReview(assignmentId){const {error}=await client.rpc('review_writing_settlement',{p_assignment_id:assignmentId,p_review_status:$('review_status').value,p_payable_amount:Number($('review_amount').value||0),p_notes:$('review_notes').value.trim()});if(error){msg('modalMsg','<div class="error">'+esc(error.message)+'</div>');return}closeModal();renderSettlementReview()}
 
@@ -1300,13 +1322,12 @@ async function renderPublishingPayment(){
 
 function publishingPaymentTable(rows){
   if(!rows.length)return'<div class="warn">暂无发表打款记录。</div>';
-  return`<div class="table-wrap"><table><thead><tr><th>订单</th><th>提交时间</th><th>期刊</th><th>版面费</th><th>发表部提供打款账号</th><th>发表状态</th><th>打款状态</th><th>打款处理时间</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${isPublishPaymentPending(r)?'due-warning':''}"><td><strong>${r.order_no}</strong><br>${r.service_name||''}</td><td>${fmtDate(r.created_at)}</td><td>${r.journal_name||'-'}</td><td>${r.page_fee?money(r.page_fee):'-'}</td><td>${publishPayeeDisplay(r)}</td><td>${r.publish_status||'-'}</td><td>${r.finance_payment_status||'-'}<br>${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td>${fmtDate(r.finance_paid_at)}</td><td><button onclick="openPublishPayEdit('${r.publishing_assignment_id}',${Number(r.page_fee||0)},'${esc(r.finance_payment_status||'未打款')}',${Number(r.finance_payment_amount||r.page_fee||0)},'${esc(r.finance_notes||'')}')">${isPublishPaymentPending(r)?'处理打款':'查看/修改'}</button></td></tr>`).join('')}</tbody></table></div>`
+  return`<div class="table-wrap"><table><thead><tr><th>订单</th><th>提交时间</th><th>期刊</th><th>版面费</th><th>发表部提供打款账号</th><th>发表状态</th><th>打款状态</th><th>打款处理时间</th><th>操作</th></tr></thead><tbody>${rows.map(r=>`<tr class="${isPublishPaymentPending(r)?'due-warning':''}"><td><strong>${r.order_no}</strong><br>${r.service_name||''}</td><td>${fmtDate(r.created_at)}</td><td>${r.journal_name||'-'}</td><td>${r.page_fee?money(r.page_fee):'-'}</td><td>${publishPayeeDisplay(r)}</td><td>${r.publish_status||'-'}</td><td>${r.finance_payment_status||'-'}<br>${r.finance_payment_amount?money(r.finance_payment_amount):''}</td><td>${fmtDate(r.finance_paid_at)}</td><td><button onclick="openPublishPayEdit('${r.publishing_assignment_id}',${Number(r.page_fee||0)},'${esc(r.finance_payment_status||'未打款')}',${Number(r.finance_payment_amount||r.page_fee||0)},'${esc(r.finance_notes||'')}','${r.order_id||r.id||''}','${esc(r.order_no||'')}')">${isPublishPaymentPending(r)?'处理打款':'查看/修改'}</button></td></tr>`).join('')}</tbody></table></div>`
 }
-function openPublishPayEdit(paId,amount,status='未打款',paidAmount=0,notes=''){
+function openPublishPayEdit(paId,amount,status='未打款',paidAmount=0,notes='',orderId='',orderNo=''){
   const st=esc(status||'未打款');
   const amt=Number(paidAmount||amount||0);
-  openModal(`<h2>发表打款处理</h2>
-    <label>打款状态</label>
+  const mainHtml = `<label>打款状态</label>
     <select id="pubpay_status">
       <option value="未打款" ${st==='未打款'?'selected':''}>未打款</option>
       <option value="已打款" ${st==='已打款'?'selected':''}>已打款</option>
@@ -1317,7 +1338,8 @@ function openPublishPayEdit(paId,amount,status='未打款',paidAmount=0,notes=''
     <textarea id="pubpay_notes">${esc(notes||'')}</textarea>
     <button id="pubpaySaveBtn" onclick="savePublishPay('${paId}')">保存</button>
     <button class="ghost" onclick="closeModal()">取消</button>
-    <div id="modalMsg"></div>`)
+    <div id="modalMsg"></div>`;
+  openActionModalWithLogs('发表打款处理', mainHtml, orderId, orderNo);
 }
 
 async function savePublishPay(paId){
@@ -1747,6 +1769,25 @@ async function renderReportView(){
   }
 
   
+
+function openActionModalWithLogs(title, mainHtml, orderId, orderNo=''){
+  openModal(`<div class="log-split-layout">
+    <div class="log-split-main">
+      <div class="log-modal-head">
+        <h2>${esc(title)}${orderNo?`｜${esc(orderNo)}`:''}</h2>
+        <button class="order-form-close" onclick="closeModal()" title="关闭">×</button>
+      </div>
+      ${mainHtml}
+    </div>
+    <div class="log-split-side">
+      <h3 class="section-title">数据日志</h3>
+      <div class="muted" style="margin-bottom:8px">日志按当前账号角色自动筛选：客服看客服操作，写作部看写作操作，财务和管理员看全部。</div>
+      <div id="logPanel" class="muted">正在加载日志...</div>
+    </div>
+  </div>`);
+  if(orderId)loadOrderLogsPanel(orderId);
+}
+
 function openWritingLogsModal(orderId,orderNo=''){
   openModal(`<div class="log-modal-head">
       <h2>写作数据日志 ${orderNo?`｜${esc(orderNo)}`:''}</h2>
