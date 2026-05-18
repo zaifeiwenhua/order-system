@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V83：多维表格风格优化版 */
+/* V84：侧栏标题区融合版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3549,6 +3549,47 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   .page-toolbar{height:auto;align-items:flex-start;flex-direction:column;padding:10px}
   .compact-search{width:100%!important}
   .toolbar-right{width:100%}
+}
+
+
+/* V84：侧栏与顶部标题区同底色，去掉侧栏右侧竖线 */
+.sidebar{
+  background:#f3f5f9!important;
+  border-right:0!important;
+  box-shadow:none!important;
+}
+
+.brand{
+  background:#f3f5f9!important;
+  border-bottom:0!important;
+}
+
+/* 顶部“全部订单/我的订单”等标题栏，与左侧菜单使用同一背景 */
+.app-header{
+  left:184px!important;
+  background:#f3f5f9!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+
+/* 主内容整体也接同一浅灰背景，形成一个连续工作区 */
+.main{
+  background:#f3f5f9!important;
+}
+
+/* 顶部标题和左侧视觉统一，不做白色横条 */
+.header-title{
+  background:transparent!important;
+}
+
+/* 内容卡片稍微下沉，避免顶部栏和表格挤在一起 */
+.card.table-page-card{
+  margin-top:0!important;
+}
+
+/* 左侧菜单和主工作区之间不再有明显分割线 */
+.layout{
+  background:#f3f5f9!important;
 }
 
 </style>
