@@ -2422,6 +2422,412 @@ body{
   }
 }
 
+
+/* V75 登录页全屏居中 + 右上角头像下拉退出 */
+html,body{
+  min-height:100%;
+}
+
+/* 登录页必须是真正全屏，不能再出现局部画布和滚动条 */
+body:has(#loginArea:not(.hidden)){
+  margin:0!important;
+  overflow:hidden!important;
+  background:#eef6ff!important;
+}
+#loginArea.hidden,
+.login-page.hidden,
+#appArea.hidden,
+.layout.hidden{
+  display:none!important;
+}
+#loginArea.login-page:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(207,226,255,.95),transparent 32%),
+    radial-gradient(circle at 88% 86%,rgba(190,220,255,.88),transparent 34%),
+    linear-gradient(135deg,#f8fbff 0%,#edf5ff 48%,#f9fcff 100%)!important;
+}
+#loginArea.login-page:not(.hidden)::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 12% 0%,rgba(255,255,255,.68),transparent 22%),
+    radial-gradient(circle at 92% 100%,rgba(219,234,254,.72),transparent 32%);
+  pointer-events:none;
+}
+#loginArea.login-page:not(.hidden) > .card:first-child{
+  display:none!important;
+}
+#loginBox,
+#writerQueryBox{
+  position:relative!important;
+  z-index:2!important;
+  width:460px!important;
+  max-width:calc(100vw - 36px)!important;
+  margin:0 auto!important;
+  padding:44px 46px 38px!important;
+  border-radius:22px!important;
+  background:rgba(255,255,255,.88)!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  box-shadow:0 26px 80px rgba(59,130,246,.16)!important;
+  backdrop-filter:blur(18px);
+}
+#loginBox.hidden,
+#writerQueryBox.hidden{
+  display:none!important;
+}
+#loginBox:before{
+  content:"用户登录";
+  display:block;
+  text-align:left;
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  color:#111827;
+  letter-spacing:.2px;
+  margin-bottom:30px;
+}
+#loginBox:after{
+  content:"";
+  display:none!important;
+}
+#loginBox h1,
+#loginBox h2,
+#writerQueryBox h2{
+  display:none!important;
+}
+#loginBox label,
+#writerQueryBox label{
+  display:none!important;
+}
+#loginBox input,
+#writerQueryBox input{
+  height:48px!important;
+  border-radius:9px!important;
+  border:1px solid #e5e7eb!important;
+  background:rgba(255,255,255,.86)!important;
+  font-size:15px!important;
+  padding:0 16px!important;
+  margin:0 0 16px!important;
+  box-shadow:none!important;
+}
+#loginBox input::placeholder,
+#writerQueryBox input::placeholder{
+  color:#a3aab8;
+}
+#loginBox input:focus,
+#writerQueryBox input:focus{
+  border-color:#3b82f6!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10)!important;
+  background:#fff!important;
+}
+#loginBox > button:not(.ghost),
+#writerQueryBox > button:not(.ghost){
+  width:100%!important;
+  height:50px!important;
+  margin:12px 0 10px!important;
+  border-radius:9px!important;
+  background:linear-gradient(90deg,#2f6bff,#268bff)!important;
+  color:#fff!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  box-shadow:0 16px 32px rgba(47,107,255,.22)!important;
+}
+#loginBox > button.ghost,
+#writerQueryBox > button.ghost{
+  width:100%!important;
+  height:44px!important;
+  margin:8px 0 0!important;
+  border-radius:9px!important;
+  background:#f6f8fc!important;
+  color:#58677c!important;
+  border:1px solid #e5eaf2!important;
+  box-shadow:none!important;
+}
+
+/* 后台右上角账号信息：头像点击下拉退出 */
+.top-user{
+  position:relative;
+  cursor:pointer;
+  padding:6px 8px 6px 6px;
+  border-radius:999px;
+  transition:.16s ease;
+}
+.top-user:hover{
+  background:#f5f8ff;
+}
+.top-user-arrow{
+  color:#98a2b3;
+  font-size:13px;
+  margin-left:2px;
+}
+.user-dropdown{
+  display:none;
+  position:absolute;
+  right:0;
+  top:48px;
+  min-width:138px;
+  padding:8px;
+  background:#fff;
+  border:1px solid #e5eaf2;
+  border-radius:12px;
+  box-shadow:0 18px 46px rgba(15,23,42,.12);
+  z-index:100;
+}
+.user-dropdown.show{
+  display:block;
+}
+.user-dropdown button{
+  width:100%!important;
+  height:38px!important;
+  margin:0!important;
+  padding:0 12px!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  color:#344054!important;
+  box-shadow:none!important;
+  text-align:left!important;
+  font-weight:800!important;
+}
+.user-dropdown button:hover{
+  background:#f5f8ff!important;
+  color:#2563eb!important;
+  transform:none!important;
+}
+
+/* 退出只保留右上角，下方侧栏退出按钮隐藏 */
+.sidebar-logout,
+.sidebar > button.secondary{
+  display:none!important;
+}
+.menu{
+  height:calc(100vh - 72px)!important;
+  padding-bottom:18px!important;
+}
+
+@media(max-width:640px){
+  #loginBox,
+  #writerQueryBox{
+    width:calc(100vw - 32px)!important;
+    padding:34px 24px 28px!important;
+  }
+  #loginBox:before{
+    font-size:26px;
+    text-align:center;
+  }
+}
+
+
+/* V76 登录页重新设计：强制居中 + 背景色块
+   目标：登录框在屏幕正中心，不靠左；背景有柔和色块，不生成图片。 */
+html:has(#loginArea:not(.hidden)),
+body:has(#loginArea:not(.hidden)){
+  width:100%!important;
+  height:100%!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#f3f8ff!important;
+}
+
+#loginArea.hidden,
+.login-page.hidden,
+#appArea.hidden,
+.layout.hidden{
+  display:none!important;
+}
+
+#loginArea.login-page:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  display:block!important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(99,167,255,.26) 0%, rgba(99,167,255,.15) 22%, transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(111,214,255,.22) 0%, rgba(111,214,255,.13) 24%, transparent 46%),
+    linear-gradient(135deg,#f8fbff 0%,#eef6ff 50%,#f9fcff 100%)!important;
+}
+
+/* 左上柔和大色块 */
+#loginArea.login-page:not(.hidden)::before{
+  content:"";
+  position:absolute;
+  width:520px;
+  height:520px;
+  left:-150px;
+  top:-170px;
+  border-radius:46% 54% 62% 38%;
+  background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(125,211,252,.12));
+  filter:blur(1px);
+  pointer-events:none;
+}
+
+/* 右下柔和大色块 */
+#loginArea.login-page:not(.hidden)::after{
+  content:"";
+  position:absolute;
+  width:620px;
+  height:620px;
+  right:-210px;
+  bottom:-240px;
+  border-radius:55% 45% 42% 58%;
+  background:linear-gradient(135deg,rgba(147,197,253,.24),rgba(34,211,238,.12));
+  pointer-events:none;
+}
+
+/* 去掉旧宣传卡/大图 */
+#loginArea.login-page:not(.hidden) > .card:first-child{
+  display:none!important;
+}
+
+/* 登录框强制放在屏幕正中心 */
+#loginBox,
+#writerQueryBox{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:5!important;
+  width:460px!important;
+  max-width:calc(100vw - 40px)!important;
+  margin:0!important;
+  padding:44px 46px 38px!important;
+  border-radius:24px!important;
+  background:rgba(255,255,255,.92)!important;
+  border:1px solid rgba(255,255,255,.86)!important;
+  box-shadow:0 28px 90px rgba(37,99,235,.18)!important;
+  backdrop-filter:blur(18px);
+}
+
+/* 隐藏状态必须优先 */
+#loginBox.hidden,
+#writerQueryBox.hidden{
+  display:none!important;
+}
+
+/* 登录卡片标题 */
+#loginBox::before{
+  content:"用户登录";
+  display:block;
+  text-align:left;
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  color:#111827;
+  letter-spacing:.2px;
+  margin-bottom:30px;
+}
+
+#loginBox::after{
+  content:"客户录单系统 · 内部协同管理";
+  display:block;
+  text-align:center;
+  margin-top:14px;
+  color:#98a2b3;
+  font-size:13px;
+}
+
+#loginBox h1,
+#loginBox h2,
+#writerQueryBox h2,
+#loginBox label,
+#writerQueryBox label{
+  display:none!important;
+}
+
+#loginBox input,
+#writerQueryBox input{
+  height:48px!important;
+  border-radius:10px!important;
+  border:1px solid #e5eaf2!important;
+  background:rgba(255,255,255,.95)!important;
+  font-size:15px!important;
+  padding:0 16px!important;
+  margin:0 0 16px!important;
+  box-shadow:none!important;
+}
+
+#loginBox input::placeholder,
+#writerQueryBox input::placeholder{
+  color:#a3aab8!important;
+}
+
+#loginBox input:focus,
+#writerQueryBox input:focus{
+  border-color:#3b82f6!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10)!important;
+  background:#fff!important;
+}
+
+#loginBox > button:not(.ghost),
+#writerQueryBox > button:not(.ghost){
+  width:100%!important;
+  height:50px!important;
+  margin:12px 0 10px!important;
+  border-radius:10px!important;
+  background:linear-gradient(90deg,#2f6bff,#268bff)!important;
+  color:#fff!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  box-shadow:0 16px 32px rgba(47,107,255,.22)!important;
+}
+
+#loginBox > button.ghost,
+#writerQueryBox > button.ghost{
+  width:100%!important;
+  height:44px!important;
+  margin:8px 0 0!important;
+  border-radius:10px!important;
+  background:#f7f9fc!important;
+  color:#58677c!important;
+  border:1px solid #e5eaf2!important;
+  box-shadow:none!important;
+}
+
+/* 写手查询卡片标题 */
+#writerQueryBox::before{
+  content:"写手查询";
+  display:block;
+  text-align:left;
+  font-size:28px;
+  line-height:1;
+  font-weight:900;
+  color:#111827;
+  letter-spacing:.2px;
+  margin-bottom:24px;
+}
+
+/* 手机端仍然居中 */
+@media(max-width:640px){
+  #loginBox,
+  #writerQueryBox{
+    width:calc(100vw - 32px)!important;
+    padding:34px 24px 28px!important;
+    border-radius:22px!important;
+  }
+  #loginBox::before,
+  #writerQueryBox::before{
+    font-size:26px;
+    text-align:center;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2439,14 +2845,17 @@ body{
     <div class="header-title">订单管理</div>
     <div class="header-actions">
       <button class="header-icon" title="消息">🔔</button>
-      <div class="top-user">
+      <div class="top-user" onclick="toggleUserDropdown(event)">
         <div class="top-avatar" id="topUserAvatar">用</div>
         <div class="top-user-meta">
           <div class="top-user-name" id="topUserName">用户</div>
           <div class="top-user-role" id="topUserRole">角色</div>
         </div>
+        <span class="top-user-arrow">⌄</span>
+        <div class="user-dropdown" id="userDropdown">
+          <button onclick="logout()">退出登录</button>
+        </div>
       </div>
-      <button class="header-logout" onclick="logout()">退出</button>
     </div>
   </header>
   <main class="main"><div id="content"></div></main>
@@ -2581,7 +2990,18 @@ if($('topUserRole'))$('topUserRole').innerText=roleName;
 if($('topUserAvatar'))$('topUserAvatar').innerText=displayName.slice(0,1);
 renderMenu();routeAfterLogin()}
 function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceWorkbench();if(currentProfile.role==='service')return renderMyOrders();return renderHome()}function menuBtn(key,label,fn){return`<button id="m_${key}" onclick="setMenu('${key}');toggleMobileMenu(false);Promise.resolve((async()=>{${fn}})()).catch(e=>showContent('<div class=&quot;card&quot;><div class=&quot;error&quot;>页面打开失败：'+esc(e&&e.message?e.message:e)+'</div></div>'))">${label}</button>`}function setMenu(k){activeMenu=k;document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
-function renderMenu(){const r=currentProfile.role;let m='';if(r==='admin')m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('writers','写手管理','renderWriterManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款方式管理','renderPaymentManage()');m+=menuBtn('biz','业务/字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance'){m+=menuBtn('finance_home','财务工作台','renderFinanceWorkbench()');m+=menuBtn('finance_all','财务订单','renderFinanceOrders()');m+=menuBtn('payment_confirm','收款确认','renderPaymentConfirmation()');m+=menuBtn('service_perf','客服业绩统计','renderServicePerformance()');m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');m+=menuBtn('settlement_summary','写手结算汇总','renderWriterSettlementSummary()');m+=menuBtn('settlement_batches','结算批次记录','renderSettlementBatches()');m+=menuBtn('publish_payment','发表打款','renderPublishingPayment()')}$('menuBox').innerHTML=m}
+function toggleUserDropdown(e){
+  if(e)e.stopPropagation();
+  const el=$('userDropdown');
+  if(el)el.classList.toggle('show');
+}
+document.addEventListener('click',function(e){
+  const el=$('userDropdown');
+  const box=document.querySelector('.top-user');
+  if(el&&box&&!box.contains(e.target))el.classList.remove('show');
+});
+
+function renderMenu(){const r=currentProfile.role;let m='';if(r==='admin')m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('writers','写手管理','renderWriterManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款管理','renderPaymentManage()');m+=menuBtn('biz','字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance'){m+=menuBtn('finance_home','财务工作台','renderFinanceWorkbench()');m+=menuBtn('finance_all','财务订单','renderFinanceOrders()');m+=menuBtn('payment_confirm','收款确认','renderPaymentConfirmation()');m+=menuBtn('service_perf','客服业绩统计','renderServicePerformance()');m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');m+=menuBtn('settlement_summary','写手结算汇总','renderWriterSettlementSummary()');m+=menuBtn('settlement_batches','结算批次记录','renderSettlementBatches()');m+=menuBtn('publish_payment','发表打款','renderPublishingPayment()')}$('menuBox').innerHTML=m}
 async function fetchDashboardRows(){if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error)throw error;return data||[]}
 async function renderHome(){setMenu('home');const rows=await fetchDashboardRows();const title=currentProfile.role==='admin'?'经营数据大屏｜全部订单':'我的业绩大屏';showContent(`<div class="screen"><div class="screen-title"><h2>${title}</h2><div class="time" id="dashTime"></div></div>${renderDashboard(rows)}</div>`);animateNums();setInterval(()=>{const t=$('dashTime');if(t)t.innerText=new Date().toLocaleString('zh-CN',{hour12:false})},1000)}
 function renderDashboard(rows){const today=stats(rows,r=>isToday(r.created_at)),week=stats(rows,r=>isThisWeek(r.created_at)),month=stats(rows,r=>isThisMonth(r.created_at));const rank=groupRows(rows.filter(r=>isThisMonth(r.created_at)),r=>r.service_name||'未指定客服');const biz=groupRows(rows.filter(r=>isThisMonth(r.created_at)),r=>(r.business_category||'-')+' / '+(r.service_project||'-'));const recent=rows.slice(0,12);const overdue=rows.filter(r=>rowClass(r)==='overdue').length,dueSoon=rows.filter(r=>['due-soon','due-warning'].includes(rowClass(r))).length,unfinished=rows.filter(r=>!closedStatus.includes(r.order_status||'')).length;const ticker=(recent.length?recent:rows).concat(recent.length?recent:rows).map(r=>`<div class="ticker-item"><strong>${r.order_no}</strong>｜${esc(r.service_name||'')}｜${esc(r.service_project||'')}｜¥${money(r.total_amount)}｜${esc(mainTitle(r))}</div>`).join('');return`<div class="metric-mini">${bigMetric('今日订单',today.count)}${bigMetric('今日成交额','¥'+money(today.total))}${bigMetric('本周订单',week.count)}${bigMetric('本月成交额','¥'+money(month.total))}</div><div class="screen-grid"><div class="screen-card"><h3>本月客服排行榜</h3>${rank.slice(0,8).map((x,i)=>rankRow(i+1,x.name,x.count+'单 / ¥'+money(x.total))).join('')||'<div class="muted">暂无数据</div>'}</div><div class="screen-card"><h3>实时订单滚动</h3><div class="ticker"><div class="ticker-inner">${ticker||'<div class="ticker-item">暂无订单</div>'}</div></div></div><div class="screen-card"><h3>本月业务排行榜</h3>${biz.slice(0,8).map((x,i)=>rankRow(i+1,x.name,x.count+'单 / ¥'+money(x.total))).join('')||'<div class="muted">暂无数据</div>'}</div></div><div class="todo-grid"><div class="todo">快到期订单<br><span class="big-num" data-num="${dueSoon}">0</span></div><div class="todo">逾期未完成<br><span class="big-num" data-num="${overdue}">0</span></div><div class="todo">未完成订单<br><span class="big-num" data-num="${unfinished}">0</span></div></div>`}function bigMetric(label,val){return`<div class="metric-box"><div class="label">${label}</div><div class="num big-num" data-num="${String(val).replace(/[^\d.]/g,'')}" data-prefix="${String(val).startsWith('¥')?'¥':''}">0</div></div>`}function rankRow(i,n,v){return`<div class="rank-row"><b>${i}</b><span>${esc(n)}</span><b>${esc(v)}</b></div>`}function groupRows(rows,kf){const m={};rows.forEach(r=>{const k=kf(r);m[k]??={name:k,count:0,total:0};m[k].count++;m[k].total+=Number(r.total_amount||0)});return Object.values(m).sort((a,b)=>b.total-a.total)}function animateNums(){document.querySelectorAll('.big-num').forEach(el=>{const target=Number(el.dataset.num||0),prefix=el.dataset.prefix||'';let n=0,step=Math.max(target/30,1);const t=setInterval(()=>{n+=step;if(n>=target){n=target;clearInterval(t)}el.innerText=prefix+(prefix?money(n):Math.floor(n))},22)})}
@@ -3609,7 +4029,7 @@ async function addWriter(){
 }
 async function disableWriter(id){await client.from('writers').update({is_active:false}).eq('id',id);renderWriterManage()}
 
-async function renderSourceManage(){setMenu('sources');await loadBase(true);showContent(`<div class="card"><h2>来源管理</h2><div class="form-grid"><div><label>新增来源</label><input id="new_source_name"></div></div><button onclick="addSource()">添加</button>${configTable(customerSources,'source')}</div>`)}async function renderPaymentManage(){setMenu('payments');await loadBase(true);showContent(`<div class="card"><h2>付款方式管理</h2><div class="form-grid"><div><label>新增付款方式</label><input id="new_pay_name"></div></div><button onclick="addPayment()">添加</button>${configTable(paymentMethods,'payment')}</div>`)}function configTable(rows,type){return`<div class="table-wrap"><table><tbody id="${type}_tbody">${rows.map(x=>`<tr draggable="true" class="drag-row" data-id="${x.id}"><td>${esc(x.name)}</td><td>拖动本行调整顺序</td><td><button class="danger" onclick="${type==='source'?'disableSource':'disablePayment'}('${x.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="saveDragOrder('${type}')">保存拖动顺序</button>`}async function addSource(){const name=$('new_source_name').value.trim();if(!name)return;await client.from('customer_sources').insert({name,sort_order:999});customerSources=[];renderSourceManage()}async function disableSource(id){await client.from('customer_sources').update({is_active:false}).eq('id',id);customerSources=[];renderSourceManage()}async function addPayment(){const name=$('new_pay_name').value.trim();if(!name)return;await client.from('payment_methods').insert({name,sort_order:999});paymentMethods=[];renderPaymentManage()}async function disablePayment(id){await client.from('payment_methods').update({is_active:false}).eq('id',id);paymentMethods=[];renderPaymentManage()}
+async function renderSourceManage(){setMenu('sources');await loadBase(true);showContent(`<div class="card"><h2>来源管理</h2><div class="form-grid"><div><label>新增来源</label><input id="new_source_name"></div></div><button onclick="addSource()">添加</button>${configTable(customerSources,'source')}</div>`)}async function renderPaymentManage(){setMenu('payments');await loadBase(true);showContent(`<div class="card"><h2>付款管理</h2><div class="form-grid"><div><label>新增付款方式</label><input id="new_pay_name"></div></div><button onclick="addPayment()">添加</button>${configTable(paymentMethods,'payment')}</div>`)}function configTable(rows,type){return`<div class="table-wrap"><table><tbody id="${type}_tbody">${rows.map(x=>`<tr draggable="true" class="drag-row" data-id="${x.id}"><td>${esc(x.name)}</td><td>拖动本行调整顺序</td><td><button class="danger" onclick="${type==='source'?'disableSource':'disablePayment'}('${x.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="saveDragOrder('${type}')">保存拖动顺序</button>`}async function addSource(){const name=$('new_source_name').value.trim();if(!name)return;await client.from('customer_sources').insert({name,sort_order:999});customerSources=[];renderSourceManage()}async function disableSource(id){await client.from('customer_sources').update({is_active:false}).eq('id',id);customerSources=[];renderSourceManage()}async function addPayment(){const name=$('new_pay_name').value.trim();if(!name)return;await client.from('payment_methods').insert({name,sort_order:999});paymentMethods=[];renderPaymentManage()}async function disablePayment(id){await client.from('payment_methods').update({is_active:false}).eq('id',id);paymentMethods=[];renderPaymentManage()}
 async function renderBusinessManage(){setMenu('biz');await loadBase(true);const catOps=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''),proOps=projects.map(p=>`<option value="${p.id}">${esc(categories.find(c=>c.id===p.category_id)?.name||'')} / ${esc(p.name)}</option>`).join('');showContent(`<div class="card"><h2>业务/项目/字段管理</h2><h3>新增业务大类</h3><input id="new_cat_name" placeholder="业务大类名称"><button onclick="addCategory()">添加业务大类</button><h3>新增具体项目</h3><div class="form-grid"><div><select id="new_project_cat">${catOps}</select></div><div><input id="new_project_name" placeholder="具体项目名称"></div></div><button onclick="addProject()">添加项目</button><h3>现有业务大类</h3><div class="table-wrap"><table><tbody>${categories.map(c=>`<tr><td>${esc(c.name)}</td><td><button class="danger" onclick="disableCategory('${c.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><h3>现有项目</h3><div class="table-wrap"><table><tbody>${projects.map(p=>`<tr><td>${esc(categories.find(c=>c.id===p.category_id)?.name||'')} / ${esc(p.name)}</td><td><button class="danger" onclick="disableProject('${p.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><h3>新增项目字段</h3><div class="form-grid"><div><select id="field_project_id" onchange="loadFieldList()">${proOps}</select></div><div><input id="field_label" placeholder="字段名称"></div><div><select id="field_type"><option value="text">单行文本</option><option value="textarea">多行文本</option><option value="number">数字</option><option value="date">日期</option><option value="datetime">日期时间</option><option value="select">单选</option></select></div><div><input id="field_options" placeholder="选项，逗号分隔"></div><div><select id="field_required"><option value="false">非必填</option><option value="true">必填</option></select></div></div><button onclick="addField()">添加字段</button><div id="bizMsg"></div><h3>当前项目字段（可拖动排序，可删除）</h3><div id="fieldList"></div></div>`);loadFieldList()}function code(prefix){return prefix+'-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999)}async function addCategory(){const name=$('new_cat_name').value.trim();if(!name)return;await client.from('business_categories').insert({name,code:code('CAT'),sort_order:999});categories=[];renderBusinessManage()}async function addProject(){const name=$('new_project_name').value.trim();if(!name)return;await client.from('service_projects').insert({name,category_id:$('new_project_cat').value,code:code('PRJ'),sort_order:999});projects=[];renderBusinessManage()}async function disableCategory(id){await client.from('business_categories').update({is_active:false}).eq('id',id);categories=[];renderBusinessManage()}async function disableProject(id){await client.from('service_projects').update({is_active:false}).eq('id',id);projects=[];renderBusinessManage()}async function addField(){const pid=$('field_project_id').value,label=$('field_label').value.trim();if(!pid||!label)return;const options=$('field_options').value.trim()?$('field_options').value.split(',').map(x=>x.trim()).filter(Boolean):[];await client.from('project_fields').insert({project_id:pid,field_key:'f_'+Date.now().toString(36),field_label:label,field_type:$('field_type').value,is_required:$('field_required').value==='true',options,sort_order:999,is_active:true});fieldsCache={};loadFieldList()}async function loadFieldList(){const pid=$('field_project_id')?.value;if(!pid)return;const fs=await getFields(pid);$('fieldList').innerHTML=`<div class="table-wrap"><table><tbody id="field_tbody">${fs.map(f=>`<tr draggable="true" class="drag-row" data-id="${f.id}"><td>${esc(f.field_label)}</td><td>${esc(f.field_type)}</td><td>拖动本行调整顺序</td><td><button class="danger" onclick="disableField('${f.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="saveDragOrder('field')">保存字段顺序</button>`;enableDrag('field_tbody')}async function disableField(id){await client.from('project_fields').update({is_active:false}).eq('id',id);fieldsCache={};loadFieldList()}
 async function renderCustomFieldManage(entity){if(currentProfile.role!=='admin'){alert('只有管理员可以自定义字段');return}const title=entity==='writer'?'写手字段自定义':'期刊字段自定义';const {data}=await client.from('custom_fields').select('*').eq('entity_type',entity).eq('is_active',true).order('sort_order',{ascending:true});openModal(`<h2>${title}</h2><div class="form-grid"><div><label>字段名称</label><input id="cf_label"></div><div><label>字段类型</label><select id="cf_type"><option value="text">单行文本</option><option value="textarea">多行文本</option><option value="number">数字</option><option value="date">日期</option><option value="select">单选</option></select></div><div><label>选项</label><input id="cf_options" placeholder="单选用，逗号分隔"></div></div><button onclick="addCustomField('${entity}')">添加字段</button><div id="modalMsg"></div><div class="table-wrap"><table><tbody>${(data||[]).map(f=>`<tr><td>${esc(f.field_label)}</td><td>${esc(f.field_type)}</td><td><button class="danger" onclick="disableCustomField('${f.id}','${entity}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="closeModal()">关闭</button>`)}async function addCustomField(entity){const label=$('cf_label').value.trim();if(!label)return;const opts=$('cf_options').value.trim()?$('cf_options').value.split(',').map(x=>x.trim()).filter(Boolean):[];const {error}=await client.from('custom_fields').insert({entity_type:entity,field_key:'cf_'+Date.now().toString(36),field_label:label,field_type:$('cf_type').value,options:opts,sort_order:999});if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}renderCustomFieldManage(entity)}async function disableCustomField(id,entity){await client.from('custom_fields').update({is_active:false}).eq('id',id);renderCustomFieldManage(entity)}
 function enableDrag(tbodyId){setTimeout(()=>{const tb=$(tbodyId);if(!tb)return;let drag=null;tb.querySelectorAll('tr').forEach(row=>{row.addEventListener('dragstart',()=>{drag=row;row.classList.add('dragging')});row.addEventListener('dragend',()=>{row.classList.remove('dragging');drag=null});row.addEventListener('dragover',e=>{e.preventDefault();const after=[...tb.querySelectorAll('tr:not(.dragging)')].find(r=>e.clientY<=r.getBoundingClientRect().top+r.offsetHeight/2);if(after)tb.insertBefore(drag,after);else tb.appendChild(drag)})})},50)}async function saveDragOrder(type){const map={field:['field_tbody','project_fields'],source:['source_tbody','customer_sources'],payment:['payment_tbody','payment_methods']};const [tbody,table]=map[type];const ids=[...$(tbody).querySelectorAll('tr')].map(r=>r.dataset.id);for(let i=0;i<ids.length;i++){await client.from(table).update({sort_order:i+1}).eq('id',ids[i])}fieldsCache={};alert('顺序已保存')}document.addEventListener('mouseover',()=>{['field_tbody','source_tbody','payment_tbody'].forEach(enableDrag)},{once:false});
