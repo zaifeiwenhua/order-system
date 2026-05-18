@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V88：报表利润率版 */
+/* V90：写手双重校验查询版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3687,10 +3687,55 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 .prog-ok{background:#ecfdf3;color:#027a48}
 .prog-normal{background:#f2f4f7;color:#475467}
 
+
+/* V89 内部写手查询 */
+.writer-query-page .internal-writer-search{
+  width:280px!important;
+}
+.writer-query-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  padding:12px 12px 0;
+}
+.writer-query-summary .module{
+  padding:12px!important;
+  border:1px solid #e6ebf2!important;
+  border-radius:10px!important;
+  background:#fff!important;
+}
+.writer-query-summary h3{
+  margin:0 0 4px!important;
+  font-size:18px!important;
+  color:#1f2937!important;
+}
+@media(max-width:900px){
+  .writer-query-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .writer-query-page .internal-writer-search{width:100%!important}
+}
+
+
+/* V90 写手查询：编号 + 姓名双重校验 */
+.writer-query-toolbar{
+  flex-wrap:wrap;
+}
+.writer-query-page .internal-writer-search{
+  width:190px!important;
+}
+.writer-query-page .writer-name-search{
+  width:160px!important;
+}
+@media(max-width:900px){
+  .writer-query-page .internal-writer-search,
+  .writer-query-page .writer-name-search{
+    width:100%!important;
+  }
+}
+
 </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录页</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">为保护写手隐私，请同时输入写手编号和姓名，信息匹配后才能查询稿费和结算状态。</div><label>写手编号</label><input id="writer_identity" placeholder="如 W010" /><label>写手姓名</label><input id="writer_query_name" placeholder="请输入姓名" onkeydown="if(event.key==='Enter'){queryWriterPublic()}" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录页</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
 <div id="appArea" class="layout hidden">
   <div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ 菜单</button><div class="mobile-title">录单系统</div></div>
   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div>
@@ -3904,7 +3949,101 @@ function rowClass(r){const st=progressStatus(r)||'';if(['已完成','已取消',
 }function applyRefundChange(){const el=$('refund_amount'),lastEl=$('last_refund_amount'),recEl=$('deposit_amount');if(!el||!lastEl||!recEl)return;const next=Number(el.value||0),last=Number(lastEl.value||0);const delta=next-last;if(delta!==0){const rec=Number(recEl.value||0);recEl.value=money(Math.max(rec-delta,0));lastEl.value=String(next)}updateBalancePreview()}
 function normalizePhone(v){return String(v||'').replace(/\D/g,'')}function phoneToEmail(v){const p=normalizePhone(v);return p?p+'@phone.local':''}function loginValueToEmail(v){const raw=String(v||'').trim();if(raw.includes('@'))return raw;return phoneToEmail(raw)}function showLogin(){$('writerQueryBox').classList.add('hidden');$('loginBox').classList.remove('hidden')}
 function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('writerQueryBox').classList.remove('hidden')}
-async function queryWriterPublic(){msg('writerQueryMsg','');const identity=$('writer_identity').value.trim();if(!identity){msg('writerQueryMsg','<div class="error">请输入写手编号、手机号或微信号。</div>');return}const {data,error}=await client.rpc('writer_public_query',{p_identity:identity});if(error){msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');return}const rows=data||[];$('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号、手机号或微信号是否正确。</div>';}
+async function queryWriterPublic(){
+  msg('writerQueryMsg','');
+  const code=$('writer_identity').value.trim();
+  const name=$('writer_query_name').value.trim();
+  if(!code||!name){
+    msg('writerQueryMsg','<div class="error">请输入写手编号和姓名。</div>');
+    return;
+  }
+  const {data,error}=await client.rpc('writer_public_query_secure_v90',{p_writer_code:code,p_writer_name:name});
+  if(error){
+    msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');
+    return;
+  }
+  const rows=data||[];
+  $('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号和姓名是否匹配。</div>';
+}
+
+function renderWriterInternalQuery(){
+  if(!['admin','finance'].includes(currentProfile?.role)){
+    showContent('<div class="card"><div class="error">当前账号无权查看写手查询。</div></div>');
+    return;
+  }
+  setMenu('writer_query');
+  showContent(`<div class="card table-page-card writer-query-page">
+    <div class="page-toolbar">
+      <div class="toolbar-left">
+        <button class="tool-btn" onclick="copyWriterQueryLink(event)">复制私发链接</button>
+        <button class="tool-btn" onclick="openWriterQueryPage(event)">打开私发页面</button>
+      </div>
+      <div class="toolbar-right writer-query-toolbar">
+        <div class="compact-search internal-writer-search" title="输入写手编号">
+          <span class="compact-search-icon">⌕</span>
+          <input id="internal_writer_identity" placeholder="写手编号" autocomplete="off"
+            onkeydown="if(event.key==='Enter'){queryWriterInternal()}else if(event.key==='Escape'){this.value='';$('internalWriterResult').innerHTML=''}" />
+        </div>
+        <div class="compact-search internal-writer-search writer-name-search" title="输入写手姓名">
+          <span class="compact-search-icon">人</span>
+          <input id="internal_writer_name" placeholder="写手姓名" autocomplete="off"
+            onkeydown="if(event.key==='Enter'){queryWriterInternal()}else if(event.key==='Escape'){this.value='';$('internalWriterResult').innerHTML=''}" />
+        </div>
+        <button class="primary-small" onclick="queryWriterInternal()">查询</button>
+      </div>
+    </div>
+    <div class="table-hint">财务和管理员可在这里模拟写手查询结果。为保护隐私，必须同时输入写手编号和姓名，信息匹配后才显示结果。</div>
+    <div id="internalWriterResult" class="internal-writer-result">
+      <div class="warn" style="margin:12px">请输入写手编号和姓名后查询。</div>
+    </div>
+  </div>`);
+}
+
+async function queryWriterInternal(){
+  const input=$('internal_writer_identity');
+  const nameInput=$('internal_writer_name');
+  const box=$('internalWriterResult');
+  if(!input||!nameInput||!box)return;
+  const code=input.value.trim();
+  const name=nameInput.value.trim();
+  if(!code||!name){box.innerHTML='<div class="error" style="margin:12px">请输入写手编号和姓名。</div>';return}
+  box.innerHTML='<div class="muted" style="margin:12px">正在查询...</div>';
+  const {data,error}=await client.rpc('writer_public_query_secure_v90',{p_writer_code:code,p_writer_name:name});
+  if(error){box.innerHTML='<div class="error" style="margin:12px">查询失败：'+esc(error.message)+'</div>';return}
+  const rows=data||[];
+  if(!rows.length){box.innerHTML='<div class="warn" style="margin:12px">没有查到订单，请检查写手编号和姓名是否匹配。</div>';return}
+
+  const totalFee=rows.reduce((a,r)=>a+Number(r.writer_fee||0),0);
+  const settled=rows.reduce((a,r)=>a+Number(r.settled_amount||0),0);
+  const balance=rows.reduce((a,r)=>a+Math.max(Number(r.writer_fee||0)-Number(r.settled_amount||0),0),0);
+
+  box.innerHTML=`<div class="writer-query-summary">
+      <div class="module"><h3>${rows.length}</h3><div class="muted">订单数</div></div>
+      <div class="module"><h3>${money(totalFee)}</h3><div class="muted">稿费合计</div></div>
+      <div class="module"><h3>${money(settled)}</h3><div class="muted">已结合计</div></div>
+      <div class="module"><h3>${money(balance)}</h3><div class="muted">余额合计</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>{
+            const fee=Number(r.writer_fee||0), s=Number(r.settled_amount||0), b=Math.max(fee-s,0);
+            return `<tr>
+              <td>${orderNoCell(r.order_no||'')}</td>
+              <td>${money(fee)}</td>
+              <td>${esc(r.settlement_status||'未结算')}</td>
+              <td>${money(s)}</td>
+              <td>${money(b)}</td>
+            </tr>`
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 
 async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入邮箱/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
 async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');const qs=new URLSearchParams(location.search);if(qs.get('writer')==='1'){renderWriterPublicQuery()}else{showLogin()}return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
@@ -3919,7 +4058,7 @@ function routeAfterLogin(){if(currentProfile.role==='writing')return renderWriti
   home:'⌂',allorders:'▦',myorders:'▤',writing:'✎',publishing:'▣',journals:'◫',writers:'☷',
   sources:'⌖',payments:'￥',biz:'⚙',accounts:'◎',reports:'◉',
   finance_home:'⌁',finance_all:'▦',payment_confirm:'✓',service_perf:'◍',
-  settlement_review:'☑',settlement_summary:'Σ',settlement_batches:'≡',publish_payment:'↗'
+  settlement_review:'☑',settlement_summary:'Σ',settlement_batches:'≡',publish_payment:'↗',writer_query:'⌕'
 };
 function menuGroup(label){return `<div class="menu-group-title">${label}</div>`}
 function setPageTitle(label){const t=$('headerTitle');if(t)t.innerText=label||'订单管理'}
@@ -3973,6 +4112,7 @@ function renderMenu(){
     m+=menuGroup('基础资料');
     m+=menuBtn('journals','期刊管理','renderJournalManage()');
     m+=menuBtn('writers','写手管理','renderWriterManage()');
+    m+=menuBtn('writer_query','写手查询','renderWriterInternalQuery()');
     m+=menuBtn('sources','来源管理','renderSourceManage()');
     m+=menuBtn('payments','付款管理','renderPaymentManage()');
     m+=menuBtn('biz','字段管理','renderBusinessManage()');
@@ -4007,6 +4147,7 @@ function renderMenu(){
     m+=menuBtn('service_perf','客服业绩','renderServicePerformance()');
     m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');
     m+=menuBtn('settlement_summary','写手结算','renderWriterSettlementSummary()');
+    m+=menuBtn('writer_query','写手查询','renderWriterInternalQuery()');
     m+=menuBtn('settlement_batches','结算批次','renderSettlementBatches()');
   }
   $('menuBox').innerHTML=m
