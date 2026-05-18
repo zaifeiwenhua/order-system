@@ -426,6 +426,11 @@ button:disabled{opacity:.58;cursor:not-allowed}
 #pub_payee_name_box.hidden{display:none!important}
 #pub_payee_account_box.hidden{display:none!important}
 
+
+/* V57 数据日志弹窗关闭按钮 */
+.log-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.log-modal-head h2{margin:0}
+
 </style>
 </head>
 <body>
@@ -1743,9 +1748,13 @@ async function renderReportView(){
 
   
 function openWritingLogsModal(orderId,orderNo=''){
-  openModal(`<h2>写作数据日志 ${orderNo?`｜${esc(orderNo)}`:''}</h2>
+  openModal(`<div class="log-modal-head">
+      <h2>写作数据日志 ${orderNo?`｜${esc(orderNo)}`:''}</h2>
+      <button class="order-form-close" onclick="closeModal()" title="关闭">×</button>
+    </div>
     <div class="info">这里记录写作部登记写手、换写手、改稿费、改写作状态、备注/异常等操作。财务可用来核对写手变更和稿费依据。</div>
-    <div id="logPanel" style="margin-top:12px"><div class="muted">正在加载日志...</div></div>`);
+    <div id="logPanel" style="margin-top:12px"><div class="muted">正在加载日志...</div></div>
+    <div style="margin-top:14px;text-align:right"><button class="ghost" onclick="closeModal()">关闭</button></div>`);
   loadOrderLogsPanel(orderId);
 }
 
