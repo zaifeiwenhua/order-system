@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V85：写作财务页面统一版 */
+/* V86：收款进度分离版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3649,6 +3649,44 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   min-height:24px;
 }
 
+
+/* V86 收款状态与订单进度分离 */
+.status-lines{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  min-width:112px;
+}
+.status-lines>div{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.status-label{
+  color:#7b8798;
+  font-size:12px;
+}
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:22px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:650;
+  background:#f2f4f7;
+  color:#475467;
+}
+.pay-ok{background:#ecfdf3;color:#027a48}
+.pay-wait{background:#fff7ed;color:#b45309}
+.pay-refund{background:#fef2f2;color:#b42318}
+.prog-run{background:#eff6ff;color:#2563eb}
+.prog-wait{background:#eef4ff;color:#3444a5}
+.prog-ok{background:#ecfdf3;color:#027a48}
+.prog-normal{background:#f2f4f7;color:#475467}
+
 </style>
 </head>
 <body>
@@ -3801,7 +3839,63 @@ function dateTimeLocalValue(v){
   return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
 }function toISO(v){return v?new Date(v).toISOString():null}function todayISO(){return new Date().toISOString().slice(0,10)}function isToday(d){if(!d)return false;return new Date(d).toISOString().slice(0,10)===todayISO()}function isThisWeek(d){if(!d)return false;const now=new Date();const x=new Date(d);const day=now.getDay()||7;const start=new Date(now);start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);const end=new Date(start);end.setDate(start.getDate()+7);return x>=start&&x<end}function isThisMonth(d){if(!d)return false;const now=new Date();const x=new Date(d);return x.getFullYear()===now.getFullYear()&&x.getMonth()===now.getMonth()}function stats(rows,filter){const arr=(rows||[]).filter(filter);return {count:arr.length,total:arr.reduce((a,r)=>a+Number(r.total_amount||0),0),deposit:arr.reduce((a,r)=>a+Number(r.deposit_amount||0),0),income:arr.reduce((a,r)=>a+Number(r.actual_income||0),0),fee:arr.reduce((a,r)=>a+Number(r.writer_fee||0),0),page:arr.reduce((a,r)=>a+Number(r.page_fee||0),0)}}function msg(id,html){const el=$(id);if(el)el.innerHTML=html;if(id==='orderFormMsg'){const f=$('orderFormMsgFooter');if(f)f.innerHTML=html}}function toggleMobileMenu(force){const s=$('sidebar'),o=$('mobileOverlay');if(!s||!o)return;const open=typeof force==='boolean'?force:!s.classList.contains('mobile-open');s.classList.toggle('mobile-open',open);o.classList.toggle('show',open)}
 function decorateTables(){document.querySelectorAll('table').forEach(table=>{const hs=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());if(!hs.length)return;table.classList.add('mobile-card-table');table.querySelectorAll('tbody tr').forEach(tr=>{[...tr.children].forEach((td,i)=>{if(!td.dataset.label)td.dataset.label=hs[i]||''})})})}
-function showContent(html){$('content').innerHTML=html;closeModal();setTimeout(decorateTables,0)}function getDyn(r,k){const v=r?.dynamic_values?.[k];if(v&&typeof v==='object'&&!Array.isArray(v))return v.value??'';return v??''}function formatDynValue(v){if(v===null||v===undefined||v==='')return'';if(Array.isArray(v))return v.join('、');if(typeof v==='object')return v.value??JSON.stringify(v);return String(v)}function pickDynByLabel(fields,dv,keywords){for(const f of fields||[]){const label=f.field_label||'';const hit=keywords.some(k=>label.includes(k));const val=formatDynValue(dv?.[f.field_key]);if(hit&&val)return val}return''}function renderDynSummary(r){const dv=r?.dynamic_values||{};const labels=dv.__labels||{};const entries=Object.entries(dv).filter(([k,v])=>k!=='__labels'&&formatDynValue(v));if(!entries.length){const t=mainTitle(r),w=mainWord(r);if(t&&t!=='-')return `<strong>${esc(t)}</strong>${w?`<br><span class="muted">${esc(w)}</span>`:''}`;return'-'}return entries.map(([k,v])=>{const label=labels[k]||projectFieldLabels[k]||fieldLabel(k)||k;const val=esc(formatDynValue(v));const hideLabel=String(label).startsWith('f_')||(String(label)===String(k)&&(String(k).startsWith('f_')||String(k).includes('_')));return hideLabel?`<div>${val}</div>`:`<div><span class="muted">${esc(label)}：</span>${val}</div>`}).join('')}function mainTitle(r){return r.title||getDyn(r,'project_title')||getDyn(r,'micro_topic')||getDyn(r,'course_topic')||getDyn(r,'article_title')||getDyn(r,'project_name')||'-'}function mainWord(r){return r.word_count||getDyn(r,'word_count_req')||getDyn(r,'page_or_word_req')||''}function rowClass(r){const st=r.order_status||'';if(closedStatus.includes(st))return'closed';const due=r.due_at?new Date(r.due_at).getTime():null;if(!due)return'';const h=(due-Date.now())/36e5;if(h<0)return'overdue';if(h<=24)return'due-soon';if(h<=48)return'due-warning';return''}function getCategoryNameById(id){return (categories.find(c=>c.id===id)?.name)||''}function publishFlowText(p,categoryId){return `${getCategoryNameById(categoryId)} ${p?.name||''} ${p?.code||''}`}function isPublishProject(p,categoryId){const t=publishFlowText(p,categoryId);return t.includes('发表')||t.includes('代发')||t.includes('写+发')||t.includes('写发')}function publishTypeByProject(p,categoryId){const t=publishFlowText(p,categoryId);if(t.includes('写+发')||t.includes('写发')||t.includes('写作+发表'))return'写作+发表';if(t.includes('代发')||t.includes('只发表')||t.includes('发表'))return'只发表';return'只发表'}function computedAutoOrderStatus(){const total=Number($('total_amount')?.value||0),received=Number($('deposit_amount')?.value||0),refund=Number($('refund_amount')?.value||0);const current=$('current_order_status')?.value||'';if(refund>0&&received<=0)return'已退款';if(refund>0&&received<total)return'部分退款';if(refund>0&&received>=total)return'部分退款';if(total>0&&received>=total)return'已收全款';if(['写作中','发表中','审核通过待收款','等待出刊'].includes(current))return current;const p=projects.find(x=>x.id===$('project_id')?.value);if(isPublishProject(p,$('category_id')?.value)&&publishTypeByProject(p,$('category_id')?.value)==='只发表')return'发表中';return'待写作部安排'}function applyRefundChange(){const el=$('refund_amount'),lastEl=$('last_refund_amount'),recEl=$('deposit_amount');if(!el||!lastEl||!recEl)return;const next=Number(el.value||0),last=Number(lastEl.value||0);const delta=next-last;if(delta!==0){const rec=Number(recEl.value||0);recEl.value=money(Math.max(rec-delta,0));lastEl.value=String(next)}updateBalancePreview()}
+function showContent(html){$('content').innerHTML=html;closeModal();setTimeout(decorateTables,0)}function getDyn(r,k){const v=r?.dynamic_values?.[k];if(v&&typeof v==='object'&&!Array.isArray(v))return v.value??'';return v??''}function formatDynValue(v){if(v===null||v===undefined||v==='')return'';if(Array.isArray(v))return v.join('、');if(typeof v==='object')return v.value??JSON.stringify(v);return String(v)}function pickDynByLabel(fields,dv,keywords){for(const f of fields||[]){const label=f.field_label||'';const hit=keywords.some(k=>label.includes(k));const val=formatDynValue(dv?.[f.field_key]);if(hit&&val)return val}return''}function renderDynSummary(r){const dv=r?.dynamic_values||{};const labels=dv.__labels||{};const entries=Object.entries(dv).filter(([k,v])=>k!=='__labels'&&formatDynValue(v));if(!entries.length){const t=mainTitle(r),w=mainWord(r);if(t&&t!=='-')return `<strong>${esc(t)}</strong>${w?`<br><span class="muted">${esc(w)}</span>`:''}`;return'-'}return entries.map(([k,v])=>{const label=labels[k]||projectFieldLabels[k]||fieldLabel(k)||k;const val=esc(formatDynValue(v));const hideLabel=String(label).startsWith('f_')||(String(label)===String(k)&&(String(k).startsWith('f_')||String(k).includes('_')));return hideLabel?`<div>${val}</div>`:`<div><span class="muted">${esc(label)}：</span>${val}</div>`}).join('')}function mainTitle(r){return r.title||getDyn(r,'project_title')||getDyn(r,'micro_topic')||getDyn(r,'course_topic')||getDyn(r,'article_title')||getDyn(r,'project_name')||'-'}function mainWord(r){return r.word_count||getDyn(r,'word_count_req')||getDyn(r,'page_or_word_req')||''}
+function paymentStatus(r){
+  const total=Number(r?.total_amount||0), received=Number(r?.deposit_amount||0), refund=Number(r?.refund_amount||0);
+  if(refund>0&&received<=0)return'已退款';
+  if(refund>0)return'部分退款';
+  if(total>0&&received>=total)return'已收全款';
+  return'待收尾款';
+}
+function progressStatus(r){
+  const st=r?.order_status||'';
+  if(['已退款','部分退款','退款/异常','已取消','异常'].includes(st))return st;
+  if(st==='已收全款'||st==='待收尾款'){
+    const ws=r?.writing_status||'';
+    if(['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(ws))return'待客服交付';
+    if(ws==='写作中'||r?.writer_id)return'写作中';
+    if(r?.publish_status&&r.publish_status!=='-')return r.publish_status;
+    return'待安排';
+  }
+  if(st==='待写作部安排')return'待安排';
+  if(st==='已交给客服')return'待客服交付';
+  if(st==='已交付')return'已交付客户';
+  return st||'待安排';
+}
+function statusPill(text,type=''){
+  const cls=type?` status-pill ${type}`:'status-pill';
+  return `<span class="${cls}">${esc(text||'-')}</span>`;
+}
+function orderStatusBlock(r){
+  const pay=paymentStatus(r), prog=progressStatus(r);
+  const payType=pay.includes('全款')?'pay-ok':pay.includes('退款')?'pay-refund':'pay-wait';
+  const progType=prog.includes('完成')||prog.includes('交付客户')?'prog-ok':prog.includes('客服交付')?'prog-wait':prog.includes('写作中')||prog.includes('发表')?'prog-run':'prog-normal';
+  return `<div class="status-lines"><div><span class="status-label">收款</span>${statusPill(pay,payType)}</div><div><span class="status-label">进度</span>${statusPill(prog,progType)}</div></div>`;
+}
+function canConfirmCustomerDelivery(r){
+  if(!r)return false;
+  if(!['admin','service'].includes(currentProfile?.role))return false;
+  if(currentProfile?.role==='service'&&!isOwnServiceOrder(r))return false;
+  const prog=progressStatus(r);
+  return ['待客服交付','已交给客服'].includes(prog);
+}
+function customerDeliveryButton(r){
+  return canConfirmCustomerDelivery(r)?`<button class="ghost" onclick="markCustomerDelivered('${r.id||r.order_id}')">已交付客户</button><br>`:'';
+}
+function rowClass(r){const st=progressStatus(r)||'';if(['已完成','已取消','退款/异常','已交付客户','已退款'].includes(st))return'closed';const due=r.due_at?new Date(r.due_at).getTime():null;if(!due)return'';const h=(due-Date.now())/36e5;if(h<0)return'overdue';if(h<=24)return'due-soon';if(h<=48)return'due-warning';return''}function getCategoryNameById(id){return (categories.find(c=>c.id===id)?.name)||''}function publishFlowText(p,categoryId){return `${getCategoryNameById(categoryId)} ${p?.name||''} ${p?.code||''}`}function isPublishProject(p,categoryId){const t=publishFlowText(p,categoryId);return t.includes('发表')||t.includes('代发')||t.includes('写+发')||t.includes('写发')}function publishTypeByProject(p,categoryId){const t=publishFlowText(p,categoryId);if(t.includes('写+发')||t.includes('写发')||t.includes('写作+发表'))return'写作+发表';if(t.includes('代发')||t.includes('只发表')||t.includes('发表'))return'只发表';return'只发表'}function computedAutoOrderStatus(){
+  const total=Number($('total_amount')?.value||0),received=Number($('deposit_amount')?.value||0),refund=Number($('refund_amount')?.value||0);
+  const current=$('current_order_status')?.value||'';
+  if(refund>0&&received<=0)return'已退款';
+  if(refund>0)return'部分退款';
+
+  // 钱收齐只影响“收款状态”，不再直接把订单当成完成。
+  if(current==='已交付客户'&&total>0&&received>=total)return'已完成';
+  if(['写作中','发表中','审核通过待收款','等待出刊','待客服交付','已交付客户','已完成','待发表部安排','已取消','退款/异常'].includes(current))return current;
+
+  const p=projects.find(x=>x.id===$('project_id')?.value);
+  if(isPublishProject(p,$('category_id')?.value)&&publishTypeByProject(p,$('category_id')?.value)==='只发表')return'发表中';
+  return'待写作部安排';
+}function applyRefundChange(){const el=$('refund_amount'),lastEl=$('last_refund_amount'),recEl=$('deposit_amount');if(!el||!lastEl||!recEl)return;const next=Number(el.value||0),last=Number(lastEl.value||0);const delta=next-last;if(delta!==0){const rec=Number(recEl.value||0);recEl.value=money(Math.max(rec-delta,0));lastEl.value=String(next)}updateBalancePreview()}
 function normalizePhone(v){return String(v||'').replace(/\D/g,'')}function phoneToEmail(v){const p=normalizePhone(v);return p?p+'@phone.local':''}function loginValueToEmail(v){const raw=String(v||'').trim();if(raw.includes('@'))return raw;return phoneToEmail(raw)}function showLogin(){$('writerQueryBox').classList.add('hidden');$('loginBox').classList.remove('hidden')}
 function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('writerQueryBox').classList.remove('hidden')}
 async function queryWriterPublic(){msg('writerQueryMsg','');const identity=$('writer_identity').value.trim();if(!identity){msg('writerQueryMsg','<div class="error">请输入写手编号、手机号或微信号。</div>');return}const {data,error}=await client.rpc('writer_public_query',{p_identity:identity});if(error){msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');return}const rows=data||[];$('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号、手机号或微信号是否正确。</div>';}
@@ -4006,7 +4100,7 @@ async function renderOrderForm(orderId=null, copySeed=null){
         <div class="full" id="publishExtraBox"></div>
         <div class="full" id="dynamicFieldsBox"></div>
         <div><label>交稿时间</label><input id="due_at" type="datetime-local" value="${dateTimeLocalValue(existing?.due_at)}" /></div>
-        <div><label>${isCopyMode?'自动订单状态（复制后重新计算）':'自动订单状态'}</label><input id="order_status_preview" readonly value="${isCopyMode?'':esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${isCopyMode?'':esc(existing?.order_status||'')}" /></div>
+        <div><label>${isCopyMode?'订单进度（复制后重新计算）':'订单进度'}</label><input id="order_status_preview" readonly value="${isCopyMode?'':esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${isCopyMode?'':esc(existing?.order_status||'')}" /></div>
         <div><label>订单总金额</label><input id="total_amount" type="number" step="0.01" value="${existing?.total_amount??0}" oninput="updateBalancePreview()" /></div>
         <div><label>实收金额</label><input id="deposit_amount" type="number" step="0.01" value="${existing?.deposit_amount??0}" oninput="updateBalancePreview()" /></div>
         <div><label>尾款金额</label><input id="balance_preview" readonly /></div>
@@ -4277,7 +4371,7 @@ function searchRows(rows,kw,fields){kw=(kw||'').trim().toLowerCase();if(!kw)retu
 }
 function csvCell(v){if(v===null||v===undefined)return'';let s=String(v).replace(/\r?\n/g,' ');if(/[",\n]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s}
 function downloadCSV(filename,columns,rows){if(!['admin','finance'].includes(currentProfile?.role)){alert('当前账号没有导出权限');return}const header=columns.map(c=>csvCell(c.label)).join(',');const body=(rows||[]).map(r=>columns.map(c=>csvCell(typeof c.value==='function'?c.value(r):r[c.value])).join(',')).join('\n');const csv='\ufeff'+header+'\n'+body;const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename+'_'+todayISO()+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)}
-const orderSearchFields=[r=>r.order_no,r=>r.wechat_account,r=>r.taobao_account,r=>r.customer_source,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>mainWord(r),r=>r.service_name,r=>r.assigned_writing_name,r=>r.assigned_publishing_name,r=>r.writer_name,r=>r.journal_name];
+const orderSearchFields=[r=>r.order_no,r=>r.wechat_account,r=>r.taobao_account,r=>r.customer_source,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>mainWord(r),r=>r.service_name,r=>r.assigned_writing_name,r=>r.assigned_publishing_name,r=>r.writer_name,r=>r.journal_name,r=>paymentStatus(r),r=>progressStatus(r)];
 
 async function loadAllFieldLabels(){
   try{
@@ -4321,7 +4415,7 @@ function applyOrderDetailReadOnly(readonly){
   if(msg)msg.innerHTML='<div class="info">只读查看：这是其他客服负责的订单，你可以查询客户归属和订单信息，但不能修改。</div>';
 }
 async function renderMyOrders(){setMenu('myorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';let rows=[];if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').eq('created_by',currentUser.id).order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}else{const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}rows=searchRows(rows,kw,orderSearchFields);showContent(`<div class="card table-page-card"><div class="page-toolbar"><div class="toolbar-left"><button class="primary-small" onclick="renderOrderForm()">+ 新增订单</button></div><div class="toolbar-right">${searchBox('renderMyOrders','订单编号/微信/淘宝/题目/期刊')}</div></div><div class="table-count">共 ${rows.length} 条</div>${orderTable(rows,currentProfile.role==='admin')}</div>`);if(kw)$('search_kw').value=kw}async function renderServiceAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_service_all_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);showContent(`<div class="card table-page-card"><div class="page-toolbar"><div class="toolbar-left"><button class="primary-small" onclick="renderOrderForm()">+ 新增订单</button></div><div class="toolbar-right">${searchBox('renderServiceAllOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}</div></div><div class="table-count">共 ${rows.length} 条</div>${orderTable(rows,false)}</div>`);if(kw)$('search_kw').value=kw}
-function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td>${orderNoCell(r.order_no)}</td><td>${fmtDateOnly(r.created_at)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td>${canEditCustomerOrder(r)?`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',false)">修改</button>`:`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',true)">查看</button><br><span class="muted">其他客服订单</span>`}</td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
+function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td>${orderNoCell(r.order_no)}</td><td>${fmtDateOnly(r.created_at)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${orderStatusBlock(r)}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td>${customerDeliveryButton(r)}${canEditCustomerOrder(r)?`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',false)">修改</button>`:`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',true)">查看</button><br><span class="muted">其他客服订单</span>`}</td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
 function exportAdminAllOrders(){const cols=[{label:'订单编号',value:r=>r.order_no},{label:'客服',value:r=>r.service_name},{label:'提交时间',value:r=>fmtDate(r.created_at)},{label:'业务大类',value:r=>r.business_category},{label:'具体项目',value:r=>r.service_project},{label:'微信号',value:r=>r.wechat_account},{label:'淘宝账号',value:r=>r.taobao_account},{label:'订单金额',value:r=>money(r.total_amount)},{label:'实收金额',value:r=>money(r.deposit_amount)},{label:'尾款',value:r=>money(r.balance_amount)},{label:'退款',value:r=>money(r.refund_amount)},{label:'付款方式',value:r=>r.payment_method_name},{label:'订单状态',value:r=>r.order_status},{label:'交稿时间',value:r=>fmtDate(r.due_at)},{label:'写作部',value:r=>r.assigned_writing_name},{label:'写手',value:r=>r.writer_name},{label:'稿费',value:r=>money(r.writer_fee)},{label:'发表部',value:r=>r.assigned_publishing_name},{label:'期刊',value:r=>r.journal_name},{label:'版面费',value:r=>money(r.page_fee)},{label:'发表打款状态',value:r=>r.finance_payment_status},{label:'发表打款金额',value:r=>money(r.finance_payment_amount)},{label:'发表打款时间',value:r=>fmtDate(r.finance_paid_at)},{label:'利润',value:r=>money(r.gross_profit)}];downloadCSV('全部订单',cols,window.__adminAllOrderRows||[])}
 
 async function renderWritingOrders(){
@@ -4396,7 +4490,7 @@ async function saveWritingEdit(orderId){
   };
   const {error}=await client.from('writing_assignments').upsert(payload,{onConflict:'order_id'});
   if(error){msg('modalMsg','<div class="error">'+error.message+'</div>');return}
-  await client.from('orders').update({order_status:'写作中'}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+  await client.from('orders').update({order_status:'写作中'}).eq('id',orderId).neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常').neq('order_status','已完成');
   closeModal();
   renderWritingOrders();
 }
@@ -4413,8 +4507,8 @@ async function markWritingDelivered(orderId){
   const {error}=await client.from('writing_assignments').upsert(writingUpdate,{onConflict:'order_id'});
   if(error){alert(error.message);return}
 
-  const nextStatus=isWritePublish?'待发表部安排':'待收尾款';
-  await client.from('orders').update({order_status:nextStatus}).eq('id',orderId).neq('order_status','已收全款').neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
+  const nextStatus=isWritePublish?'待发表部安排':'待客服交付';
+  await client.from('orders').update({order_status:nextStatus}).eq('id',orderId).neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
 
   if(isWritePublish){
     await client.from('publishing_assignments').update({publish_status:'待审核'}).eq('order_id',orderId);
@@ -5028,7 +5122,25 @@ async function renderReportView(){
     return `<h3>${title}</h3><div class="table-wrap"><table><thead><tr><th>名称</th><th>订单数</th><th>成交金额</th><th>实收金额</th><th>稿费</th><th>版面费</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td><td>${money(r.total)}</td><td>${money(r.dep)}</td><td>${money(r.fee)}</td><td>${money(r.page)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
-  async function openOrderDetail(orderId,readOnlyMode=false){
+  
+async function markCustomerDelivered(orderId){
+  if(!confirm('确认已经把稿子/成果交付给客户了吗？'))return;
+  const {data,error}=await client.from('orders').select('total_amount,deposit_amount,refund_amount,created_by').eq('id',orderId).single();
+  if(error){alert(error.message);return}
+  if(currentProfile.role==='service'&&data?.created_by!==currentUser.id){alert('这是其他客服的订单，只能查看，不能确认交付。');return}
+  const total=Number(data?.total_amount||0), received=Number(data?.deposit_amount||0), refund=Number(data?.refund_amount||0);
+  let next='已交付客户';
+  if(refund>0&&received<=0)next='已退款';
+  else if(refund>0)next='部分退款';
+  else if(total>0&&received>=total)next='已完成';
+  const {error:upErr}=await client.from('orders').update({order_status:next}).eq('id',orderId);
+  if(upErr){alert(upErr.message);return}
+  if(activeMenu==='allorders')return currentProfile.role==='service'?renderServiceAllOrders():renderAllOrders();
+  if(activeMenu==='myorders')return renderMyOrders();
+  return routeAfterLogin();
+}
+
+async function openOrderDetail(orderId,readOnlyMode=false){
     if(!['admin','service'].includes(currentProfile.role)){alert('当前角色暂不支持在这里编辑订单');return}
     await loadBase(true);
 
@@ -5079,7 +5191,7 @@ async function renderReportView(){
           <div class="full" id="publishExtraBox"></div>
           <div class="full" id="dynamicFieldsBox"></div>
           <div><label>交稿时间</label><input id="due_at" type="datetime-local" value="${dateTimeLocalValue(existing?.due_at)}" /></div>
-          <div><label>自动订单状态</label><input id="order_status_preview" readonly value="${esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${esc(existing?.order_status||'')}" /></div>
+          <div><label>订单进度</label><input id="order_status_preview" readonly value="${esc(existing?.order_status||'')}" /><input id="current_order_status" type="hidden" value="${esc(existing?.order_status||'')}" /></div>
           <div><label>订单总金额</label><input id="total_amount" type="number" step="0.01" value="${existing?.total_amount??0}" oninput="updateBalancePreview()" /></div>
           <div><label>实收金额</label><input id="deposit_amount" type="number" step="0.01" value="${existing?.deposit_amount??0}" oninput="updateBalancePreview()" /></div>
           <div><label>尾款金额</label><input id="balance_preview" readonly /></div>
