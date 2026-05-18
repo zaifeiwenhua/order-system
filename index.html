@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V90：写手双重校验查询版 */
+/* V92：查询链接按钮优化版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3732,10 +3732,248 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   }
 }
 
+
+/* V91 写手查询卡片优化 */
+#writerQueryBox.writer-public-card{
+  width:450px!important;
+  max-width:calc(100vw - 36px)!important;
+  padding:42px 44px 34px!important;
+  border-radius:24px!important;
+}
+
+#writerQueryBox.writer-public-card h2{
+  display:block!important;
+  text-align:center!important;
+  font-size:32px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  color:#111827!important;
+  margin:0 0 22px!important;
+}
+
+#writerQueryBox.writer-public-card h2:before{
+  display:none!important;
+  content:none!important;
+}
+
+.writer-query-note{
+  padding:12px 14px;
+  margin:0 0 18px;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  background:linear-gradient(135deg,#eff6ff,#ecfeff);
+  color:#2563eb;
+  font-size:14px;
+  line-height:1.6;
+  font-weight:600;
+}
+
+#writerQueryBox.writer-public-card label{
+  display:block!important;
+  margin:14px 0 7px!important;
+  color:#344054!important;
+  font-size:14px!important;
+  font-weight:700!important;
+}
+
+#writerQueryBox.writer-public-card input{
+  height:48px!important;
+  border-radius:11px!important;
+  border:1px solid #dbe3ef!important;
+  background:#fff!important;
+  font-size:15px!important;
+  padding:0 14px!important;
+  margin:0!important;
+}
+
+#writerQueryBox.writer-public-card button:not(.ghost){
+  height:52px!important;
+  margin:26px 0 10px!important;
+  border-radius:11px!important;
+  background:linear-gradient(90deg,#2f6bff,#268bff)!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  box-shadow:0 16px 32px rgba(47,107,255,.22)!important;
+}
+
+#writerQueryBox.writer-public-card .ghost{
+  display:none!important;
+}
+
+#writerQueryResult{
+  margin-top:18px;
+}
+
+.writer-loading,
+.writer-empty{
+  padding:14px;
+  border-radius:12px;
+  background:#f8fafc;
+  color:#667085;
+  text-align:center;
+  font-size:14px;
+}
+
+.writer-result-head{
+  padding:2px 2px 12px;
+  text-align:left;
+}
+
+.writer-hello{
+  font-size:20px;
+  font-weight:900;
+  color:#111827;
+  margin-bottom:4px;
+}
+
+.writer-sub{
+  color:#667085;
+  font-size:14px;
+}
+
+.writer-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:10px 0 18px;
+}
+
+.writer-summary-item{
+  border:1px solid #e6ebf2;
+  border-radius:14px;
+  background:#fff;
+  padding:13px 12px;
+  box-shadow:0 8px 20px rgba(30,64,175,.04);
+}
+
+.writer-summary-item.strong{
+  background:linear-gradient(135deg,#eff6ff,#ecfeff);
+  border-color:#bfdbfe;
+}
+
+.writer-summary-item .num{
+  font-size:21px;
+  font-weight:900;
+  color:#111827;
+  line-height:1.1;
+}
+
+.writer-summary-item .label{
+  margin-top:6px;
+  color:#667085;
+  font-size:13px;
+}
+
+.writer-detail-title{
+  margin:12px 0 10px;
+  font-size:15px;
+  font-weight:900;
+  color:#1f2937;
+}
+
+.writer-order-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.writer-order-card{
+  border:1px solid #e6ebf2;
+  border-radius:14px;
+  background:#fff;
+  padding:13px 12px;
+}
+
+.writer-order-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.writer-order-top .order-no{
+  font-weight:900;
+  color:#1f2937;
+}
+
+.settle-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:2px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+
+.settle-badge.unpaid{
+  background:#fff7ed;
+  color:#b45309;
+}
+
+.settle-badge.paid{
+  background:#ecfdf3;
+  color:#027a48;
+}
+
+.writer-order-money{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+.writer-order-money div{
+  background:#f8fafc;
+  border-radius:10px;
+  padding:9px 8px;
+}
+
+.writer-order-money span{
+  display:block;
+  color:#667085;
+  font-size:12px;
+  margin-bottom:5px;
+}
+
+.writer-order-money b{
+  display:block;
+  color:#111827;
+  font-size:15px;
+  font-weight:900;
+}
+
+.writer-query-footer{
+  margin-top:14px;
+  text-align:center;
+  color:#98a2b3;
+  font-size:13px;
+}
+
+@media(max-width:640px){
+  #writerQueryBox.writer-public-card{
+    padding:32px 22px 26px!important;
+  }
+  .writer-order-money{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">为保护写手隐私，请同时输入写手编号和姓名，信息匹配后才能查询稿费和结算状态。</div><label>写手编号</label><input id="writer_identity" placeholder="如 W010" /><label>写手姓名</label><input id="writer_query_name" placeholder="请输入姓名" onkeydown="if(event.key==='Enter'){queryWriterPublic()}" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录页</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden writer-public-card">
+  <h2>写手稿费查询</h2>
+  <div class="writer-query-note">为保护写手隐私，请同时输入写手编号和姓名，信息匹配后才能查询稿费和结算状态。</div>
+  <label>写手编号</label>
+  <input id="writer_identity" placeholder="请输入写手编号，如 W181" />
+  <label>写手姓名</label>
+  <input id="writer_query_name" placeholder="请输入姓名" onkeydown="if(event.key==='Enter'){queryWriterPublic()}" />
+  <button onclick="queryWriterPublic()">查询我的稿费</button>
+  <button class="ghost" onclick="showLogin()">返回登录页</button>
+  <div id="writerQueryMsg"></div>
+  <div id="writerQueryResult"></div>
+</div></div>
 <div id="appArea" class="layout hidden">
   <div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ 菜单</button><div class="mobile-title">录单系统</div></div>
   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div>
@@ -3957,13 +4195,57 @@ async function queryWriterPublic(){
     msg('writerQueryMsg','<div class="error">请输入写手编号和姓名。</div>');
     return;
   }
+  $('writerQueryResult').innerHTML='<div class="writer-loading">正在查询...</div>';
   const {data,error}=await client.rpc('writer_public_query_secure_v90',{p_writer_code:code,p_writer_name:name});
   if(error){
+    $('writerQueryResult').innerHTML='';
     msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');
     return;
   }
   const rows=data||[];
-  $('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号和姓名是否匹配。</div>';
+  if(!rows.length){
+    $('writerQueryResult').innerHTML='<div class="writer-empty">没有查到记录，请检查写手编号和姓名是否匹配。</div>';
+    return;
+  }
+
+  const totalFee=rows.reduce((a,r)=>a+Number(r.writer_fee||0),0);
+  const settled=rows.reduce((a,r)=>a+Number(r.settled_amount||0),0);
+  const balance=rows.reduce((a,r)=>a+Math.max(Number(r.writer_fee||0)-Number(r.settled_amount||0),0),0);
+  const unpaidCount=rows.filter(r=>Math.max(Number(r.writer_fee||0)-Number(r.settled_amount||0),0)>0).length;
+
+  $('writerQueryResult').innerHTML=`
+    <div class="writer-result-head">
+      <div class="writer-hello">${esc(name)}，您好</div>
+      <div class="writer-sub">已查询到 ${rows.length} 笔稿费记录</div>
+    </div>
+    <div class="writer-summary-grid">
+      <div class="writer-summary-item"><div class="num">${money(totalFee)}</div><div class="label">稿费合计</div></div>
+      <div class="writer-summary-item"><div class="num">${money(settled)}</div><div class="label">已结算</div></div>
+      <div class="writer-summary-item strong"><div class="num">${money(balance)}</div><div class="label">待结算</div></div>
+      <div class="writer-summary-item"><div class="num">${unpaidCount}</div><div class="label">未结订单</div></div>
+    </div>
+    <div class="writer-detail-title">订单明细</div>
+    <div class="writer-order-list">
+      ${rows.map(r=>{
+        const fee=Number(r.writer_fee||0);
+        const s=Number(r.settled_amount||0);
+        const b=Math.max(fee-s,0);
+        const status=esc(r.settlement_status||'未结算');
+        return `<div class="writer-order-card">
+          <div class="writer-order-top">
+            <span class="order-no">订单 ${esc(r.order_no||'-')}</span>
+            <span class="settle-badge ${b>0?'unpaid':'paid'}">${status}</span>
+          </div>
+          <div class="writer-order-money">
+            <div><span>稿费</span><b>${money(fee)}</b></div>
+            <div><span>已结算</span><b>${money(s)}</b></div>
+            <div><span>待结算</span><b>${money(b)}</b></div>
+          </div>
+        </div>`
+      }).join('')}
+    </div>
+    <div class="writer-query-footer">此页面仅用于写手本人查询稿费和结算状态。</div>
+  `;
 }
 
 function renderWriterInternalQuery(){
@@ -3975,8 +4257,7 @@ function renderWriterInternalQuery(){
   showContent(`<div class="card table-page-card writer-query-page">
     <div class="page-toolbar">
       <div class="toolbar-left">
-        <button class="tool-btn" onclick="copyWriterQueryLink(event)">复制私发链接</button>
-        <button class="tool-btn" onclick="openWriterQueryPage(event)">打开私发页面</button>
+        <button class="tool-btn" onclick="copyWriterQueryLink(event)">复制查询链接</button>
       </div>
       <div class="toolbar-right writer-query-toolbar">
         <div class="compact-search internal-writer-search" title="输入写手编号">
@@ -4085,9 +4366,9 @@ async function copyWriterQueryLink(e){
   const url=writerQueryUrl();
   try{
     await navigator.clipboard.writeText(url);
-    alert('写手查询链接已复制：\n' + url);
+    alert('查询链接已复制：\n' + url);
   }catch(err){
-    prompt('复制这个链接发给写手：', url);
+    prompt('复制这个查询链接：', url);
   }
   const el=$('userDropdown'); if(el)el.classList.remove('show');
 }
