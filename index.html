@@ -2828,6 +2828,176 @@ body:has(#loginArea:not(.hidden)){
   }
 }
 
+
+/* V77 登录框强制居中修复版：不靠左，固定在浏览器正中心 */
+body:has(#loginArea:not(.hidden)){
+  margin:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  overflow:hidden!important;
+  background:#eef6ff!important;
+}
+
+#loginArea.login-page:not(.hidden){
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  display:block!important;
+  background:
+    radial-gradient(circle at 14% 14%,rgba(89,157,255,.24),transparent 30%),
+    radial-gradient(circle at 86% 82%,rgba(101,205,255,.22),transparent 34%),
+    linear-gradient(135deg,#f8fbff 0%,#edf6ff 52%,#f9fcff 100%)!important;
+}
+
+#loginArea.login-page:not(.hidden)::before{
+  content:"";
+  position:absolute;
+  left:-130px;
+  top:-150px;
+  width:520px;
+  height:520px;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(59,130,246,.18),rgba(125,211,252,.08));
+  pointer-events:none;
+}
+
+#loginArea.login-page:not(.hidden)::after{
+  content:"";
+  position:absolute;
+  right:-180px;
+  bottom:-210px;
+  width:620px;
+  height:620px;
+  border-radius:50%;
+  background:linear-gradient(135deg,rgba(147,197,253,.24),rgba(34,211,238,.10));
+  pointer-events:none;
+}
+
+/* 隐藏左侧标题卡，防止影响布局 */
+#loginArea.login-page:not(.hidden) > .card:first-child{
+  display:none!important;
+}
+
+/* 核心：用 fixed + 50vw/50vh 强制放在屏幕中心 */
+#loginArea:not(.hidden) #loginBox:not(.hidden),
+#loginArea:not(.hidden) #writerQueryBox:not(.hidden){
+  position:fixed!important;
+  left:50vw!important;
+  top:50vh!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:20!important;
+  width:460px!important;
+  max-width:calc(100vw - 40px)!important;
+  margin:0!important;
+  padding:42px 46px 36px!important;
+  border-radius:24px!important;
+  background:rgba(255,255,255,.94)!important;
+  border:1px solid rgba(255,255,255,.88)!important;
+  box-shadow:0 28px 90px rgba(37,99,235,.18)!important;
+  backdrop-filter:blur(18px);
+}
+
+#loginArea #loginBox.hidden,
+#loginArea #writerQueryBox.hidden{
+  display:none!important;
+}
+
+#loginBox::before{
+  content:"用户登录";
+  display:block;
+  text-align:center;
+  font-size:30px;
+  line-height:1;
+  font-weight:900;
+  color:#111827;
+  letter-spacing:.2px;
+  margin-bottom:30px;
+}
+
+#writerQueryBox::before{
+  content:"写手查询";
+  display:block;
+  text-align:center;
+  font-size:30px;
+  line-height:1;
+  font-weight:900;
+  color:#111827;
+  letter-spacing:.2px;
+  margin-bottom:24px;
+}
+
+#loginBox::after{
+  content:"客户录单系统 · 内部协同管理";
+  display:block;
+  text-align:center;
+  margin-top:14px;
+  color:#98a2b3;
+  font-size:13px;
+}
+
+#loginBox h1,#loginBox h2,#writerQueryBox h2,
+#loginBox label,#writerQueryBox label{
+  display:none!important;
+}
+
+#loginBox input,
+#writerQueryBox input{
+  height:48px!important;
+  border-radius:10px!important;
+  border:1px solid #e5eaf2!important;
+  background:#fff!important;
+  font-size:15px!important;
+  padding:0 16px!important;
+  margin:0 0 16px!important;
+  box-shadow:none!important;
+}
+
+#loginBox input:focus,
+#writerQueryBox input:focus{
+  border-color:#3b82f6!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10)!important;
+}
+
+#loginBox > button:not(.ghost),
+#writerQueryBox > button:not(.ghost){
+  width:100%!important;
+  height:50px!important;
+  margin:12px 0 10px!important;
+  border-radius:10px!important;
+  background:linear-gradient(90deg,#2f6bff,#268bff)!important;
+  color:#fff!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  box-shadow:0 16px 32px rgba(47,107,255,.22)!important;
+}
+
+#loginBox > button.ghost,
+#writerQueryBox > button.ghost{
+  width:100%!important;
+  height:44px!important;
+  margin:8px 0 0!important;
+  border-radius:10px!important;
+  background:#f7f9fc!important;
+  color:#58677c!important;
+  border:1px solid #e5eaf2!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:640px){
+  #loginArea:not(.hidden) #loginBox:not(.hidden),
+  #loginArea:not(.hidden) #writerQueryBox:not(.hidden){
+    width:calc(100vw - 32px)!important;
+    padding:34px 24px 28px!important;
+  }
+}
+
 </style>
 </head>
 <body>
