@@ -2998,10 +2998,24 @@ body:has(#loginArea:not(.hidden)){
   }
 }
 
+
+/* V78 写手查询改为私发链接入口 */
+#loginBox .ghost{
+  display:none!important;
+}
+#writerQueryBox::after{
+  content:"此页面仅用于写手本人查询稿费和结算状态";
+  display:block;
+  text-align:center;
+  margin-top:12px;
+  color:#98a2b3;
+  font-size:13px;
+}
+
 </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录页</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
 <div id="appArea" class="layout hidden">
   <div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ 菜单</button><div class="mobile-title">录单系统</div></div>
   <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div>
@@ -3151,7 +3165,7 @@ function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('writ
 async function queryWriterPublic(){msg('writerQueryMsg','');const identity=$('writer_identity').value.trim();if(!identity){msg('writerQueryMsg','<div class="error">请输入写手编号、手机号或微信号。</div>');return}const {data,error}=await client.rpc('writer_public_query',{p_identity:identity});if(error){msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');return}const rows=data||[];$('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号、手机号或微信号是否正确。</div>';}
 
 async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入邮箱/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
-async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
+async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');const qs=new URLSearchParams(location.search);if(qs.get('writer')==='1'){renderWriterPublicQuery()}else{showLogin()}return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
 const displayName=p.display_name||'未命名';
 const roleName=roleMap[p.role]||p.role;
 if($('sideUser'))$('sideUser').innerHTML='';
