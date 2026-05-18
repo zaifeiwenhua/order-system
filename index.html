@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V97：首页概览浅色统一版：去掉深色大屏，和当前后台风格保持一致 */
+/* V98：编号复制提示修复版：去掉深色大屏，和当前后台风格保持一致 */
 .screen{
   background:transparent!important;
   color:#1f2937!important;
@@ -3424,6 +3424,37 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   .todo-grid{
     grid-template-columns:1fr!important;
   }
+}
+
+
+/* V98 订单编号复制提示修复：默认隐藏，鼠标悬停才显示 */
+.order-no-copy{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  cursor:pointer!important;
+  color:#1f2937!important;
+}
+
+.order-no-copy strong{
+  font-weight:700!important;
+}
+
+.order-no-copy .copy-tip{
+  display:none!important;
+  font-size:12px!important;
+  line-height:1!important;
+  color:#2563eb!important;
+  background:#eef5ff!important;
+  border:1px solid #dbeafe!important;
+  border-radius:6px!important;
+  padding:3px 6px!important;
+  font-weight:600!important;
+}
+
+.order-no-copy:hover .copy-tip{
+  display:inline-flex!important;
 }
 
 </style>
