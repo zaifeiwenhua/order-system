@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V95：写作在线巡检提醒版 */
+/* V96：创建日志简化版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4093,6 +4093,22 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   margin-top:4px!important;
   color:#98a2b3!important;
   font-size:12px!important;
+}
+
+
+/* V96 日志创建记录简化 */
+.data-log-create-card{
+  padding-bottom:16px!important;
+}
+.data-log-create-card .data-log-top{
+  margin-bottom:0!important;
+}
+.data-log-create-card .data-log-tagrow,
+.data-log-create-card .data-log-line{
+  display:none!important;
+}
+.data-log-create-card .data-log-count{
+  color:#344054!important;
 }
 
 </style>
@@ -6115,11 +6131,15 @@ function renderLogTimeline(logs){
         return true;
       });
 
-      const shown=changes.slice(0,24);
-      const targetHtml=targets.length?`<div class="data-log-tagrow">${targets.map(t=>`<span class="data-log-tag">${esc(t)}</span>`).join('')}</div>`:'';
-      const changesHtml = shown.length ? shown.map(c=>{
-        const oldHtml = (action==='创建') ? '' : ((c.oldVal!==undefined && c.oldVal!==null && String(c.oldVal)!=='')
-          ? `<span class="data-log-old">${esc(String(c.oldVal))}</span>` : '');
+      const isCreate = action==='创建';
+
+      // V96：创建日志只显示“谁创建了订单 + 当前数据”，不展开创建时填写的全部字段。
+      // 后续修改日志仍然展开显示“改了什么、从什么改到什么”。
+      const shown=isCreate?[]:changes.slice(0,24);
+      const targetHtml=(!isCreate&&targets.length)?`<div class="data-log-tagrow">${targets.map(t=>`<span class="data-log-tag">${esc(t)}</span>`).join('')}</div>`:'';
+      const changesHtml = isCreate ? '' : (shown.length ? shown.map(c=>{
+        const oldHtml = (c.oldVal!==undefined && c.oldVal!==null && String(c.oldVal)!=='')
+          ? `<span class="data-log-old">${esc(String(c.oldVal))}</span>` : '';
         const newHtml = (c.newVal!==undefined && c.newVal!==null && String(c.newVal)!=='')
           ? `<span class="data-log-new">${esc(String(c.newVal))}</span>` : '';
         return `<div class="data-log-line">
@@ -6129,11 +6149,11 @@ function renderLogTimeline(logs){
             <div class="data-log-values">${oldHtml}${newHtml||'<span class="data-log-empty">空</span>'}</div>
           </div>
         </div>`;
-      }).join('') : `<div class="data-log-line"><div class="data-log-icon">ℹ️</div><div class="data-log-body"><div class="data-log-empty">(当前数据)</div></div></div>`;
+      }).join('') : `<div class="data-log-line"><div class="data-log-icon">ℹ️</div><div class="data-log-body"><div class="data-log-empty">暂无字段变更</div></div></div>`);
 
-      const more = changes.length>shown.length ? `<div class="muted" style="margin-top:8px">另有 ${changes.length-shown.length} 项变更未展开显示。</div>` : '';
+      const more = (!isCreate&&changes.length>shown.length) ? `<div class="muted" style="margin-top:8px">另有 ${changes.length-shown.length} 项变更未展开显示。</div>` : '';
 
-      return `<div class="data-log-card">
+      return `<div class="data-log-card ${isCreate?'data-log-create-card':''}">
         <div class="data-log-top">
           <div class="data-log-userbox">
             <div class="data-log-avatar">${esc(avatar)}</div>
