@@ -1926,6 +1926,22 @@ body{
   }
 }
 
+
+/* V71 修复：登录页隐藏状态被登录页 display:grid 覆盖 */
+#loginArea.hidden,
+.login-page.hidden{
+  display:none!important;
+}
+#appArea.hidden,
+.layout.hidden{
+  display:none!important;
+}
+
+/* 登录页仅在真正显示 loginArea 时生效，避免登录后的主界面被登录页样式干扰 */
+#loginArea.login-page:not(.hidden){
+  display:grid!important;
+}
+
 </style>
 </head>
 <body>
