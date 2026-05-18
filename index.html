@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V86：收款进度分离版 */
+/* V87：写作交稿同步修复版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -3849,14 +3849,20 @@ function paymentStatus(r){
 }
 function progressStatus(r){
   const st=r?.order_status||'';
+  const ws=r?.writing_status||'';
+
   if(['已退款','部分退款','退款/异常','已取消','异常'].includes(st))return st;
+
+  // V87：先看写作状态。写作部点“已交给客服”后，客服端必须优先显示“待客服交付”。
+  if(['已交给客服','已交稿','写作完成','终稿完成'].includes(ws))return'待客服交付';
+  if(ws==='已完成' && st!=='已完成')return'待客服交付';
+
   if(st==='已收全款'||st==='待收尾款'){
-    const ws=r?.writing_status||'';
-    if(['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(ws))return'待客服交付';
     if(ws==='写作中'||r?.writer_id)return'写作中';
     if(r?.publish_status&&r.publish_status!=='-')return r.publish_status;
     return'待安排';
   }
+
   if(st==='待写作部安排')return'待安排';
   if(st==='已交给客服')return'待客服交付';
   if(st==='已交付')return'已交付客户';
@@ -4497,23 +4503,14 @@ async function saveWritingEdit(orderId){
 
 async function markWritingDelivered(orderId){
   if(!confirm('确认这份稿子已经线下交给客服了吗？'))return;
-  const {data:pa}=await client.from('publishing_assignments').select('publish_type').eq('order_id',orderId).maybeSingle();
-  const isWritePublish=pa&&['写作+发表','写+发'].includes(pa.publish_type);
-  const writingUpdate={
-    order_id:orderId,
-    writing_manager_id:currentUser.id,
-    writing_status:'已交给客服'
-  };
-  const {error}=await client.from('writing_assignments').upsert(writingUpdate,{onConflict:'order_id'});
-  if(error){alert(error.message);return}
 
-  const nextStatus=isWritePublish?'待发表部安排':'待客服交付';
-  await client.from('orders').update({order_status:nextStatus}).eq('id',orderId).neq('order_status','已退款').neq('order_status','部分退款').neq('order_status','已取消').neq('order_status','退款/异常');
-
-  if(isWritePublish){
-    await client.from('publishing_assignments').update({publish_status:'待审核'}).eq('order_id',orderId);
+  const {error}=await client.rpc('mark_writing_delivered_v87',{p_order_id:orderId});
+  if(error){
+    alert('更新失败：'+error.message);
+    return;
   }
 
+  showToast('已更新为：待客服交付');
   renderWritingOrders();
 }
 
