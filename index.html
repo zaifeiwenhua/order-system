@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>客户录单系统 V34 日志与弹窗优化版</title>
+  <title>客户录单系统</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937}.login-page{max-width:520px;margin:38px auto;padding:0 16px}.layout{display:flex;min-height:100vh}.sidebar{width:238px;background:#111827;color:#fff;padding:18px 14px;position:fixed;left:0;top:0;bottom:0;overflow:auto}.brand{font-size:20px;font-weight:700;margin:4px 8px 18px}.side-info{font-size:12px;color:#cbd5e1;background:#1f2937;border-radius:12px;padding:10px;margin:0 4px 14px;line-height:1.7}.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:#e5e7eb;padding:11px 12px;border-radius:10px;margin:4px 0;font-size:14px;cursor:pointer}.menu button:hover,.menu button.active{background:#2563eb;color:#fff}.main{margin-left:238px;flex:1;padding:24px;max-width:calc(100vw - 238px)}.card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(15,23,42,.05);margin-bottom:16px}h1{margin:0 0 8px;font-size:28px}h2{margin:0 0 14px;font-size:21px}h3{margin:0 0 8px;font-size:17px}.muted{color:#6b7280;font-size:14px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.full{grid-column:1/-1}label{display:block;font-size:14px;margin:12px 0 6px;color:#374151}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;outline:none;background:#fff}textarea{min-height:86px;resize:vertical}button{border:none;background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;font-size:15px;cursor:pointer;margin:6px 4px 6px 0}button.secondary{background:#111827}button.ghost{background:#eef2ff;color:#1f2937}button.danger{background:#dc2626}.tag{display:inline-block;padding:4px 9px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;margin-left:8px}.error{color:#b91c1c;margin-top:12px;font-size:14px}.success{color:#047857;margin-top:12px;font-size:14px}.warn{color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.info{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}.table-wrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:14px;margin-top:10px}table{width:100%;border-collapse:collapse;font-size:14px;background:#fff}th,td{border-bottom:1px solid #e5e7eb;padding:10px 8px;text-align:left;vertical-align:top}th{background:#f9fafb;color:#374151;white-space:nowrap}tr.overdue td{background:#fee2e2!important}tr.due-soon td{background:#ffedd5!important}tr.due-warning td{background:#fef9c3!important}tr.closed td{background:#f3f4f6!important;color:#6b7280}.searchbar{display:grid;grid-template-columns:2fr 1fr auto auto;gap:10px;align-items:end;margin:12px 0}.module{border:1px solid #e5e7eb;border-radius:14px;background:#fff;padding:18px}.drag-row{cursor:grab}.drag-row.dragging{opacity:.45}.modal-mask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(15,23,42,.45);z-index:99;display:flex;align-items:center;justify-content:center;padding:18px}.modal{background:#fff;border-radius:16px;max-width:960px;width:100%;max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
@@ -442,10 +442,1035 @@ button:disabled{opacity:.58;cursor:not-allowed}
   .log-split-side{border-left:0;border-top:1px solid #e5e7eb;margin-top:16px;padding-left:0}
 }
 
+
+/* V61 全面视觉升级 + 右侧日志宽屏修复 */
+:root{
+  --brand:#2563eb;
+  --brand2:#06b6d4;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --line:#dbeafe;
+  --soft:#f8fbff;
+  --card:#ffffff;
+}
+body{
+  background:
+    radial-gradient(circle at 8% -10%,rgba(37,99,235,.20),transparent 36%),
+    radial-gradient(circle at 95% 0%,rgba(6,182,212,.16),transparent 32%),
+    #f6f9ff;
+  color:var(--ink);
+}
+.sidebar{
+  background:linear-gradient(180deg,#061831 0%,#0b1f3f 46%,#08111f 100%)!important;
+  border-right:1px solid rgba(96,165,250,.18);
+  box-shadow:12px 0 34px rgba(15,23,42,.18);
+}
+.brand{
+  letter-spacing:.5px;
+  color:#e0f2fe!important;
+}
+.side-info{
+  background:rgba(15,23,42,.55)!important;
+  border:1px solid rgba(96,165,250,.20);
+  color:#cfe8ff!important;
+}
+.menu button{
+  border:1px solid transparent!important;
+  transition:.18s ease;
+}
+.menu button:hover,.menu button.active{
+  background:linear-gradient(90deg,rgba(37,99,235,.92),rgba(6,182,212,.56))!important;
+  border-color:rgba(147,197,253,.35)!important;
+  box-shadow:0 10px 28px rgba(37,99,235,.25);
+}
+.card{
+  border:1px solid rgba(148,163,184,.22)!important;
+  background:rgba(255,255,255,.90)!important;
+  box-shadow:0 16px 42px rgba(15,23,42,.07)!important;
+  backdrop-filter:blur(8px);
+}
+input,select,textarea{
+  border-color:#cbd5e1!important;
+  background:linear-gradient(180deg,#fff,#fbfdff)!important;
+  transition:.16s ease;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#60a5fa!important;
+  box-shadow:0 0 0 4px rgba(37,99,235,.10)!important;
+}
+button{
+  box-shadow:0 10px 22px rgba(37,99,235,.14);
+  transition:.16s ease;
+}
+button:hover{transform:translateY(-1px)}
+button.ghost{
+  background:#eef6ff!important;
+  color:#1e3a8a!important;
+  box-shadow:none;
+}
+button.secondary{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a)!important;
+}
+.modal-mask{
+  background:rgba(2,6,23,.56)!important;
+  backdrop-filter:blur(6px);
+}
+
+/* 让带右侧日志的处理弹窗真正变宽，不再被默认 960px 限制 */
+.modal:has(.log-split-layout){
+  max-width:min(1320px,96vw)!important;
+  width:min(1320px,96vw)!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  box-shadow:0 28px 80px rgba(2,8,23,.32)!important;
+}
+.log-split-layout{
+  display:grid!important;
+  grid-template-columns:minmax(460px,0.95fr) minmax(480px,0.82fr)!important;
+  gap:0!important;
+  width:100%;
+  max-height:88vh!important;
+  min-width:0!important;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(125,211,252,.42);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+}
+.log-split-main{
+  max-height:88vh!important;
+  overflow:auto!important;
+  padding:26px 28px 110px!important;
+  background:
+    linear-gradient(180deg,rgba(239,246,255,.92),rgba(255,255,255,.98) 28%),
+    #fff;
+  min-width:0;
+}
+.log-split-side{
+  max-height:88vh!important;
+  overflow:auto!important;
+  padding:24px 24px 28px!important;
+  border-left:1px solid rgba(147,197,253,.42)!important;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(6,182,212,.11),transparent 34%),
+    linear-gradient(180deg,#f8fbff,#eef6ff)!important;
+  border-radius:0!important;
+  min-width:0;
+}
+.log-modal-head{
+  position:sticky;
+  top:0;
+  z-index:5;
+  margin:-26px -28px 18px!important;
+  padding:22px 28px 16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.88));
+  border-bottom:1px solid rgba(191,219,254,.72);
+  backdrop-filter:blur(10px);
+}
+.log-modal-head h2{
+  font-size:23px;
+  color:#0b2a59;
+  letter-spacing:.2px;
+}
+.log-split-main .info{
+  border:1px solid rgba(96,165,250,.38);
+  background:linear-gradient(90deg,rgba(239,246,255,.96),rgba(236,254,255,.88));
+  color:#1d4ed8;
+  border-radius:12px;
+}
+.log-split-main label{
+  color:#15345f;
+  font-weight:650;
+}
+.log-split-main input,
+.log-split-main select,
+.log-split-main textarea{
+  border-radius:13px!important;
+  min-height:44px;
+}
+.log-split-main textarea{
+  min-height:150px;
+}
+.log-split-main > button,
+.log-split-main #pubpaySaveBtn{
+  min-width:128px;
+  background:linear-gradient(135deg,#2563eb,#06b6d4)!important;
+  border-radius:12px!important;
+}
+.log-split-main .ghost{
+  background:#f1f5f9!important;
+  color:#334155!important;
+}
+
+/* 日志卡片更清楚，避免右侧信息被挤掉 */
+.log-split-side .section-title{
+  color:#075985!important;
+  border-bottom:1px solid rgba(14,165,233,.28)!important;
+  padding-bottom:12px;
+  margin-top:0;
+}
+.data-log-timeline{
+  gap:14px!important;
+}
+.data-log-card{
+  border:1px solid rgba(147,197,253,.34)!important;
+  border-radius:18px!important;
+  padding:16px!important;
+  background:rgba(255,255,255,.94)!important;
+  box-shadow:0 14px 32px rgba(15,23,42,.08)!important;
+}
+.data-log-avatar{
+  background:linear-gradient(135deg,#1d4ed8,#06b6d4)!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(37,99,235,.24);
+}
+.data-log-username{
+  font-size:16px!important;
+  color:#0f172a!important;
+}
+.data-log-time{
+  white-space:nowrap;
+}
+.data-log-action{
+  color:#16a34a!important;
+}
+.data-log-label{
+  color:#183b65!important;
+}
+.data-log-old,.data-log-new{
+  font-size:14px;
+  border-radius:9px!important;
+  padding:5px 10px!important;
+}
+.data-log-old{
+  background:#ffe4e6!important;
+  color:#be123c!important;
+}
+.data-log-new{
+  background:#dcfce7!important;
+  color:#15803d!important;
+}
+.data-log-tag{
+  background:#e0f2fe!important;
+  color:#0369a1!important;
+}
+
+/* 普通订单详情弹窗右侧日志也加宽 */
+.order-modal{
+  max-width:min(1480px,97vw)!important;
+  width:min(1480px,97vw)!important;
+  grid-template-columns:minmax(0,1fr) minmax(460px,38vw)!important;
+  border:1px solid rgba(147,197,253,.36);
+}
+.order-modal-right{
+  background:linear-gradient(180deg,#f8fbff,#eef6ff)!important;
+  padding:20px!important;
+}
+.order-modal-left{
+  background:#fff;
+}
+
+@media(max-width:1180px){
+  .modal:has(.log-split-layout){
+    width:97vw!important;
+  }
+  .log-split-layout{
+    grid-template-columns:minmax(420px,1fr) minmax(420px,.9fr)!important;
+  }
+  .order-modal{
+    grid-template-columns:minmax(0,1fr) 420px!important;
+  }
+}
+@media(max-width:900px){
+  .modal:has(.log-split-layout){
+    width:96vw!important;
+    max-height:92vh!important;
+    overflow:auto!important;
+  }
+  .log-split-layout{
+    display:block!important;
+    max-height:none!important;
+    overflow:auto!important;
+    border-radius:18px;
+  }
+  .log-split-main,.log-split-side{
+    max-height:none!important;
+    overflow:visible!important;
+    padding:18px!important;
+  }
+  .log-split-side{
+    border-left:0!important;
+    border-top:1px solid rgba(147,197,253,.42)!important;
+  }
+  .log-modal-head{
+    margin:-18px -18px 14px!important;
+    padding:16px 18px 12px;
+  }
+}
+
+
+/* V62 投用前全页面美化：表格、筛选区、统计卡、按钮、弹窗统一升级 */
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  letter-spacing:.01em;
+}
+.main{
+  padding:26px 28px!important;
+}
+h1,h2,h3{
+  color:#0b2a59;
+  letter-spacing:.2px;
+}
+.card h2{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.card h2:before{
+  content:"";
+  display:inline-block;
+  width:4px;
+  height:20px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#2563eb,#06b6d4);
+}
+.searchbar{
+  background:linear-gradient(135deg,#f8fbff,#eef6ff);
+  border:1px solid rgba(147,197,253,.32);
+  border-radius:18px;
+  padding:14px;
+  margin:12px 0 16px;
+  display:grid;
+  grid-template-columns:1.2fr .2fr auto auto;
+  gap:12px;
+  align-items:end;
+}
+.searchbar input{
+  min-height:44px;
+}
+.table-wrap{
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:18px;
+  overflow:auto;
+  background:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+table{
+  width:100%;
+  border-collapse:separate!important;
+  border-spacing:0;
+  background:#fff;
+}
+thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:linear-gradient(180deg,#f8fbff,#eef6ff)!important;
+  color:#173b68!important;
+  font-weight:800!important;
+  border-bottom:1px solid rgba(148,163,184,.28)!important;
+  white-space:nowrap;
+}
+th,td{
+  padding:13px 12px!important;
+  border-bottom:1px solid #edf2f7!important;
+  vertical-align:top;
+}
+tbody tr{
+  transition:.12s ease;
+}
+tbody tr:hover{
+  background:#f8fbff!important;
+}
+tbody tr.due-warning{
+  background:#fff7ed!important;
+}
+tbody tr.due-warning:hover{
+  background:#ffedd5!important;
+}
+.tag{
+  background:linear-gradient(135deg,#e0f2fe,#dcfce7)!important;
+  color:#075985!important;
+  font-weight:650;
+}
+.info{
+  background:linear-gradient(90deg,#eff6ff,#ecfeff)!important;
+  border:1px solid rgba(96,165,250,.35)!important;
+  color:#1d4ed8!important;
+  border-radius:14px!important;
+  padding:12px 14px!important;
+}
+.warn{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  border-radius:12px;
+  padding:10px 12px;
+}
+.success{
+  background:#ecfdf5;
+  border:1px solid #bbf7d0;
+  color:#166534;
+  border-radius:12px;
+  padding:10px 12px;
+}
+.error{
+  background:#fef2f2;
+  border:1px solid #fecaca;
+  color:#b91c1c!important;
+  border-radius:12px;
+  padding:10px 12px;
+}
+button{
+  font-weight:650!important;
+}
+button.danger{
+  background:linear-gradient(135deg,#ef4444,#dc2626)!important;
+}
+button.ghost{
+  border:1px solid rgba(147,197,253,.35)!important;
+}
+.grid .card,
+.screen-card,
+.kpi-card{
+  border-radius:20px!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,251,255,.92))!important;
+}
+.screen{
+  border:1px solid rgba(125,211,252,.22);
+  background:
+    radial-gradient(circle at 12% 0%,rgba(37,99,235,.26),transparent 35%),
+    radial-gradient(circle at 90% 18%,rgba(6,182,212,.20),transparent 32%),
+    linear-gradient(135deg,#061831,#0f2b58 52%,#08111f)!important;
+}
+.screen .card,
+.screen-card,
+.screen table{
+  background:rgba(255,255,255,.92)!important;
+  color:#0f172a!important;
+}
+.modal{
+  border:1px solid rgba(147,197,253,.32);
+}
+.order-form-shell{
+  background:
+    linear-gradient(180deg,#f8fbff,#fff 22%),
+    #fff!important;
+}
+.order-form-header{
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(10px);
+}
+.order-form-footer{
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(10px);
+}
+.order-modal .section-title,
+.log-split-side .section-title{
+  color:#0b4a7d!important;
+}
+.data-log-card{
+  overflow:hidden;
+}
+.data-log-card:before{
+  content:"";
+  display:block;
+  height:3px;
+  margin:-16px -16px 12px;
+  background:linear-gradient(90deg,#2563eb,#06b6d4,transparent);
+}
+.data-log-values{
+  align-items:center;
+}
+.data-log-values:has(.data-log-old):has(.data-log-new)::before{
+  content:"";
+}
+.form-grid .full{
+  grid-column:1/-1;
+}
+@media(max-width:768px){
+  .main{padding:14px!important}
+  .searchbar{grid-template-columns:1fr!important}
+  .card{padding:16px!important;border-radius:16px!important}
+  .mobile-card-table tbody tr{
+    border:1px solid rgba(148,163,184,.25)!important;
+    border-radius:16px!important;
+    margin-bottom:12px!important;
+    background:#fff!important;
+    box-shadow:0 10px 24px rgba(15,23,42,.06);
+  }
+}
+
+
+/* V64 专业版：订单详情与数据日志重新设计
+   目标：不花哨、不刺眼；左侧信息清楚，右侧日志完整可读，整体更像正式后台系统 */
+:root{
+  --zz-blue:#2563eb;
+  --zz-blue-dark:#123b76;
+  --zz-cyan:#0ea5e9;
+  --zz-bg:#f5f7fb;
+  --zz-panel:#ffffff;
+  --zz-panel-soft:#f8fafc;
+  --zz-text:#0f172a;
+  --zz-muted:#667085;
+  --zz-line:#e5eaf2;
+  --zz-shadow:0 22px 70px rgba(15,23,42,.18);
+}
+body{
+  background:#f5f7fb!important;
+  color:var(--zz-text)!important;
+}
+.modal-mask{
+  background:rgba(15,23,42,.52)!important;
+  backdrop-filter:blur(4px);
+  padding:18px!important;
+}
+
+/* 订单详情弹窗：更宽、更稳、更像正式系统 */
+.order-modal{
+  width:min(1500px,96vw)!important;
+  max-width:min(1500px,96vw)!important;
+  height:88vh!important;
+  display:grid!important;
+  grid-template-columns:minmax(620px,1.08fr) minmax(460px,.72fr)!important;
+  background:var(--zz-panel)!important;
+  border:1px solid rgba(203,213,225,.9)!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  box-shadow:var(--zz-shadow)!important;
+}
+
+/* 左侧订单表单区 */
+.order-modal-left{
+  background:#fff!important;
+  padding:0!important;
+  overflow:auto!important;
+  min-width:0!important;
+}
+.order-toolbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:10!important;
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--zz-line)!important;
+  padding:18px 24px!important;
+  margin:0!important;
+}
+.order-toolbar .title{
+  font-size:22px!important;
+  font-weight:800!important;
+  color:#101828!important;
+  letter-spacing:.2px;
+}
+.order-sub-actions button{
+  height:38px;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+.order-form-close,.order-toolbar-close{
+  background:#f3f6fb!important;
+  color:#344054!important;
+  border:1px solid #e4e7ec!important;
+  box-shadow:none!important;
+}
+.order-modal-left > .section-title,
+.order-modal-left > .form-grid,
+.order-modal-left > .card,
+.order-modal-left > label,
+.order-modal-left > input,
+.order-modal-left > select,
+.order-modal-left > textarea{
+  margin-left:24px!important;
+  margin-right:24px!important;
+}
+.order-modal-left .section-title{
+  margin-top:22px!important;
+  margin-bottom:14px!important;
+  padding:0 0 12px!important;
+  border-bottom:1px solid #edf0f5!important;
+  color:#1d2939!important;
+  font-size:16px!important;
+  font-weight:800!important;
+}
+.order-modal-left .section-title:before{
+  content:"";
+  display:inline-block;
+  width:4px;
+  height:16px;
+  border-radius:999px;
+  background:#2563eb;
+  margin-right:8px;
+  vertical-align:-2px;
+}
+.order-modal-left .form-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px 18px!important;
+}
+.order-modal-left label{
+  font-size:13px!important;
+  color:#475467!important;
+  font-weight:650!important;
+  margin:10px 0 6px!important;
+}
+.order-modal-left input,
+.order-modal-left select,
+.order-modal-left textarea{
+  min-height:42px!important;
+  border:1px solid #d0d7e2!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  box-shadow:0 1px 2px rgba(16,24,40,.03)!important;
+  font-size:14px!important;
+}
+.order-modal-left input:focus,
+.order-modal-left select:focus,
+.order-modal-left textarea:focus{
+  border-color:#60a5fa!important;
+  box-shadow:0 0 0 3px rgba(37,99,235,.10)!important;
+}
+.order-modal-left .card{
+  border:1px solid #e5eaf2!important;
+  border-radius:18px!important;
+  box-shadow:none!important;
+  background:#fcfdff!important;
+  margin-top:22px!important;
+  padding:20px!important;
+}
+.order-modal-left .card h3,
+.order-modal-left .card h2{
+  color:#1d2939!important;
+}
+.order-modal-left .card h2:before,
+.order-modal-left .card h3:before{
+  display:none!important;
+}
+.detail-toolbar + .section-title{
+  margin-top:22px!important;
+}
+.order-modal-left .order-form-footer,
+.order-modal-left > div:last-child:has(#orderFormMsg){
+  border-top:1px solid var(--zz-line)!important;
+}
+
+/* 右侧日志区：去掉夸张色块，改成安静、完整、可读 */
+.order-modal-right{
+  background:#f8fafc!important;
+  border-left:1px solid #e5eaf2!important;
+  padding:0!important;
+  overflow:auto!important;
+  min-width:0!important;
+}
+.order-modal-right .section-title{
+  position:sticky!important;
+  top:0!important;
+  z-index:4!important;
+  margin:0!important;
+  padding:18px 22px 12px!important;
+  background:rgba(248,250,252,.96)!important;
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid #e5eaf2!important;
+  color:#0f3d68!important;
+  font-size:17px!important;
+}
+.order-modal-right .section-title:before{
+  content:"";
+  display:inline-block;
+  width:4px;
+  height:16px;
+  border-radius:999px;
+  background:#0ea5e9;
+  margin-right:8px;
+  vertical-align:-2px;
+}
+.order-modal-right > .muted{
+  padding:10px 22px 0!important;
+  color:#667085!important;
+  font-size:13px!important;
+}
+.order-modal-right #logPanel{
+  padding:14px 18px 22px!important;
+}
+
+/* 数据日志卡片：更专业、更紧凑 */
+.data-log-timeline{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:12px!important;
+}
+.data-log-card{
+  position:relative!important;
+  background:#fff!important;
+  border:1px solid #e6eaf0!important;
+  border-radius:16px!important;
+  padding:14px 16px!important;
+  box-shadow:0 8px 22px rgba(16,24,40,.05)!important;
+}
+.data-log-card:before{
+  display:none!important;
+}
+.data-log-top{
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-bottom:10px!important;
+}
+.data-log-userbox{
+  gap:10px!important;
+}
+.data-log-avatar{
+  width:36px!important;
+  height:36px!important;
+  flex:0 0 36px!important;
+  background:#eef4ff!important;
+  color:#1d4ed8!important;
+  box-shadow:none!important;
+  border:1px solid #dbeafe!important;
+}
+.data-log-username{
+  font-size:16px!important;
+  line-height:1.25!important;
+  color:#101828!important;
+  font-weight:800!important;
+}
+.data-log-count{
+  margin-top:3px!important;
+  color:#475467!important;
+  font-size:13px!important;
+  font-weight:650!important;
+}
+.data-log-meta{
+  text-align:right!important;
+  color:#667085!important;
+}
+.data-log-time{
+  font-size:12px!important;
+  color:#667085!important;
+  margin-bottom:5px!important;
+}
+.data-log-action{
+  font-size:13px!important;
+  color:#15803d!important;
+  font-weight:800!important;
+}
+.data-log-tagrow{
+  margin:2px 0 10px!important;
+  display:flex!important;
+  gap:6px!important;
+  flex-wrap:wrap!important;
+}
+.data-log-tag{
+  background:#f2f4f7!important;
+  color:#344054!important;
+  border-radius:999px!important;
+  padding:4px 8px!important;
+  font-size:12px!important;
+  border:1px solid #e4e7ec!important;
+}
+.data-log-line{
+  display:grid!important;
+  grid-template-columns:22px minmax(0,1fr)!important;
+  gap:8px!important;
+  padding:10px 0!important;
+  border-top:1px solid #f0f2f5!important;
+}
+.data-log-line:first-of-type{
+  border-top:0!important;
+}
+.data-log-icon{
+  color:#98a2b3!important;
+  font-size:14px!important;
+  line-height:22px!important;
+  text-align:center!important;
+}
+.data-log-label{
+  color:#344054!important;
+  font-size:14px!important;
+  font-weight:750!important;
+  margin-bottom:6px!important;
+}
+.data-log-values{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:6px!important;
+}
+.data-log-old,.data-log-new{
+  font-size:13px!important;
+  line-height:1.35!important;
+  border-radius:8px!important;
+  padding:5px 9px!important;
+  max-width:100%!important;
+  word-break:break-word!important;
+}
+.data-log-old{
+  background:#fff1f3!important;
+  color:#b42318!important;
+  text-decoration:line-through!important;
+  border:1px solid #ffd6dc!important;
+}
+.data-log-new{
+  background:#ecfdf3!important;
+  color:#027a48!important;
+  border:1px solid #abefc6!important;
+}
+.data-log-values .data-log-old + .data-log-new:before{
+  content:"→";
+  color:#98a2b3;
+  margin:0 4px 0 -2px;
+}
+
+/* 带日志的处理弹窗也使用同一套专业风格 */
+.modal:has(.log-split-layout){
+  width:min(1360px,96vw)!important;
+  max-width:min(1360px,96vw)!important;
+  padding:0!important;
+  background:transparent!important;
+  box-shadow:0 24px 70px rgba(15,23,42,.22)!important;
+}
+.log-split-layout{
+  grid-template-columns:minmax(560px,1fr) minmax(460px,.78fr)!important;
+  background:#fff!important;
+  border:1px solid #d9e2ef!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+}
+.log-split-main{
+  background:#fff!important;
+  padding:0 26px 96px!important;
+}
+.log-modal-head{
+  margin:0 -26px 18px!important;
+  padding:18px 26px!important;
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid #e5eaf2!important;
+}
+.log-modal-head h2{
+  color:#101828!important;
+  font-size:22px!important;
+}
+.log-split-side{
+  background:#f8fafc!important;
+  border-left:1px solid #e5eaf2!important;
+  padding:0!important;
+}
+.log-split-side .section-title{
+  position:sticky!important;
+  top:0!important;
+  z-index:4!important;
+  margin:0!important;
+  padding:18px 22px 12px!important;
+  background:rgba(248,250,252,.96)!important;
+  backdrop-filter:blur(10px);
+}
+.log-split-side > .muted{
+  padding:10px 22px 0!important;
+}
+.log-split-side #logPanel{
+  padding:14px 18px 22px!important;
+}
+.log-split-main .info{
+  margin-bottom:16px!important;
+  background:#eff6ff!important;
+  border:1px solid #bfdbfe!important;
+  color:#1d4ed8!important;
+  border-radius:12px!important;
+}
+.log-split-main textarea{
+  min-height:140px!important;
+}
+.log-split-main button{
+  box-shadow:none!important;
+}
+.log-split-main button:not(.ghost):not(.danger){
+  background:#2563eb!important;
+}
+.log-split-main button.ghost{
+  background:#f2f4f7!important;
+  color:#344054!important;
+}
+
+/* 滚动条统一细化 */
+.order-modal-left::-webkit-scrollbar,
+.order-modal-right::-webkit-scrollbar,
+.log-split-main::-webkit-scrollbar,
+.log-split-side::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+.order-modal-left::-webkit-scrollbar-thumb,
+.order-modal-right::-webkit-scrollbar-thumb,
+.log-split-main::-webkit-scrollbar-thumb,
+.log-split-side::-webkit-scrollbar-thumb{
+  background:#cbd5e1;
+  border-radius:999px;
+}
+.order-modal-left::-webkit-scrollbar-track,
+.order-modal-right::-webkit-scrollbar-track,
+.log-split-main::-webkit-scrollbar-track,
+.log-split-side::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+@media(max-width:1100px){
+  .order-modal{
+    grid-template-columns:minmax(0,1fr) 420px!important;
+  }
+  .modal:has(.log-split-layout){
+    width:97vw!important;
+  }
+  .log-split-layout{
+    grid-template-columns:minmax(460px,1fr) minmax(400px,.8fr)!important;
+  }
+}
+@media(max-width:900px){
+  .order-modal{
+    display:block!important;
+    overflow:auto!important;
+    height:92vh!important;
+  }
+  .order-modal-right{
+    border-left:0!important;
+    border-top:1px solid #e5eaf2!important;
+  }
+  .log-split-layout{
+    display:block!important;
+  }
+  .log-split-main,.log-split-side{
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
+
+
+/* V65 日志三分之一 + 禁止横向溢出
+   目标：右侧数据日志约占 1/3，左侧操作区约占 2/3；不出现横向滚动条，不截断文字 */
+*{box-sizing:border-box}
+.modal-mask{overflow:hidden!important}
+
+/* 订单详情弹窗：左 2/3，右 1/3 */
+.order-modal{
+  width:min(1440px,96vw)!important;
+  max-width:min(1440px,96vw)!important;
+  grid-template-columns:minmax(0,2fr) minmax(360px,1fr)!important;
+  overflow:hidden!important;
+}
+.order-modal-left,
+.order-modal-right{
+  min-width:0!important;
+  overflow-x:hidden!important;
+}
+.order-modal-left{
+  padding-right:0!important;
+}
+.order-modal-right{
+  max-width:none!important;
+}
+
+/* 带处理操作的弹窗：左 2/3，右 1/3 */
+.modal:has(.log-split-layout){
+  width:min(1320px,96vw)!important;
+  max-width:min(1320px,96vw)!important;
+  overflow:hidden!important;
+}
+.log-split-layout{
+  grid-template-columns:minmax(0,2fr) minmax(350px,1fr)!important;
+  width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.log-split-main,
+.log-split-side{
+  min-width:0!important;
+  overflow-x:hidden!important;
+}
+
+/* 日志内容自动换行，避免撑出横向滚动条 */
+.data-log-card,
+.data-log-line,
+.data-log-body,
+.data-log-values,
+.data-log-label,
+.data-log-old,
+.data-log-new,
+.data-log-tagrow,
+.data-log-username,
+.data-log-count{
+  min-width:0!important;
+  max-width:100%!important;
+}
+.data-log-values{
+  display:flex!important;
+  flex-wrap:wrap!important;
+}
+.data-log-old,
+.data-log-new{
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+}
+
+/* 表单和日志容器不允许横向撑开 */
+.form-grid,
+.table-wrap,
+.card,
+.order-toolbar,
+.log-modal-head{
+  min-width:0!important;
+  max-width:100%!important;
+}
+.order-toolbar{
+  overflow:hidden!important;
+}
+.order-toolbar-left{
+  min-width:0!important;
+}
+.order-toolbar .title{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+/* 表格区域如果内容过多，只在表格内部滚动，不拖出整个弹窗 */
+.table-wrap{
+  overflow:auto!important;
+  max-width:100%!important;
+}
+
+/* 窄屏时上下排列 */
+@media(max-width:960px){
+  .order-modal{
+    display:block!important;
+    overflow:auto!important;
+  }
+  .log-split-layout{
+    display:block!important;
+    overflow:auto!important;
+  }
+  .order-modal-right,
+  .log-split-side{
+    border-left:0!important;
+    border-top:1px solid #e5eaf2!important;
+  }
+}
+
+
+/* V67 客服全部订单：可查不可改 */
+.readonly-field{
+  background:#f8fafc!important;
+  color:#475467!important;
+  cursor:not-allowed!important;
+}
+
 </style>
 </head>
 <body>
-<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1><div class="muted">V34：日志与弹窗优化版</div></div><div id="loginBox" class="card"><h2>登录系统</h2><label>手机号 / 管理员邮箱</label><input id="phone" type="text" placeholder="员工输入手机号；旧管理员账号可输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div class="info">员工账号请先在 Supabase 后台 Add user 创建，再由管理员在系统账号管理里填写姓名、角色并启用。</div><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
+<div id="loginArea" class="login-page"><div class="card"><h1>客户录单系统</h1></div><div id="loginBox" class="card"><h2>登录系统</h2><label>账号</label><input id="phone" type="text" placeholder="请输入邮箱" /><label>密码</label><input id="password" type="password" placeholder="请输入密码" /><button onclick="login()">登录</button><button class="ghost" onclick="renderWriterPublicQuery()">写手查询</button><div id="loginMsg"></div></div><div id="writerQueryBox" class="card hidden"><h2>写手查询</h2><div class="info">写手不用注册，输入写手编号/手机号/微信号，即可查询自己的订单、稿费和结算状态。</div><label>写手编号 / 手机号 / 微信号</label><input id="writer_identity" placeholder="如 W010、手机号或微信号" /><button onclick="queryWriterPublic()">查询</button><button class="ghost" onclick="showLogin()">返回登录</button><div id="writerQueryMsg"></div><div id="writerQueryResult"></div></div></div>
 <div id="appArea" class="layout hidden"><div class="mobile-topbar"><button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰ 菜单</button><div class="mobile-title">录单系统</div></div><div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu(false)"></div><aside class="sidebar" id="sidebar"><div class="brand">录单系统</div><div class="side-info" id="sideUser"></div><div class="menu" id="menuBox"></div><button class="secondary" style="width:100%;margin-top:16px" onclick="logout()">退出登录</button></aside><main class="main"><div id="content"></div></main></div><div id="modalRoot"></div>
 <script>
 const SUPABASE_URL='https://kifnfihqavambwatclle.supabase.co';
@@ -567,7 +1592,7 @@ function normalizePhone(v){return String(v||'').replace(/\D/g,'')}function phone
 function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('writerQueryBox').classList.remove('hidden')}
 async function queryWriterPublic(){msg('writerQueryMsg','');const identity=$('writer_identity').value.trim();if(!identity){msg('writerQueryMsg','<div class="error">请输入写手编号、手机号或微信号。</div>');return}const {data,error}=await client.rpc('writer_public_query',{p_identity:identity});if(error){msg('writerQueryMsg','<div class="error">查询失败：'+esc(error.message)+'</div>');return}const rows=data||[];$('writerQueryResult').innerHTML=rows.length?`<div class="table-wrap"><table><thead><tr><th>订单编号</th><th>稿费</th><th>结算状态</th><th>已结算金额</th><th>余额</th></tr></thead><tbody>${rows.map(r=>{const fee=Number(r.writer_fee||0),settled=Number(r.settled_amount||0),balance=Math.max(fee-settled,0);return `<tr><td>${esc(r.order_no||'')}</td><td>${money(fee)}</td><td>${esc(r.settlement_status||'未结算')}</td><td>${money(settled)}</td><td>${money(balance)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="warn">没有查到订单，请检查写手编号、手机号或微信号是否正确。</div>';}
 
-async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入手机号/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
+async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),password=$('password').value;if(!raw||!password){msg('loginMsg','<div class="error">请输入邮箱/管理员邮箱和密码。</div>');return}const email=loginValueToEmail(raw);if(!email){msg('loginMsg','<div class="error">登录账号格式不正确。</div>');return}const {error}=await client.auth.signInWithPassword({email,password});if(error){msg('loginMsg','<div class="error">登录失败：'+error.message+'</div>');return}await loadApp()}async function logout(){await client.auth.signOut();currentUser=null;currentProfile=null;$('appArea').classList.add('hidden');$('loginArea').classList.remove('hidden');showLogin()}
 async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');$('sideUser').innerHTML=`<strong>${esc(p.display_name)}</strong><br>手机号：${esc(p.phone||'未绑定')}<br><span class="tag">${roleMap[p.role]||p.role}</span>`;renderMenu();routeAfterLogin()}
 function routeAfterLogin(){if(currentProfile.role==='writing')return renderWritingOrders();if(currentProfile.role==='publishing')return renderPublishingOrders();if(currentProfile.role==='finance')return renderFinanceWorkbench();if(currentProfile.role==='service')return renderMyOrders();return renderHome()}function menuBtn(key,label,fn){return`<button id="m_${key}" onclick="setMenu('${key}');toggleMobileMenu(false);Promise.resolve((async()=>{${fn}})()).catch(e=>showContent('<div class=&quot;card&quot;><div class=&quot;error&quot;>页面打开失败：'+esc(e&&e.message?e.message:e)+'</div></div>'))">${label}</button>`}function setMenu(k){activeMenu=k;document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active'));const el=$('m_'+k);if(el)el.classList.add('active')}
 function renderMenu(){const r=currentProfile.role;let m='';if(r==='admin')m+=menuBtn('home','首页','renderHome()');if(r==='admin'){m+=menuBtn('allorders','全部订单','renderAllOrders()');m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()');m+=menuBtn('writers','写手管理','renderWriterManage()');m+=menuBtn('sources','来源管理','renderSourceManage()');m+=menuBtn('payments','付款方式管理','renderPaymentManage()');m+=menuBtn('biz','业务/字段管理','renderBusinessManage()');m+=menuBtn('accounts','账号管理','renderAccountManage()');m+=menuBtn('reports','统计报表','renderReportView()')}if(r==='service'){m+=menuBtn('myorders','我的订单','renderMyOrders()');m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='writing'){m+=menuBtn('writing','写作订单','renderWritingOrders()');m+=menuBtn('writers','写手管理','renderWriterManage()')}if(r==='publishing'){m+=menuBtn('publishing','发表订单','renderPublishingOrders()');m+=menuBtn('journals','期刊管理','renderJournalManage()')}if(r==='finance'){m+=menuBtn('finance_home','财务工作台','renderFinanceWorkbench()');m+=menuBtn('finance_all','财务订单','renderFinanceOrders()');m+=menuBtn('payment_confirm','收款确认','renderPaymentConfirmation()');m+=menuBtn('service_perf','客服业绩统计','renderServicePerformance()');m+=menuBtn('settlement_review','结算核对','renderSettlementReview()');m+=menuBtn('settlement_summary','写手结算汇总','renderWriterSettlementSummary()');m+=menuBtn('settlement_batches','结算批次记录','renderSettlementBatches()');m+=menuBtn('publish_payment','发表打款','renderPublishingPayment()')}$('menuBox').innerHTML=m}
@@ -885,6 +1910,11 @@ async function saveOrder(orderId=null){
       service_notes:$('service_notes').value.trim()
     };
     let orderData,err;
+    if(orderId && currentProfile.role==='service'){
+      const {data:own,error:ownErr}=await client.from('orders').select('created_by').eq('id',orderId).single();
+      if(ownErr){msg('orderFormMsg','<div class="error">权限校验失败：'+esc(ownErr.message)+'</div>');return}
+      if(own?.created_by!==currentUser.id){msg('orderFormMsg','<div class="error">这是其他客服负责的订单，只能查看，不能修改。</div>');return}
+    }
     if(orderId){const r=await client.from('orders').update(payload).eq('id',orderId).select('id,order_no').single();orderData=r.data;err=r.error}
     else{payload.created_by=currentUser.id;const r=await client.from('orders').insert(payload).select('id,order_no').single();orderData=r.data;err=r.error}
     if(err){msg('orderFormMsg','<div class="error">'+esc(err.message)+'</div>');return}
@@ -937,8 +1967,38 @@ async function loadAllFieldLabels(){
     projectFieldLabels=projectFieldLabels||{};
   }
 }
-async function renderAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);window.__adminAllOrderRows=rows;showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderAllOrders','订单编号/微信/淘宝/业务/题目/客服/写作部/发表部/写手/期刊')}<button onclick="renderOrderForm()">新增订单</button><button class="ghost" onclick="exportAdminAllOrders()">导出当前结果</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,true)}</div>`);if(kw)$('search_kw').value=kw}async function renderMyOrders(){setMenu('myorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';let rows=[];if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').eq('created_by',currentUser.id).order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}else{const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}rows=searchRows(rows,kw,orderSearchFields);showContent(`<div class="card"><h2>我的订单</h2>${searchBox('renderMyOrders','订单编号/微信/淘宝/题目/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,currentProfile.role==='admin')}</div>`);if(kw)$('search_kw').value=kw}async function renderServiceAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_service_all_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderServiceAllOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,false)}</div>`);if(kw)$('search_kw').value=kw}
-function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${fmtDate(r.created_at)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td><button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}')">修改</button></td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
+async function renderAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);window.__adminAllOrderRows=rows;showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderAllOrders','订单编号/微信/淘宝/业务/题目/客服/写作部/发表部/写手/期刊')}<button onclick="renderOrderForm()">新增订单</button><button class="ghost" onclick="exportAdminAllOrders()">导出当前结果</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,true)}</div>`);if(kw)$('search_kw').value=kw}
+function isOwnServiceOrder(r){
+  if(!r)return false;
+  if(currentProfile?.role!=='service')return true;
+  const uid=currentUser?.id||'';
+  if(r.created_by && r.created_by===uid)return true;
+  if(r.service_user_id && r.service_user_id===uid)return true;
+  if(r.service_id && r.service_id===uid)return true;
+  if(r.created_by_name && currentProfile?.display_name && r.created_by_name===currentProfile.display_name)return true;
+  if(r.service_name && currentProfile?.display_name && r.service_name===currentProfile.display_name)return true;
+  return false;
+}
+function canEditCustomerOrder(r){
+  if(currentProfile?.role==='admin')return true;
+  if(currentProfile?.role==='service')return isOwnServiceOrder(r);
+  return false;
+}
+function applyOrderDetailReadOnly(readonly){
+  if(!readonly)return;
+  const root=document.querySelector('.order-modal-left');
+  if(!root)return;
+  root.querySelectorAll('input,select,textarea').forEach(el=>{
+    if(el.type!=='hidden'){
+      el.disabled=true;
+      el.classList.add('readonly-field');
+    }
+  });
+  const msg=$('orderFormMsg');
+  if(msg)msg.innerHTML='<div class="info">只读查看：这是其他客服负责的订单，你可以查询客户归属和订单信息，但不能修改。</div>';
+}
+async function renderMyOrders(){setMenu('myorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';let rows=[];if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').eq('created_by',currentUser.id).order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}else{const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}rows=searchRows(rows,kw,orderSearchFields);showContent(`<div class="card"><h2>我的订单</h2>${searchBox('renderMyOrders','订单编号/微信/淘宝/题目/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,currentProfile.role==='admin')}</div>`);if(kw)$('search_kw').value=kw}async function renderServiceAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_service_all_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);showContent(`<div class="card"><h2>全部订单</h2>${searchBox('renderServiceAllOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}<button onclick="renderOrderForm()">新增订单</button><div class="muted">共 ${rows.length} 条</div>${orderTable(rows,false)}</div>`);if(kw)$('search_kw').value=kw}
+function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td><strong>${r.order_no}</strong></td><td>${fmtDate(r.created_at)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${r.order_status||'-'}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td>${canEditCustomerOrder(r)?`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',false)">修改</button>`:`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',true)">查看</button><br><span class="muted">其他客服订单</span>`}</td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
 function exportAdminAllOrders(){const cols=[{label:'订单编号',value:r=>r.order_no},{label:'客服',value:r=>r.service_name},{label:'提交时间',value:r=>fmtDate(r.created_at)},{label:'业务大类',value:r=>r.business_category},{label:'具体项目',value:r=>r.service_project},{label:'微信号',value:r=>r.wechat_account},{label:'淘宝账号',value:r=>r.taobao_account},{label:'订单金额',value:r=>money(r.total_amount)},{label:'实收金额',value:r=>money(r.deposit_amount)},{label:'尾款',value:r=>money(r.balance_amount)},{label:'退款',value:r=>money(r.refund_amount)},{label:'付款方式',value:r=>r.payment_method_name},{label:'订单状态',value:r=>r.order_status},{label:'交稿时间',value:r=>fmtDate(r.due_at)},{label:'写作部',value:r=>r.assigned_writing_name},{label:'写手',value:r=>r.writer_name},{label:'稿费',value:r=>money(r.writer_fee)},{label:'发表部',value:r=>r.assigned_publishing_name},{label:'期刊',value:r=>r.journal_name},{label:'版面费',value:r=>money(r.page_fee)},{label:'发表打款状态',value:r=>r.finance_payment_status},{label:'发表打款金额',value:r=>money(r.finance_payment_amount)},{label:'发表打款时间',value:r=>fmtDate(r.finance_paid_at)},{label:'利润',value:r=>money(r.gross_profit)}];downloadCSV('全部订单',cols,window.__adminAllOrderRows||[])}
 
 async function renderWritingOrders(){
@@ -1456,7 +2516,7 @@ function toggleJournalContactFields(prefix){
   const label=$(prefix+'contact_label');
   const input=$(prefix+'contact_value');
   if(label)label.innerText=type==='QQ'?'QQ号':type==='手机'?'手机号':'微信号';
-  if(input)input.placeholder=type==='QQ'?'请输入QQ号':type==='手机'?'请输入手机号':'请输入微信号';
+  if(input)input.placeholder=type==='QQ'?'请输入QQ号':type==='手机'?'请输入邮箱':'请输入微信号';
 }
 
 function formatIncludedDatabases(v){
@@ -1622,7 +2682,7 @@ async function renderReportView(){
     return `<h3>${title}</h3><div class="table-wrap"><table><thead><tr><th>名称</th><th>订单数</th><th>成交金额</th><th>实收金额</th><th>稿费</th><th>版面费</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td><td>${money(r.total)}</td><td>${money(r.dep)}</td><td>${money(r.fee)}</td><td>${money(r.page)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
-  async function openOrderDetail(orderId){
+  async function openOrderDetail(orderId,readOnlyMode=false){
     if(!['admin','service'].includes(currentProfile.role)){alert('当前角色暂不支持在这里编辑订单');return}
     await loadBase(true);
 
@@ -1637,6 +2697,7 @@ async function renderReportView(){
     }
     if(r.error){alert(r.error.message);return}
     existing=r.data||{};
+    const readOnly = !!readOnlyMode || (currentProfile.role==='service' && !isOwnServiceOrder(existing));
     const internal=currentProfile.role==='admin';
     journals=await loadJournals(internal);
     const catOps=categories.map(c=>`<option value="${c.id}" ${existing?.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
@@ -1644,14 +2705,15 @@ async function renderReportView(){
     const payOps=paymentMethods.map(p=>`<option value="${p.id}" ${existing?.payment_method_id===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
     const wOps=writingUsers.map(u=>`<option value="${u.id}" ${existing?.assigned_writing_user_id===u.id?'selected':''}>${esc(u.display_name)}</option>`).join('');
     const pOps=publishingUsers.map(u=>`<option value="${u.id}" ${existing?.assigned_publishing_user_id===u.id?'selected':''}>${esc(u.display_name)}</option>`).join('');
-    const delBtn=currentProfile.role==='admin'?`<button class="danger" onclick="deleteOrder('${orderId}')">删除</button>`:'';
+    const delBtn=(!readOnly&&currentProfile.role==='admin')?`<button class="danger" onclick="deleteOrder('${orderId}')">删除</button>`:'';
+    const copyBtn=!readOnly?`<button class="ghost" onclick="copyOrder('${orderId}')">复制订单</button>`:'';
     $('modalRoot').innerHTML=`<div class="modal-mask"><div class="modal order-modal">
       <div class="order-modal-left">
         <div class="order-toolbar detail-toolbar">
           <div class="order-toolbar-left">
-            <div class="title">${esc(existing.order_no||'订单详情')}</div>
+            <div class="title">${esc(existing.order_no||'订单详情')}${readOnly?'（只读查看）':''}</div>
             <div class="order-sub-actions">
-              <button class="ghost" onclick="copyOrder('${orderId}')">复制订单</button>
+              ${copyBtn}
               ${delBtn}
             </div>
           </div>
@@ -1680,7 +2742,7 @@ async function renderReportView(){
         </div>
         <div id="orderFormMsg" class="footer-msg"></div>
         <div class="order-form-footer order-detail-footer">
-          <button id="submitOrderBtn" data-label="保存修改" onclick="saveOrder('${orderId}')">保存修改</button>
+          ${readOnly?'<button class="ghost" onclick="closeModal()">关闭</button>':`<button id="submitOrderBtn" data-label="保存修改" onclick="saveOrder('${orderId}')">保存修改</button>`}
           <div id="orderFormMsgFooter" class="footer-msg"></div>
         </div>
       </div>
@@ -1701,6 +2763,7 @@ async function renderReportView(){
       if($('assigned_publishing_user_id'))$('assigned_publishing_user_id').value=existing.assigned_publishing_user_id||'';
       if($('journal_id'))$('journal_id').value=existing.journal_id||'';
       updateBalancePreview();
+      applyOrderDetailReadOnly(readOnly);
     }catch(e){
       const m=$('orderFormMsg');
       if(m)m.innerHTML='<div class="error">订单字段回填失败：'+esc(e?.message||e)+'</div>';
