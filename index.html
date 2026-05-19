@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V103：客服期刊查询筛选版 */
+/* V105：期刊内部搜索同排版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4295,6 +4295,130 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 @media(max-width:900px){
   .journal-filterbar select{width:100%!important}
+}
+
+
+/* V104 期刊查询：搜索框和筛选项同排显示 */
+.journal-toolbar{
+  min-height:50px!important;
+  height:auto!important;
+  padding:9px 12px!important;
+}
+.journal-toolbar-right{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+}
+.journal-toolbar-right .journal-searchbar{
+  margin:0!important;
+}
+.journal-toolbar-right .compact-search{
+  width:220px!important;
+}
+.journal-toolbar-right .journal-filterbar{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.journal-toolbar-right .journal-filterbar select{
+  width:128px!important;
+  height:32px!important;
+  min-height:32px!important;
+  border:1px solid #dfe6ef!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  color:#344054!important;
+  font-size:13px!important;
+  padding:0 9px!important;
+}
+@media(max-width:900px){
+  .journal-toolbar{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+  .journal-toolbar-right{
+    width:100%!important;
+    justify-content:flex-start!important;
+  }
+  .journal-toolbar-right .compact-search,
+  .journal-toolbar-right .journal-filterbar,
+  .journal-toolbar-right .journal-filterbar select{
+    width:100%!important;
+  }
+}
+
+
+/* V105 管理员/发表部：期刊搜索筛选移动到添加/导入同排右侧 */
+.journal-action-row-with-search{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-top:10px!important;
+}
+
+.journal-action-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+}
+
+.journal-action-search{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  flex:1!important;
+}
+
+.journal-action-search .journal-searchbar{
+  margin:0!important;
+}
+
+.journal-action-search .compact-search{
+  width:220px!important;
+}
+
+.journal-action-search .journal-filterbar{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:0!important;
+  background:transparent!important;
+}
+
+.journal-action-search .journal-filterbar select{
+  width:128px!important;
+  height:32px!important;
+  min-height:32px!important;
+  border:1px solid #dfe6ef!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  color:#344054!important;
+  font-size:13px!important;
+  padding:0 9px!important;
+}
+
+@media(max-width:900px){
+  .journal-action-row-with-search{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+  .journal-action-search,
+  .journal-action-search .compact-search,
+  .journal-action-search .journal-filterbar,
+  .journal-action-search .journal-filterbar select{
+    width:100%!important;
+    justify-content:flex-start!important;
+  }
 }
 
 </style>
@@ -5942,20 +6066,22 @@ async function renderJournalManage(){
     addForm=`<div class="card journal-add-card" style="box-shadow:none;background:#f9fafb">
       <h3>新增期刊</h3>
       ${journalFormHtml('j_')}
-      <div class="journal-action-row">
-        <button onclick="addJournal()">添加期刊</button>
-        <button class="ghost" onclick="openJournalImport()">导入</button>
+      <div class="journal-action-row journal-action-row-with-search">
+        <div class="journal-action-left">
+          <button onclick="addJournal()">添加期刊</button>
+          <button class="ghost" onclick="openJournalImport()">导入</button>
+        </div>
+        <div class="journal-action-search">${journalSearchBox()}${journalFilterBar(allRows)}</div>
       </div>
       <div id="journalMsg"></div>
     </div>`;
   }
 
   showContent(`<div class="card table-page-card journal-page">
-    <div class="page-toolbar">
+    <div class="page-toolbar journal-toolbar">
       <div class="toolbar-left"><h2 class="toolbar-title">${pageTitle}</h2></div>
-      <div class="toolbar-right">${journalSearchBox()}</div>
+      ${internal?'':`<div class="toolbar-right journal-toolbar-right">${journalSearchBox()}${journalFilterBar(allRows)}</div>`}
     </div>
-    ${journalFilterBar(allRows)}
     ${addForm}
     <div class="table-count">共 ${rows.length} 条</div>
     ${internal?journalInternalTable(rows):journalServiceTable(rows)}
