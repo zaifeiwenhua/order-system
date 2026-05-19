@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V98：登记写手搜索版 */
+/* V99：写手选择框内搜索版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4140,6 +4140,91 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   font-size:15px;
   z-index:1;
   pointer-events:none;
+}
+
+
+/* V99 登记写手：把搜索功能做到“请选择写手”框本身，不再额外增加字段 */
+.writer-combo{
+  position:relative;
+  margin:0 0 12px;
+}
+
+.writer-combo input[type="text"],
+.writer-combo #edit_writer_display{
+  width:100%!important;
+  height:44px!important;
+  padding:0 12px 0 34px!important;
+  border:1px solid #dbe3ef!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  font-size:14px!important;
+  box-shadow:none!important;
+}
+
+.writer-combo input:focus{
+  border-color:#3b82f6!important;
+  box-shadow:0 0 0 3px rgba(59,130,246,.10)!important;
+}
+
+.writer-combo .writer-search-icon{
+  position:absolute;
+  left:11px;
+  top:22px;
+  transform:translateY(-50%);
+  color:#7b8798;
+  font-size:15px;
+  z-index:2;
+  pointer-events:none;
+}
+
+.writer-combo-dropdown{
+  position:absolute;
+  left:0;
+  right:0;
+  top:48px;
+  z-index:9999;
+  max-height:240px;
+  overflow:auto;
+  border:1px solid #dbe3ef;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 14px 34px rgba(15,23,42,.12);
+  padding:6px;
+}
+
+.writer-combo-option{
+  display:flex;
+  align-items:center;
+  min-height:36px;
+  padding:0 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  color:#1f2937;
+}
+
+.writer-combo-option:hover{
+  background:#eef5ff;
+  color:#2563eb;
+}
+
+.writer-combo-code{
+  font-weight:750;
+}
+
+.writer-combo-name{
+  color:#667085;
+  margin-left:2px;
+}
+
+.writer-combo-empty{
+  padding:10px;
+  color:#98a2b3;
+  font-size:14px;
+}
+
+.writer-select-search{
+  display:none!important;
 }
 
 </style>
@@ -5146,33 +5231,70 @@ function writingTable(rows){
 }
 
 
-function filterEditWriterOptions(){
-  const input=$('edit_writer_search');
-  const select=$('edit_writer_id');
-  if(!input||!select||!window.__editWriterOptions)return;
-  const kw=input.value.trim().toLowerCase();
-  const current=select.value;
-  const filtered=window.__editWriterOptions.filter(w=>{
+function writerDisplayText(w){
+  return `${w?.writer_code||''}（${w?.writer_name||''}）`;
+}
+
+function renderEditWriterDropdown(keyword=''){
+  const list=$('edit_writer_dropdown');
+  if(!list||!window.__editWriterOptions)return;
+  const kw=String(keyword||'').trim().toLowerCase();
+  const rows=window.__editWriterOptions.filter(w=>{
     const code=String(w.writer_code||'').toLowerCase();
     const name=String(w.writer_name||'').toLowerCase();
     return !kw || code.includes(kw) || name.includes(kw);
-  });
-  select.innerHTML='<option value="">请选择写手</option>'+filtered.map(w=>`<option value="${w.id}">${esc(w.writer_code)}（${esc(w.writer_name)}）</option>`).join('');
-  if(current && filtered.some(w=>w.id===current))select.value=current;
+  }).slice(0,80);
+
+  list.innerHTML=rows.length?rows.map(w=>`
+    <div class="writer-combo-option" onclick="selectEditWriter('${w.id}')">
+      <span class="writer-combo-code">${esc(w.writer_code||'')}</span>
+      <span class="writer-combo-name">（${esc(w.writer_name||'')}）</span>
+    </div>`).join(''):'<div class="writer-combo-empty">没有匹配的写手</div>';
+}
+
+function openEditWriterDropdown(){
+  const box=$('edit_writer_dropdown');
+  const input=$('edit_writer_display');
+  if(!box||!input)return;
+  renderEditWriterDropdown(input.value);
+  box.classList.remove('hidden');
+}
+
+function closeEditWriterDropdownLater(){
+  setTimeout(()=>{$('edit_writer_dropdown')?.classList.add('hidden')},180);
+}
+
+function searchEditWriterCombo(){
+  const input=$('edit_writer_display');
+  const hidden=$('edit_writer_id');
+  if(hidden)hidden.value='';
+  openEditWriterDropdown();
+  renderEditWriterDropdown(input?.value||'');
+}
+
+function selectEditWriter(id){
+  const w=(window.__editWriterOptions||[]).find(x=>x.id===id);
+  if(!w)return;
+  $('edit_writer_id').value=id;
+  $('edit_writer_display').value=writerDisplayText(w);
+  $('edit_writer_dropdown')?.classList.add('hidden');
 }
 
 async function openWritingEdit(orderId){
   await loadWriters();
   const {data}=await client.from('v_writing_orders').select('*').eq('order_id',orderId).single();
   window.__editWriterOptions=writers||[];
-  const opts=writers.map(w=>`<option value="${w.id}" ${data?.writer_id===w.id?'selected':''}>${esc(w.writer_code)}（${esc(w.writer_name)}）</option>`).join('');
+  const selectedWriter=writers.find(w=>w.id===data?.writer_id);
+  const selectedWriterText=selectedWriter?writerDisplayText(selectedWriter):'';
   const mainHtml = `<div class="info">保存后系统会自动把写作进度改为“写作中”，客服那边也会同步看到“写作中”。</div>
     <label>写手</label>
-    <div class="writer-select-search">
+    <div class="writer-combo" onclick="openEditWriterDropdown()">
       <span class="writer-search-icon">⌕</span>
-      <input id="edit_writer_search" placeholder="搜索写手编号或姓名" oninput="filterEditWriterOptions()" />
+      <input id="edit_writer_display" value="${esc(selectedWriterText)}" placeholder="请选择写手" autocomplete="off"
+        oninput="searchEditWriterCombo()" onfocus="openEditWriterDropdown()" onblur="closeEditWriterDropdownLater()" />
+      <input id="edit_writer_id" type="hidden" value="${data?.writer_id||''}" />
+      <div id="edit_writer_dropdown" class="writer-combo-dropdown hidden"></div>
     </div>
-    <select id="edit_writer_id"><option value="">请选择写手</option>${opts}</select>
     <label>稿费</label>
     <input id="edit_writer_fee" type="number" step="0.01" value="${data?.writer_fee??0}" />
     <label>写作备注</label>
