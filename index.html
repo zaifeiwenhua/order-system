@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V99：写手选择框内搜索版 */
+/* V100：订单进度显示一致修复版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4409,11 +4409,14 @@ function progressStatus(r){
   const st=r?.order_status||'';
   const ws=r?.writing_status||'';
 
+  // V100：先尊重订单主状态里的最终状态。
+  // 之前管理员全量视图里同时拿到了 writing_status='已交给客服'，
+  // 导致已完成订单被误判成“待客服交付”；客服视图字段不完全一致，所以显示不一致。
+  if(['已完成','已交付客户'].includes(st))return'已完成';
   if(['已退款','部分退款','退款/异常','已取消','异常'].includes(st))return st;
 
-  // V87：先看写作状态。写作部点“已交给客服”后，客服端必须优先显示“待客服交付”。
-  if(['已交给客服','已交稿','写作完成','终稿完成'].includes(ws))return'待客服交付';
-  if(ws==='已完成' && st!=='已完成')return'待客服交付';
+  // 未完成订单再看写作状态：写作部交稿后，客服端显示“待客服交付”。
+  if(['已交给客服','已交稿','写作完成','终稿完成','已完成'].includes(ws))return'待客服交付';
 
   if(st==='已收全款'||st==='待收尾款'){
     if(ws==='写作中'||r?.writer_id)return'写作中';
