@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V100：订单进度显示一致修复版 */
+/* V101：写手管理优化版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4227,6 +4227,22 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   display:none!important;
 }
 
+
+/* V101 写手管理优化 */
+.writer-manage-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:10px 0 12px;
+}
+.disabled-row{
+  opacity:.58;
+  background:#f8fafc!important;
+}
+.disabled-row td{
+  color:#667085!important;
+}
+
 </style>
 </head>
 <body>
@@ -4464,6 +4480,81 @@ function rowClass(r){const st=progressStatus(r)||'';if(['已完成','已取消',
   return'待写作部安排';
 }function applyRefundChange(){const el=$('refund_amount'),lastEl=$('last_refund_amount'),recEl=$('deposit_amount');if(!el||!lastEl||!recEl)return;const next=Number(el.value||0),last=Number(lastEl.value||0);const delta=next-last;if(delta!==0){const rec=Number(recEl.value||0);recEl.value=money(Math.max(rec-delta,0));lastEl.value=String(next)}updateBalancePreview()}
 function normalizePhone(v){return String(v||'').replace(/\D/g,'')}function phoneToEmail(v){const p=normalizePhone(v);return p?p+'@phone.local':''}function loginValueToEmail(v){const raw=String(v||'').trim();if(raw.includes('@'))return raw;return phoneToEmail(raw)}function showLogin(){$('writerQueryBox').classList.add('hidden');$('loginBox').classList.remove('hidden')}
+
+function renderWriterSelfSubmit(){
+  $('loginBox').classList.add('hidden');
+  $('writerQueryBox').classList.add('hidden');
+  let box=$('writerSubmitBox');
+  if(!box){
+    box=document.createElement('div');
+    box.id='writerSubmitBox';
+    box.className='card writer-public-card';
+    $('loginArea').appendChild(box);
+  }
+  box.classList.remove('hidden');
+  box.innerHTML=`<h2>写手资料提交</h2>
+    <div class="writer-query-note">请按真实信息填写，提交后由内部人员审核启用。启用后才能被分配订单。</div>
+    <label>写手编号</label><input id="self_writer_code" placeholder="如 W010" />
+    <label>写手姓名</label><input id="self_writer_name" placeholder="请输入姓名" />
+    <label>手机号</label><input id="self_writer_phone" placeholder="请输入手机号" />
+    <label>微信号</label><input id="self_writer_wechat" placeholder="请输入微信号" />
+    <label>收款方式</label>
+    <select id="self_writer_payment_method" onchange="toggleSelfWriterPaymentFields()">
+      <option value="支付宝">支付宝</option>
+      <option value="微信">微信</option>
+      <option value="银行卡">银行卡</option>
+      <option value="其他">其他</option>
+    </select>
+    <div id="selfPaymentAccountBox"><label id="selfPaymentAccountLabel">支付宝账号</label><input id="self_writer_payment_account" placeholder="请输入支付宝账号" /></div>
+    <div id="selfBankNameBox" class="hidden"><label>所属银行</label><input id="self_writer_payment_bank_name" placeholder="如 中国工商银行" /></div>
+    <div id="selfBankAccountBox" class="hidden"><label>银行卡号</label><input id="self_writer_bank_account" placeholder="请输入银行卡号" /></div>
+    <button onclick="submitWriterSelfForm()">提交资料</button>
+    <div id="writerSubmitMsg"></div>`;
+  toggleSelfWriterPaymentFields();
+}
+
+function toggleSelfWriterPaymentFields(){
+  const m=$('self_writer_payment_method')?.value||'';
+  const box=$('selfPaymentAccountBox'),bankBox=$('selfBankNameBox'),bankAccBox=$('selfBankAccountBox'),label=$('selfPaymentAccountLabel');
+  if(!box||!bankBox||!bankAccBox)return;
+  if(m==='银行卡'){
+    box.classList.add('hidden');
+    bankBox.classList.remove('hidden');
+    bankAccBox.classList.remove('hidden');
+  }else{
+    box.classList.remove('hidden');
+    bankBox.classList.add('hidden');
+    bankAccBox.classList.add('hidden');
+    if(label)label.innerText=m==='支付宝'?'支付宝账号':(m==='微信'?'微信收款账号':'收款账号');
+  }
+}
+
+async function submitWriterSelfForm(){
+  const code=$('self_writer_code').value.trim();
+  const name=$('self_writer_name').value.trim();
+  if(!code||!name){
+    msg('writerSubmitMsg','<div class="error">写手编号和姓名必填。</div>');
+    return;
+  }
+  const method=$('self_writer_payment_method').value;
+  const payload={
+    p_writer_code:code,
+    p_writer_name:name,
+    p_phone:$('self_writer_phone').value.trim()||null,
+    p_wechat_account:$('self_writer_wechat').value.trim()||null,
+    p_payment_method:method||null,
+    p_payment_account:method==='银行卡'?($('self_writer_bank_account').value.trim()||null):($('self_writer_payment_account').value.trim()||null),
+    p_payment_bank_name:method==='银行卡'?($('self_writer_payment_bank_name').value.trim()||null):null
+  };
+  const {error}=await client.rpc('writer_self_submit_v101',payload);
+  if(error){
+    msg('writerSubmitMsg','<div class="error">提交失败：'+esc(error.message)+'</div>');
+    return;
+  }
+  msg('writerSubmitMsg','<div class="info">已提交成功，请等待内部人员审核启用。</div>');
+  ['self_writer_code','self_writer_name','self_writer_phone','self_writer_wechat','self_writer_payment_account','self_writer_payment_bank_name','self_writer_bank_account'].forEach(id=>{if($(id))$(id).value=''});
+}
+
 function renderWriterPublicQuery(){$('loginBox').classList.add('hidden');$('writerQueryBox').classList.remove('hidden')}
 async function queryWriterPublic(){
   msg('writerQueryMsg','');
@@ -4612,7 +4703,7 @@ async function login(){msg('loginMsg','');const raw=$('phone').value.trim(),pass
   $('loginArea').classList.remove('hidden');
   showLogin()
 }
-async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');const qs=new URLSearchParams(location.search);if(qs.get('writer')==='1'){renderWriterPublicQuery()}else{showLogin()}return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
+async function loadApp(){const {data:s}=await client.auth.getSession();if(!s.session){$('loginArea').classList.remove('hidden');$('appArea').classList.add('hidden');const qs=new URLSearchParams(location.search);if(qs.get('writer_submit')==='1'){renderWriterSelfSubmit()}else if(qs.get('writer')==='1'){renderWriterPublicQuery()}else{showLogin()}return}currentUser=s.session.user;const {data:p,error}=await client.from('profiles').select('email,phone,display_name,role,is_active').eq('id',currentUser.id).single();if(error||!p){msg('loginMsg','<div class="error">没有找到角色信息。</div>');return}if(!p.is_active){await client.auth.signOut();msg('loginMsg','<div class="error">账号未启用，请联系管理员。</div>');return}currentProfile=p;$('loginArea').classList.add('hidden');$('appArea').classList.remove('hidden');
 const displayName=p.display_name||'未命名';
 const roleName=roleMap[p.role]||p.role;
 if($('sideUser'))$('sideUser').innerHTML='';
@@ -4699,6 +4790,20 @@ document.addEventListener('click',function(e){
 function writerQueryUrl(){
   return location.origin + location.pathname + '?writer=1';
 }
+function writerSubmitUrl(){
+  return location.origin + location.pathname + '?writer_submit=1';
+}
+async function copyWriterSubmitLink(e){
+  if(e)e.stopPropagation();
+  const url=writerSubmitUrl();
+  try{
+    await navigator.clipboard.writeText(url);
+    alert('写手自填链接已复制：\n' + url);
+  }catch(err){
+    prompt('复制这个写手自填链接：', url);
+  }
+}
+
 async function copyWriterQueryLink(e){
   if(e)e.stopPropagation();
   const url=writerQueryUrl();
@@ -5839,9 +5944,14 @@ async function disableJournal(id){
 }
 async function renderWriterManage(){
   setMenu('writers');
-  await loadWriters();
-  showContent(`<div class="card"><h2>写手管理</h2>
-    <div class="form-grid">
+
+  // 写手管理页需要看到停用写手；分配订单时仍然只加载启用写手。
+  const {data,error}=await client.from('writers').select('*').order('created_at',{ascending:false});
+  if(error){showContent(`<div class="card"><div class="error">${esc(error.message)}</div></div>`);return}
+  writers=data||[];
+
+  const isAdmin=currentProfile.role==='admin';
+  const formHtml=isAdmin?`<div class="form-grid">
       <div><label>写手编号</label><input id="writer_code" placeholder="如 W010"></div>
       <div><label>写手名称</label><input id="writer_name"></div>
       <div><label>手机号</label><input id="writer_phone"></div>
@@ -5851,14 +5961,41 @@ async function renderWriterManage(){
       <div id="bankNameBox" class="hidden"><label>所属银行</label><input id="writer_payment_bank_name" placeholder="如 中国工商银行"></div>
       <div id="bankAccountBox" class="hidden"><label>银行卡号</label><input id="writer_bank_account" placeholder="请输入银行卡号"></div>
     </div>
-    <button onclick="addWriter()">添加写手</button>
-    <button class="ghost" onclick="renderCustomFieldManage('writer')">自定义写手字段</button>
+    <button onclick="addWriter()">添加写手</button>`:'';
+
+  const customBtn=isAdmin?`<button class="ghost" onclick="renderCustomFieldManage('writer')">自定义写手字段</button>`:'';
+  const writerRows=writers.map(w=>{
+    const active=w.is_active!==false;
+    return `<tr class="${active?'':'disabled-row'}">
+      <td><strong>${esc(w.writer_code)}</strong></td>
+      <td>${esc(w.writer_name)}</td>
+      <td>${esc(w.phone||'')}</td>
+      <td>${esc(w.wechat_account||'')}</td>
+      <td>${esc(w.payment_method||'')}</td>
+      <td>${writerPaymentDisplay(w)}</td>
+      <td>${active?'<span class="tag ok-tag">启用中</span>':'<span class="tag warn-tag">已停用</span>'}</td>
+      <td>
+        <button class="ghost" onclick="openWriterEdit('${w.id}')">修改信息</button>
+        <button class="${active?'danger':'secondary'}" onclick="toggleWriterActive('${w.id}',${active?'false':'true'})">${active?'停用':'启用'}</button>
+      </td>
+    </tr>`
+  }).join('');
+
+  showContent(`<div class="card"><h2>写手管理</h2>
+    ${formHtml}
+    <div class="writer-manage-actions">
+      <button class="ghost" onclick="copyWriterSubmitLink(event)">复制链接给写手（写手自己提交）</button>
+      <button class="ghost" onclick="openWriterImport()">导入写手</button>
+      ${customBtn}
+    </div>
     <div id="writerMsg"></div>
-    <div class="table-wrap"><table><thead><tr><th>编号</th><th>写手</th><th>手机号</th><th>微信</th><th>收款方式</th><th>收款账号</th><th>操作</th></tr></thead><tbody>${writers.map(w=>`<tr><td><strong>${esc(w.writer_code)}</strong></td><td>${esc(w.writer_name)}</td><td>${esc(w.phone||'')}</td><td>${esc(w.wechat_account||'')}</td><td>${esc(w.payment_method||'')}</td><td>${writerPaymentDisplay(w)}</td><td><button class="danger" onclick="disableWriter('${w.id}')">删除</button></td></tr>`).join('')}</tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>编号</th><th>写手</th><th>手机号</th><th>微信</th><th>收款方式</th><th>收款账号</th><th>状态</th><th>操作</th></tr></thead><tbody>${writerRows}</tbody></table></div>
   </div>`);
-  toggleWriterPaymentFields();
+  if(isAdmin)toggleWriterPaymentFields();
 }
+
 async function addWriter(){
+  if(currentProfile.role!=='admin'){msg('writerMsg','<div class="error">只有管理员可以直接添加写手。</div>');return}
   const name=$('writer_name').value.trim(),code=$('writer_code').value.trim();
   if(!name||!code){msg('writerMsg','<div class="error">写手编号和名称必填。</div>');return}
   const method=$('writer_payment_method').value;
@@ -5869,13 +6006,122 @@ async function addWriter(){
     wechat_account:$('writer_wechat').value.trim()||null,
     payment_method:method||null,
     payment_bank_name:method==='银行卡'?($('writer_payment_bank_name').value.trim()||null):null,
-    payment_account:method==='银行卡'?($('writer_bank_account').value.trim()||null):($('writer_payment_account').value.trim()||null)
+    payment_account:method==='银行卡'?($('writer_bank_account').value.trim()||null):($('writer_payment_account').value.trim()||null),
+    is_active:true
   };
   const {error}=await client.from('writers').insert(payload);
-  if(error){msg('writerMsg','<div class="error">'+error.message+'</div>');return}
+  if(error){msg('writerMsg','<div class="error">'+esc(error.message)+'</div>');return}
   renderWriterManage();
 }
-async function disableWriter(id){await client.from('writers').update({is_active:false}).eq('id',id);renderWriterManage()}
+
+async function toggleWriterActive(id,active){
+  const text=active?'启用':'停用';
+  if(!confirm(`确认${text}这个写手吗？`))return;
+  const {error}=await client.from('writers').update({is_active:active}).eq('id',id);
+  if(error){alert(error.message);return}
+  renderWriterManage();
+}
+
+async function openWriterEdit(id){
+  const {data,error}=await client.from('writers').select('*').eq('id',id).single();
+  if(error){alert(error.message);return}
+  const method=data.payment_method||'支付宝';
+  const bankVisible=method==='银行卡';
+  openModal(`<div class="order-form-shell">
+    <div class="order-form-header"><h2>修改写手信息</h2><button class="order-form-close" onclick="closeModal()">×</button></div>
+    <div class="order-form-body">
+      <div class="form-grid">
+        <div><label>写手编号</label><input id="edit_writer_code_manage" value="${esc(data.writer_code||'')}"></div>
+        <div><label>写手名称</label><input id="edit_writer_name_manage" value="${esc(data.writer_name||'')}"></div>
+        <div><label>手机号</label><input id="edit_writer_phone_manage" value="${esc(data.phone||'')}"></div>
+        <div><label>微信号</label><input id="edit_writer_wechat_manage" value="${esc(data.wechat_account||'')}"></div>
+        <div><label>收款方式</label><select id="edit_writer_payment_method_manage" onchange="toggleWriterEditPaymentFields()">
+          ${['支付宝','微信','银行卡','其他'].map(x=>`<option value="${x}" ${method===x?'selected':''}>${x}</option>`).join('')}
+        </select></div>
+        <div id="editPaymentAccountBox"><label id="editPaymentAccountLabel">收款账号</label><input id="edit_writer_payment_account_manage" value="${esc(bankVisible?'':(data.payment_account||''))}"></div>
+        <div id="editBankNameBox" class="${bankVisible?'':'hidden'}"><label>所属银行</label><input id="edit_writer_payment_bank_name_manage" value="${esc(data.payment_bank_name||'')}"></div>
+        <div id="editBankAccountBox" class="${bankVisible?'':'hidden'}"><label>银行卡号</label><input id="edit_writer_bank_account_manage" value="${esc(bankVisible?(data.payment_account||''):'')}"></div>
+      </div>
+      <div id="writerEditMsg"></div>
+    </div>
+    <div class="order-form-footer">
+      <button onclick="saveWriterEdit('${id}')">保存修改</button>
+      <button class="ghost" onclick="closeModal()">关闭</button>
+    </div>
+  </div>`);
+  toggleWriterEditPaymentFields();
+}
+
+function toggleWriterEditPaymentFields(){
+  const m=$('edit_writer_payment_method_manage')?.value||'';
+  const box=$('editPaymentAccountBox'),bankBox=$('editBankNameBox'),bankAccBox=$('editBankAccountBox'),label=$('editPaymentAccountLabel');
+  if(!box||!bankBox||!bankAccBox)return;
+  if(m==='银行卡'){
+    box.classList.add('hidden');bankBox.classList.remove('hidden');bankAccBox.classList.remove('hidden');
+  }else{
+    box.classList.remove('hidden');bankBox.classList.add('hidden');bankAccBox.classList.add('hidden');
+    if(label)label.innerText=m==='支付宝'?'支付宝账号':(m==='微信'?'微信收款账号':'收款账号');
+  }
+}
+
+async function saveWriterEdit(id){
+  const method=$('edit_writer_payment_method_manage').value;
+  const payload={
+    writer_code:$('edit_writer_code_manage').value.trim(),
+    writer_name:$('edit_writer_name_manage').value.trim(),
+    phone:$('edit_writer_phone_manage').value.trim()||null,
+    wechat_account:$('edit_writer_wechat_manage').value.trim()||null,
+    payment_method:method||null,
+    payment_bank_name:method==='银行卡'?($('edit_writer_payment_bank_name_manage').value.trim()||null):null,
+    payment_account:method==='银行卡'?($('edit_writer_bank_account_manage').value.trim()||null):($('edit_writer_payment_account_manage').value.trim()||null)
+  };
+  if(!payload.writer_code||!payload.writer_name){msg('writerEditMsg','<div class="error">写手编号和名称必填。</div>');return}
+  const {error}=await client.from('writers').update(payload).eq('id',id);
+  if(error){msg('writerEditMsg','<div class="error">'+esc(error.message)+'</div>');return}
+  closeModal();
+  renderWriterManage();
+}
+
+function openWriterImport(){
+  openModal(`<div class="order-form-shell">
+    <div class="order-form-header"><h2>导入写手</h2><button class="order-form-close" onclick="closeModal()">×</button></div>
+    <div class="order-form-body">
+      <div class="info">一行一个写手，建议格式：编号,姓名,手机号,微信号,收款方式,收款账号。也支持用制表符分隔。</div>
+      <textarea id="writer_import_text" style="min-height:220px" placeholder="w010,郑颜,13800000000,wx001,支付宝,13800000000&#10;w181,王婷,13900000000,wx002,微信,wx002"></textarea>
+      <div id="writerImportMsg"></div>
+    </div>
+    <div class="order-form-footer">
+      <button onclick="importWritersFromText()">开始导入</button>
+      <button class="ghost" onclick="closeModal()">关闭</button>
+    </div>
+  </div>`);
+}
+
+function parseWriterImportLine(line){
+  let parts=line.includes('\\t')?line.split('\\t'):line.split(',');
+  parts=parts.map(x=>x.trim());
+  if(parts.length<2)return null;
+  return {
+    writer_code:parts[0],
+    writer_name:parts[1],
+    phone:parts[2]||null,
+    wechat_account:parts[3]||null,
+    payment_method:parts[4]||'支付宝',
+    payment_account:parts[5]||null,
+    is_active:true
+  };
+}
+
+async function importWritersFromText(){
+  const text=$('writer_import_text').value.trim();
+  if(!text){msg('writerImportMsg','<div class="error">请粘贴需要导入的写手信息。</div>');return}
+  const rows=text.split(/\\n+/).map(x=>parseWriterImportLine(x)).filter(Boolean);
+  if(!rows.length){msg('writerImportMsg','<div class="error">没有识别到有效写手，请检查格式。</div>');return}
+  const {error}=await client.from('writers').insert(rows);
+  if(error){msg('writerImportMsg','<div class="error">'+esc(error.message)+'</div>');return}
+  msg('writerImportMsg','<div class="info">导入成功：'+rows.length+' 条。</div>');
+  setTimeout(()=>{closeModal();renderWriterManage()},800);
+}
 
 async function renderSourceManage(){setMenu('sources');await loadBase(true);showContent(`<div class="card"><h2>来源管理</h2><div class="form-grid"><div><label>新增来源</label><input id="new_source_name"></div></div><button onclick="addSource()">添加</button>${configTable(customerSources,'source')}</div>`)}async function renderPaymentManage(){setMenu('payments');await loadBase(true);showContent(`<div class="card"><h2>付款管理</h2><div class="form-grid"><div><label>新增付款方式</label><input id="new_pay_name"></div></div><button onclick="addPayment()">添加</button>${configTable(paymentMethods,'payment')}</div>`)}function configTable(rows,type){return`<div class="table-wrap"><table><tbody id="${type}_tbody">${rows.map(x=>`<tr draggable="true" class="drag-row" data-id="${x.id}"><td>${esc(x.name)}</td><td>拖动本行调整顺序</td><td><button class="danger" onclick="${type==='source'?'disableSource':'disablePayment'}('${x.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="saveDragOrder('${type}')">保存拖动顺序</button>`}async function addSource(){const name=$('new_source_name').value.trim();if(!name)return;await client.from('customer_sources').insert({name,sort_order:999});customerSources=[];renderSourceManage()}async function disableSource(id){await client.from('customer_sources').update({is_active:false}).eq('id',id);customerSources=[];renderSourceManage()}async function addPayment(){const name=$('new_pay_name').value.trim();if(!name)return;await client.from('payment_methods').insert({name,sort_order:999});paymentMethods=[];renderPaymentManage()}async function disablePayment(id){await client.from('payment_methods').update({is_active:false}).eq('id',id);paymentMethods=[];renderPaymentManage()}
 async function renderBusinessManage(){setMenu('biz');await loadBase(true);const catOps=categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(''),proOps=projects.map(p=>`<option value="${p.id}">${esc(categories.find(c=>c.id===p.category_id)?.name||'')} / ${esc(p.name)}</option>`).join('');showContent(`<div class="card"><h2>业务/项目/字段管理</h2><h3>新增业务大类</h3><input id="new_cat_name" placeholder="业务大类名称"><button onclick="addCategory()">添加业务大类</button><h3>新增具体项目</h3><div class="form-grid"><div><select id="new_project_cat">${catOps}</select></div><div><input id="new_project_name" placeholder="具体项目名称"></div></div><button onclick="addProject()">添加项目</button><h3>现有业务大类</h3><div class="table-wrap"><table><tbody>${categories.map(c=>`<tr><td>${esc(c.name)}</td><td><button class="danger" onclick="disableCategory('${c.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><h3>现有项目</h3><div class="table-wrap"><table><tbody>${projects.map(p=>`<tr><td>${esc(categories.find(c=>c.id===p.category_id)?.name||'')} / ${esc(p.name)}</td><td><button class="danger" onclick="disableProject('${p.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><h3>新增项目字段</h3><div class="form-grid"><div><select id="field_project_id" onchange="loadFieldList()">${proOps}</select></div><div><input id="field_label" placeholder="字段名称"></div><div><select id="field_type"><option value="text">单行文本</option><option value="textarea">多行文本</option><option value="number">数字</option><option value="date">日期</option><option value="datetime">日期时间</option><option value="select">单选</option></select></div><div><input id="field_options" placeholder="选项，逗号分隔"></div><div><select id="field_required"><option value="false">非必填</option><option value="true">必填</option></select></div></div><button onclick="addField()">添加字段</button><div id="bizMsg"></div><h3>当前项目字段（可拖动排序，可删除）</h3><div id="fieldList"></div></div>`);loadFieldList()}function code(prefix){return prefix+'-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999)}async function addCategory(){const name=$('new_cat_name').value.trim();if(!name)return;await client.from('business_categories').insert({name,code:code('CAT'),sort_order:999});categories=[];renderBusinessManage()}async function addProject(){const name=$('new_project_name').value.trim();if(!name)return;await client.from('service_projects').insert({name,category_id:$('new_project_cat').value,code:code('PRJ'),sort_order:999});projects=[];renderBusinessManage()}async function disableCategory(id){await client.from('business_categories').update({is_active:false}).eq('id',id);categories=[];renderBusinessManage()}async function disableProject(id){await client.from('service_projects').update({is_active:false}).eq('id',id);projects=[];renderBusinessManage()}async function addField(){const pid=$('field_project_id').value,label=$('field_label').value.trim();if(!pid||!label)return;const options=$('field_options').value.trim()?$('field_options').value.split(',').map(x=>x.trim()).filter(Boolean):[];await client.from('project_fields').insert({project_id:pid,field_key:'f_'+Date.now().toString(36),field_label:label,field_type:$('field_type').value,is_required:$('field_required').value==='true',options,sort_order:999,is_active:true});fieldsCache={};loadFieldList()}async function loadFieldList(){const pid=$('field_project_id')?.value;if(!pid)return;const fs=await getFields(pid);$('fieldList').innerHTML=`<div class="table-wrap"><table><tbody id="field_tbody">${fs.map(f=>`<tr draggable="true" class="drag-row" data-id="${f.id}"><td>${esc(f.field_label)}</td><td>${esc(f.field_type)}</td><td>拖动本行调整顺序</td><td><button class="danger" onclick="disableField('${f.id}')">删除</button></td></tr>`).join('')}</tbody></table></div><button class="ghost" onclick="saveDragOrder('field')">保存字段顺序</button>`;enableDrag('field_tbody')}async function disableField(id){await client.from('project_fields').update({is_active:false}).eq('id',id);fieldsCache={};loadFieldList()}
