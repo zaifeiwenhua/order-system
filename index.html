@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V101：写手管理优化版 */
+/* V102：期刊管理优化版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4241,6 +4241,32 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 .disabled-row td{
   color:#667085!important;
+}
+
+
+/* V102 期刊管理与搜索风格修正 */
+.journal-page .toolbar-title{
+  margin:0!important;
+  font-size:18px!important;
+  color:#1f2937!important;
+}
+.journal-page .journal-searchbar{
+  margin:0!important;
+}
+.journal-add-card{
+  margin:12px!important;
+  border:1px solid #e6ebf2!important;
+  border-radius:12px!important;
+}
+.journal-action-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.journal-action-row button{
+  height:36px!important;
+  border-radius:8px!important;
 }
 
 </style>
@@ -5791,11 +5817,30 @@ async function savePublishPay(paId){
 }
 
 
+function journalSearchBox(){
+  return `<div class="searchbar compact-searchbar journal-searchbar">
+    <div class="compact-search" title="期刊名称/收录情况/收稿方向/主办单位/ISSN/CN">
+      <span class="compact-search-icon">⌕</span>
+      <input id="journal_kw" placeholder="搜索期刊" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){renderJournalManage()}else if(event.key==='Escape'){this.value='';renderJournalManage()}" />
+    </div>
+  </div>`;
+}
+
 async function renderJournalManage(){
   setMenu('journals');
-  const internal=currentProfile.role!=='service';
+  const internal=['admin','publishing'].includes(currentProfile.role);
   const kw=$('journal_kw')?.value||'';
-  let rows=await loadJournals(internal);
+
+  let rows=[];
+  if(internal){
+    const {data,error}=await client.from('journals').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">${esc(error.message)}</div></div>`);return}
+    rows=data||[];
+  }else{
+    rows=await loadJournals(false);
+  }
+
   rows=searchRows(rows,kw,[
     r=>r.journal_name,
     r=>formatIncludedDatabases(r.included_databases),
@@ -5809,18 +5854,27 @@ async function renderJournalManage(){
     r=>r.editor_fee,
     r=>formatJournalContact(r)
   ]);
+
   let addForm='';
   if(internal){
-    addForm=`<div class="card" style="box-shadow:none;background:#f9fafb">
+    addForm=`<div class="card journal-add-card" style="box-shadow:none;background:#f9fafb">
       <h3>新增期刊</h3>
       ${journalFormHtml('j_')}
-      <button onclick="addJournal()">添加期刊</button>
+      <div class="journal-action-row">
+        <button onclick="addJournal()">添加期刊</button>
+        <button class="ghost" onclick="openJournalImport()">导入</button>
+      </div>
       <div id="journalMsg"></div>
     </div>`;
   }
-  showContent(`<div class="card"><h2>期刊管理</h2>
-    <div class="searchbar"><div><label>查询期刊</label><input id="journal_kw" placeholder="期刊名称/收录情况/收稿方向/主办单位/ISSN/CN"></div><div></div><button onclick="renderJournalManage()">查询</button><button class="ghost" onclick="$('journal_kw').value='';renderJournalManage()">清空</button></div>
+
+  showContent(`<div class="card table-page-card journal-page">
+    <div class="page-toolbar">
+      <div class="toolbar-left"><h2 class="toolbar-title">期刊管理</h2></div>
+      <div class="toolbar-right">${journalSearchBox()}</div>
+    </div>
     ${addForm}
+    <div class="table-count">共 ${rows.length} 条</div>
     ${internal?journalInternalTable(rows):journalServiceTable(rows)}
   </div>`);
   if(kw)$('journal_kw').value=kw;
@@ -5885,7 +5939,7 @@ function toggleJournalContactFields(prefix){
   const label=$(prefix+'contact_label');
   const input=$(prefix+'contact_value');
   if(label)label.innerText=type==='QQ'?'QQ号':type==='手机'?'手机号':'微信号';
-  if(input)input.placeholder=type==='QQ'?'请输入QQ号':type==='手机'?'请输入邮箱':'请输入微信号';
+  if(input)input.placeholder=type==='QQ'?'请输入QQ号':type==='手机'?'请输入手机号':'请输入微信号';
 }
 
 function formatIncludedDatabases(v){
@@ -5909,21 +5963,24 @@ function journalServiceTable(rows){
 
 function journalInternalTable(rows){
   if(!rows.length)return'<div class="warn">暂无期刊。</div>';
-  return`<div class="table-wrap"><table><thead><tr><th>期刊名称</th><th>收录情况</th><th>收稿方向</th><th>主办单位</th><th>出版周期</th><th>ISSN号</th><th>CN号</th><th>字符</th><th>版面费</th><th>编辑费</th><th>编辑联系方式</th><th>备注</th><th>操作</th></tr></thead><tbody>${rows.map(j=>`<tr><td>${esc(j.journal_name)}</td><td>${esc(formatIncludedDatabases(j.included_databases))}</td><td>${esc(j.accepted_directions||'')}</td><td>${esc(j.organizer||'')}</td><td>${esc(j.publish_cycle||'')}</td><td>${esc(j.issn_no||'')}</td><td>${esc(j.cn_no||'')}</td><td>${esc(j.char_count||'')}</td><td>${money(j.page_fee)}</td><td>${money(j.editor_fee)}</td><td>${esc(formatJournalContact(j))}</td><td>${esc(j.internal_notes||'')}</td><td><button class="ghost" onclick="openJournalEdit('${j.id}')">修改</button><button class="danger" onclick="disableJournal('${j.id}')">删除</button></td></tr>`).join('')}</tbody></table></div>`;
+  return`<div class="table-wrap"><table><thead><tr><th>期刊名称</th><th>收录情况</th><th>收稿方向</th><th>主办单位</th><th>出版周期</th><th>ISSN号</th><th>CN号</th><th>字符</th><th>版面费</th><th>编辑费</th><th>编辑联系方式</th><th>备注</th><th>状态</th><th>操作</th></tr></thead><tbody>${rows.map(j=>{
+    const active=j.is_active!==false;
+    return `<tr class="${active?'':'disabled-row'}"><td>${esc(j.journal_name)}</td><td>${esc(formatIncludedDatabases(j.included_databases))}</td><td>${esc(j.accepted_directions||'')}</td><td>${esc(j.organizer||'')}</td><td>${esc(j.publish_cycle||'')}</td><td>${esc(j.issn_no||'')}</td><td>${esc(j.cn_no||'')}</td><td>${esc(j.char_count||'')}</td><td>${money(j.page_fee)}</td><td>${money(j.editor_fee)}</td><td>${esc(formatJournalContact(j))}</td><td>${esc(j.internal_notes||'')}</td><td>${active?'<span class="tag ok-tag">启用中</span>':'<span class="tag warn-tag">已停用</span>'}</td><td><button class="ghost" onclick="openJournalEdit('${j.id}')">修改</button><button class="${active?'danger':'secondary'}" onclick="toggleJournalActive('${j.id}',${active?'false':'true'})">${active?'停用':'启用'}</button></td></tr>`
+  }).join('')}</tbody></table></div>`;
 }
 
 async function addJournal(){
   const payload=getJournalFormPayload('j_');
   if(!payload.journal_name){msg('journalMsg','<div class="error">期刊名称必填。</div>');return}
+  payload.is_active=true;
   const {error}=await client.from('journals').insert(payload);
   if(error){msg('journalMsg','<div class="error">'+error.message+'</div>');return}
   renderJournalManage();
 }
 
 async function openJournalEdit(id){
-  const rows=await loadJournals(true);
-  const j=rows.find(x=>x.id===id);
-  if(!j){alert('没有找到期刊');return}
+  const {data:j,error}=await client.from('journals').select('*').eq('id',id).single();
+  if(error||!j){alert(error?.message||'没有找到期刊');return}
   openModal(`<h2>修改期刊</h2>${journalFormHtml('edit_j_',j)}<button onclick="saveJournalEdit('${id}')">保存修改</button><button class="ghost" onclick="closeModal()">取消</button><div id="modalMsg"></div>`);
   toggleJournalContactFields('edit_j_');
 }
@@ -5937,11 +5994,71 @@ async function saveJournalEdit(id){
   renderJournalManage();
 }
 
-async function disableJournal(id){
-  if(!confirm('确认删除/停用这个期刊吗？'))return;
-  await client.from('journals').update({is_active:false}).eq('id',id);
+async function toggleJournalActive(id,active){
+  if(!confirm(`确认${active?'启用':'停用'}这个期刊吗？`))return;
+  const {error}=await client.from('journals').update({is_active:active}).eq('id',id);
+  if(error){alert(error.message);return}
   renderJournalManage();
 }
+
+function openJournalImport(){
+  openModal(`<div class="order-form-shell">
+    <div class="order-form-header"><h2>导入期刊</h2><button class="order-form-close" onclick="closeModal()">×</button></div>
+    <div class="order-form-body">
+      <div class="info">一行一个期刊，建议格式：期刊名称,收录情况,收稿方向,主办单位,出版周期,ISSN,CN,字符,版面费,编辑费,联系方式类型,联系方式,备注。也支持从表格复制的制表符分隔。</div>
+      <textarea id="journal_import_text" style="min-height:220px" placeholder="期刊A,知网/维普,教育教学,某某单位,月刊,ISSN,CN,5000,800,0,微信,wx001,备注"></textarea>
+      <div id="journalImportMsg"></div>
+    </div>
+    <div class="order-form-footer">
+      <button onclick="importJournalsFromText()">开始导入</button>
+      <button class="ghost" onclick="closeModal()">关闭</button>
+    </div>
+  </div>`);
+}
+
+function parseJournalIncluded(s){
+  if(!s)return[];
+  return String(s).split(/[、,，/|；;]+/).map(x=>x.trim()).filter(Boolean);
+}
+
+function parseJournalImportLine(line){
+  let parts=line.includes('\t')?line.split('\t'):line.split(',');
+  parts=parts.map(x=>x.trim());
+  if(!parts[0])return null;
+  const contactType=parts[10]||'微信';
+  const contactValue=parts[11]||'';
+  return {
+    journal_name:parts[0],
+    journal_level:'',
+    included_databases:parseJournalIncluded(parts[1]||''),
+    accepted_directions:parts[2]||'',
+    organizer:parts[3]||'',
+    publish_cycle:parts[4]||null,
+    issn_no:parts[5]||'',
+    cn_no:parts[6]||'',
+    char_count:parts[7]||'',
+    customer_price:0,
+    page_fee:Number(parts[8]||0),
+    editor_fee:Number(parts[9]||0),
+    editor_contact_type:contactType,
+    editor_contact_value:contactValue,
+    editor_contact:contactValue?`${contactType}：${contactValue}`:'',
+    internal_notes:parts[12]||'',
+    is_active:true
+  };
+}
+
+async function importJournalsFromText(){
+  const text=$('journal_import_text').value.trim();
+  if(!text){msg('journalImportMsg','<div class="error">请粘贴需要导入的期刊信息。</div>');return}
+  const rows=text.split(/\n+/).map(x=>parseJournalImportLine(x)).filter(Boolean);
+  if(!rows.length){msg('journalImportMsg','<div class="error">没有识别到有效期刊，请检查格式。</div>');return}
+  const {error}=await client.from('journals').insert(rows);
+  if(error){msg('journalImportMsg','<div class="error">'+esc(error.message)+'</div>');return}
+  msg('journalImportMsg','<div class="info">导入成功：'+rows.length+' 条。</div>');
+  setTimeout(()=>{closeModal();renderJournalManage()},800);
+}
+
 async function renderWriterManage(){
   setMenu('writers');
 
