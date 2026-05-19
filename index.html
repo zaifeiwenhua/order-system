@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V102：期刊管理优化版 */
+/* V103：客服期刊查询筛选版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4269,6 +4269,34 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   border-radius:8px!important;
 }
 
+
+/* V103 客服期刊查询与筛选 */
+.journal-filterbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:10px 12px 0;
+  background:#fff;
+}
+.journal-filterbar select{
+  width:180px!important;
+  height:34px!important;
+  min-height:34px!important;
+  border:1px solid #dfe6ef!important;
+  border-radius:8px!important;
+  background:#fff!important;
+  color:#344054!important;
+  font-size:13px!important;
+  padding:0 10px!important;
+}
+.journal-filterbar select:focus{
+  border-color:#7aa7ff!important;
+  box-shadow:0 0 0 3px rgba(47,107,255,.08)!important;
+}
+@media(max-width:900px){
+  .journal-filterbar select{width:100%!important}
+}
+
 </style>
 </head>
 <body>
@@ -4875,7 +4903,7 @@ function renderMenu(){
     m+=menuBtn('myorders','我的订单','renderMyOrders()');
     m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');
     m+=menuGroup('查询资料');
-    m+=menuBtn('journals','期刊管理','renderJournalManage()');
+    m+=menuBtn('journals','期刊查询','renderJournalManage()');
   }
   if(r==='writing'){
     m+=menuGroup('写作中心');
@@ -5819,7 +5847,7 @@ async function savePublishPay(paId){
 
 function journalSearchBox(){
   return `<div class="searchbar compact-searchbar journal-searchbar">
-    <div class="compact-search" title="期刊名称/收录情况/收稿方向/主办单位/ISSN/CN">
+    <div class="compact-search" title="搜索期刊所有字段">
       <span class="compact-search-icon">⌕</span>
       <input id="journal_kw" placeholder="搜索期刊" autocomplete="off"
         onkeydown="if(event.key==='Enter'){renderJournalManage()}else if(event.key==='Escape'){this.value='';renderJournalManage()}" />
@@ -5827,10 +5855,71 @@ function journalSearchBox(){
   </div>`;
 }
 
+function journalAllText(r){
+  return Object.values(r||{}).map(v=>{
+    if(v===null||v===undefined)return '';
+    if(Array.isArray(v))return v.join(' ');
+    if(typeof v==='object')return JSON.stringify(v);
+    return String(v);
+  }).join(' ');
+}
+
+function uniqJournalValues(rows, getter){
+  const set=new Set();
+  (rows||[]).forEach(r=>{
+    const v=getter(r);
+    if(Array.isArray(v)){
+      v.forEach(x=>{x=String(x||'').trim();if(x)set.add(x)});
+    }else{
+      String(v||'').split(/[、,，/|；;\n]+/).forEach(x=>{x=x.trim();if(x)set.add(x)});
+    }
+  });
+  return [...set].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+}
+
+function journalFilterBar(rows){
+  const dirVal=$('journal_filter_direction')?.value||'';
+  const incVal=$('journal_filter_included')?.value||'';
+  const cycleVal=$('journal_filter_cycle')?.value||'';
+
+  const dirs=uniqJournalValues(rows,r=>r.accepted_directions);
+  const includes=uniqJournalValues(rows,r=>Array.isArray(r.included_databases)?r.included_databases:formatIncludedDatabases(r.included_databases));
+  const cycles=uniqJournalValues(rows,r=>r.publish_cycle);
+
+  const ops=(arr,cur,all)=>`<option value="">${all}</option>`+arr.map(x=>`<option value="${esc(x)}" ${cur===x?'selected':''}>${esc(x)}</option>`).join('');
+
+  return `<div class="journal-filterbar">
+    <select id="journal_filter_direction" onchange="renderJournalManage()">${ops(dirs,dirVal,'全部方向')}</select>
+    <select id="journal_filter_included" onchange="renderJournalManage()">${ops(includes,incVal,'全部收录')}</select>
+    <select id="journal_filter_cycle" onchange="renderJournalManage()">${ops(cycles,cycleVal,'全部周期')}</select>
+  </div>`;
+}
+
+function applyJournalFilters(rows){
+  const dir=$('journal_filter_direction')?.value||'';
+  const inc=$('journal_filter_included')?.value||'';
+  const cycle=$('journal_filter_cycle')?.value||'';
+
+  return (rows||[]).filter(r=>{
+    const dirText=String(r.accepted_directions||'');
+    const incText=formatIncludedDatabases(r.included_databases);
+    const cycleText=String(r.publish_cycle||'');
+    if(dir && !dirText.includes(dir))return false;
+    if(inc && !incText.includes(inc))return false;
+    if(cycle && cycleText!==cycle)return false;
+    return true;
+  });
+}
+
 async function renderJournalManage(){
   setMenu('journals');
   const internal=['admin','publishing'].includes(currentProfile.role);
+  const isService=currentProfile.role==='service';
+  const pageTitle=isService?'期刊查询':'期刊管理';
   const kw=$('journal_kw')?.value||'';
+  const savedDir=$('journal_filter_direction')?.value||'';
+  const savedInc=$('journal_filter_included')?.value||'';
+  const savedCycle=$('journal_filter_cycle')?.value||'';
 
   let rows=[];
   if(internal){
@@ -5841,19 +5930,12 @@ async function renderJournalManage(){
     rows=await loadJournals(false);
   }
 
-  rows=searchRows(rows,kw,[
-    r=>r.journal_name,
-    r=>formatIncludedDatabases(r.included_databases),
-    r=>r.accepted_directions,
-    r=>r.organizer,
-    r=>r.publish_cycle,
-    r=>r.issn_no,
-    r=>r.cn_no,
-    r=>r.char_count,
-    r=>r.page_fee,
-    r=>r.editor_fee,
-    r=>formatJournalContact(r)
+  const allRows=rows||[];
+
+  rows=searchRows(allRows,kw,[
+    r=>journalAllText(r)
   ]);
+  rows=applyJournalFilters(rows);
 
   let addForm='';
   if(internal){
@@ -5870,14 +5952,19 @@ async function renderJournalManage(){
 
   showContent(`<div class="card table-page-card journal-page">
     <div class="page-toolbar">
-      <div class="toolbar-left"><h2 class="toolbar-title">期刊管理</h2></div>
+      <div class="toolbar-left"><h2 class="toolbar-title">${pageTitle}</h2></div>
       <div class="toolbar-right">${journalSearchBox()}</div>
     </div>
+    ${journalFilterBar(allRows)}
     ${addForm}
     <div class="table-count">共 ${rows.length} 条</div>
     ${internal?journalInternalTable(rows):journalServiceTable(rows)}
   </div>`);
+
   if(kw)$('journal_kw').value=kw;
+  if(savedDir&&$('journal_filter_direction'))$('journal_filter_direction').value=savedDir;
+  if(savedInc&&$('journal_filter_included'))$('journal_filter_included').value=savedInc;
+  if(savedCycle&&$('journal_filter_cycle'))$('journal_filter_cycle').value=savedCycle;
   if(internal)toggleJournalContactFields('j_');
 }
 
@@ -5958,7 +6045,7 @@ function formatJournalContact(j){
 
 function journalServiceTable(rows){
   if(!rows.length)return'<div class="warn">暂无期刊。</div>';
-  return`<div class="table-wrap"><table><thead><tr><th>期刊名称</th><th>收录情况</th><th>收稿方向</th><th>主办单位</th><th>出版周期</th><th>ISSN号</th><th>CN号</th><th>字符</th></tr></thead><tbody>${rows.map(j=>`<tr><td>${esc(j.journal_name)}</td><td>${esc(formatIncludedDatabases(j.included_databases))}</td><td>${esc(j.accepted_directions||'')}</td><td>${esc(j.organizer||'')}</td><td>${esc(j.publish_cycle||'')}</td><td>${esc(j.issn_no||'')}</td><td>${esc(j.cn_no||'')}</td><td>${esc(j.char_count||'')}</td></tr>`).join('')}</tbody></table></div>`;
+  return`<div class="table-wrap"><table><thead><tr><th>期刊名称</th><th>收录情况</th><th>收稿方向</th><th>主办单位</th><th>出版周期</th><th>ISSN号</th><th>CN号</th><th>字符</th><th>版面费</th></tr></thead><tbody>${rows.map(j=>`<tr><td>${esc(j.journal_name)}</td><td>${esc(formatIncludedDatabases(j.included_databases))}</td><td>${esc(j.accepted_directions||'')}</td><td>${esc(j.organizer||'')}</td><td>${esc(j.publish_cycle||'')}</td><td>${esc(j.issn_no||'')}</td><td>${esc(j.cn_no||'')}</td><td>${esc(j.char_count||'')}</td><td>${money(j.page_fee)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function journalInternalTable(rows){
