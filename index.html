@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V107：首页风格统一版 */
+/* V108：未完订单入口版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4731,6 +4731,15 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   }
 }
 
+
+/* V108 未完订单入口 */
+.toolbar-title{
+  margin:0!important;
+  font-size:18px!important;
+  color:#1f2937!important;
+  font-weight:900!important;
+}
+
 </style>
 </head>
 <body>
@@ -5207,10 +5216,10 @@ function routeAfterLogin(){
   try{saved=localStorage.getItem('srx_active_menu')||''}catch(e){}
 
   const allow={
-    admin:['home','allorders','myorders','writing','publishing','journals','writers','writer_query','sources','payments','biz','accounts','reports'],
-    service:['myorders','allorders','journals'],
-    writing:['writing','writers'],
-    publishing:['publishing','journals'],
+    admin:['home','allorders','unfinished','myorders','writing','publishing','journals','writers','writer_query','sources','payments','biz','accounts','reports'],
+    service:['myorders','unfinished','allorders','journals'],
+    writing:['writing','unfinished','writers'],
+    publishing:['publishing','unfinished','journals'],
     finance:['finance_home','finance_all','payment_confirm','publish_payment','service_perf','settlement_review','settlement_summary','writer_query','settlement_batches']
   };
 
@@ -5229,6 +5238,7 @@ function runMenuByKey(k){
   const map={
     home:renderHome,
     allorders:()=>currentProfile.role==='service'?renderServiceAllOrders():renderAllOrders(),
+    unfinished:renderUnfinishedOrders,
     myorders:renderMyOrders,
     writing:renderWritingOrders,
     publishing:renderPublishingOrders,
@@ -5251,7 +5261,7 @@ function runMenuByKey(k){
   };
   return (map[k]||renderHome)();
 }const menuIconMap={
-  home:'⌂',allorders:'▦',myorders:'▤',writing:'✎',publishing:'▣',journals:'◫',writers:'☷',
+  home:'⌂',allorders:'▦',unfinished:'◌',myorders:'▤',writing:'✎',publishing:'▣',journals:'◫',writers:'☷',
   sources:'⌖',payments:'￥',biz:'⚙',accounts:'◎',reports:'◉',
   finance_home:'⌁',finance_all:'▦',payment_confirm:'✓',service_perf:'◍',
   settlement_review:'☑',settlement_summary:'Σ',settlement_batches:'≡',publish_payment:'↗',writer_query:'⌕'
@@ -5482,6 +5492,7 @@ function renderMenu(){
     m+=menuGroup('订单中心');
     m+=menuBtn('home','首页','renderHome()');
     m+=menuBtn('allorders','全部订单','renderAllOrders()');
+    m+=menuBtn('unfinished','未完订单','renderUnfinishedOrders()');
     m+=menuBtn('myorders','我的订单','renderMyOrders()');
     m+=menuGroup('业务处理');
     m+=menuBtn('writing','写作订单','renderWritingOrders()');
@@ -5500,6 +5511,7 @@ function renderMenu(){
   if(r==='service'){
     m+=menuGroup('订单中心');
     m+=menuBtn('myorders','我的订单','renderMyOrders()');
+    m+=menuBtn('unfinished','未完订单','renderUnfinishedOrders()');
     m+=menuBtn('allorders','全部订单','renderServiceAllOrders()');
     m+=menuGroup('查询资料');
     m+=menuBtn('journals','期刊查询','renderJournalManage()');
@@ -5507,11 +5519,13 @@ function renderMenu(){
   if(r==='writing'){
     m+=menuGroup('写作中心');
     m+=menuBtn('writing','写作订单','renderWritingOrders()');
+    m+=menuBtn('unfinished','未完订单','renderUnfinishedOrders()');
     m+=menuBtn('writers','写手管理','renderWriterManage()');
   }
   if(r==='publishing'){
     m+=menuGroup('发表中心');
     m+=menuBtn('publishing','发表订单','renderPublishingOrders()');
+    m+=menuBtn('unfinished','未完订单','renderUnfinishedOrders()');
     m+=menuBtn('journals','期刊管理','renderJournalManage()');
   }
   if(r==='finance'){
@@ -5938,6 +5952,107 @@ function applyOrderDetailReadOnly(readonly){
   const msg=$('orderFormMsg');
   if(msg)msg.innerHTML='<div class="info">只读查看：这是其他客服负责的订单，你可以查询客户归属和订单信息，但不能修改。</div>';
 }
+
+function isGeneralUnfinishedOrder(r){
+  const st=String(r?.order_status||'');
+  const prog=progressStatus(r);
+  if(['已完成','已交付客户'].includes(prog))return false;
+  if(['已完成','已交付客户','已取消','已退款'].includes(st))return false;
+  return true;
+}
+
+function isWritingUnfinishedOrder(r){
+  return !writingReminderDone(r);
+}
+
+function isPublishingUnfinishedOrder(r){
+  const ps=String(r?.publish_status||'');
+  if(['已完成','已出刊'].includes(ps))return false;
+  return true;
+}
+
+async function renderUnfinishedOrders(){
+  setMenu('unfinished');
+  await loadAllFieldLabels();
+  const kw=$('search_kw')?.value||'';
+  const role=currentProfile.role;
+
+  if(role==='admin'){
+    const {data,error}=await client.from('v_admin_orders_full').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}
+    let rows=(data||[]).filter(isGeneralUnfinishedOrder);
+    rows=searchRows(rows,kw,orderSearchFields);
+    window.__adminAllOrderRows=rows;
+    showContent(`<div class="card table-page-card">
+      <div class="page-toolbar">
+        <div class="toolbar-left"><h2 class="toolbar-title">未完订单</h2></div>
+        <div class="toolbar-right">${searchBox('renderUnfinishedOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}</div>
+      </div>
+      <div class="table-hint">这里显示还没有最终完成的订单，方便管理员盯全局进度。</div>
+      <div class="table-count">共 ${rows.length} 条</div>
+      ${orderTable(rows,true)}
+    </div>`);
+    if(kw)$('search_kw').value=kw;
+    return;
+  }
+
+  if(role==='service'){
+    const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}
+    let rows=(data||[]).filter(isGeneralUnfinishedOrder);
+    rows=searchRows(rows,kw,orderSearchFields);
+    showContent(`<div class="card table-page-card">
+      <div class="page-toolbar">
+        <div class="toolbar-left"><h2 class="toolbar-title">未完订单</h2></div>
+        <div class="toolbar-right">${searchBox('renderUnfinishedOrders','订单编号/微信/淘宝/业务/题目/期刊')}</div>
+      </div>
+      <div class="table-hint">这里只显示当前客服自己的未完成订单。</div>
+      <div class="table-count">共 ${rows.length} 条</div>
+      ${orderTable(rows,false)}
+    </div>`);
+    if(kw)$('search_kw').value=kw;
+    return;
+  }
+
+  if(role==='writing'){
+    const {data,error}=await client.from('v_writing_orders').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}
+    let rows=(data||[]).filter(isWritingUnfinishedOrder);
+    rows=searchRows(rows,kw,[r=>r.order_no,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.writer_name,r=>r.writer_code,r=>r.writing_status]);
+    showContent(`<div class="card table-page-card">
+      <div class="page-toolbar">
+        <div class="toolbar-left"><h2 class="toolbar-title">未完订单</h2></div>
+        <div class="toolbar-right">${searchBox('renderUnfinishedOrders','订单编号/客服/题目/写手/状态')}</div>
+      </div>
+      <div class="table-hint">这里显示写作环节未完成的订单：未登记写手、写作中、临期或逾期未交给客服。</div>
+      <div class="table-count">共 ${rows.length} 条</div>
+      ${writingTable(rows)}
+    </div>`);
+    if(kw)$('search_kw').value=kw;
+    return;
+  }
+
+  if(role==='publishing'){
+    const {data,error}=await client.from('v_publishing_orders').select('*').order('created_at',{ascending:false});
+    if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}
+    let rows=(data||[]).filter(isPublishingUnfinishedOrder);
+    rows=searchRows(rows,kw,[r=>r.order_no,r=>r.service_name,r=>r.business_category,r=>r.service_project,r=>mainTitle(r),r=>r.journal_name,r=>r.publish_status,r=>r.finance_payment_status]);
+    showContent(`<div class="card table-page-card">
+      <div class="page-toolbar">
+        <div class="toolbar-left"><h2 class="toolbar-title">未完订单</h2></div>
+        <div class="toolbar-right">${searchBox('renderUnfinishedOrders','订单编号/客服/题目/期刊/发表状态')}</div>
+      </div>
+      <div class="table-hint">这里显示发表环节未完成的订单：待审核、审核中、审核通过、待打款、已打款等待出刊等。</div>
+      <div class="table-count">共 ${rows.length} 条</div>
+      ${publishingTable(rows)}
+    </div>`);
+    if(kw)$('search_kw').value=kw;
+    return;
+  }
+
+  showContent('<div class="card"><div class="warn">当前部门暂未设置未完订单入口。</div></div>');
+}
+
 async function renderMyOrders(){setMenu('myorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';let rows=[];if(currentProfile.role==='admin'){const {data,error}=await client.from('v_admin_orders_full').select('*').eq('created_by',currentUser.id).order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}else{const {data,error}=await client.from('v_service_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}rows=data||[]}rows=searchRows(rows,kw,orderSearchFields);showContent(`<div class="card table-page-card"><div class="page-toolbar"><div class="toolbar-left"><button class="primary-small" onclick="renderOrderForm()">+ 新增订单</button></div><div class="toolbar-right">${searchBox('renderMyOrders','订单编号/微信/淘宝/题目/期刊')}</div></div><div class="table-count">共 ${rows.length} 条</div>${orderTable(rows,currentProfile.role==='admin')}</div>`);if(kw)$('search_kw').value=kw}async function renderServiceAllOrders(){setMenu('allorders');await loadAllFieldLabels();const kw=$('search_kw')?.value||'';const {data,error}=await client.from('v_service_all_orders').select('*').order('created_at',{ascending:false});if(error){showContent(`<div class="card"><div class="error">${error.message}</div></div>`);return}const rows=searchRows(data||[],kw,orderSearchFields);showContent(`<div class="card table-page-card"><div class="page-toolbar"><div class="toolbar-left"><button class="primary-small" onclick="renderOrderForm()">+ 新增订单</button></div><div class="toolbar-right">${searchBox('renderServiceAllOrders','订单编号/微信/淘宝/业务/题目/客服/期刊')}</div></div><div class="table-count">共 ${rows.length} 条</div>${orderTable(rows,false)}</div>`);if(kw)$('search_kw').value=kw}
 function orderTable(rows,admin){if(!rows.length)return'<div class="warn">暂无订单。</div>';return`<div class="table-wrap"><table><thead><tr><th>编号</th><th>提交时间</th><th>业务/项目</th><th>客户账号</th><th>核心信息</th><th>交稿时间</th><th>状态</th><th>金额</th><th>付款方式</th><th>部门</th><th>发表</th><th>操作</th>${admin?'<th>成本/利润</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr class="${rowClass(r)}"><td>${orderNoCell(r.order_no)}</td><td>${fmtDateOnly(r.created_at)}</td><td>${r.business_category||'-'}<br>${r.service_project||'-'}</td><td>微信：${r.wechat_account||'-'}<br>淘宝：${r.taobao_account||'-'}</td><td>${renderDynSummary(r)}</td><td>${fmtDate(r.due_at)}</td><td>${orderStatusBlock(r)}</td><td>总：${money(r.total_amount)}<br>实收：${money(r.deposit_amount)}<br>尾：${money(r.balance_amount)}<br>退：${money(r.refund_amount)}</td><td>${r.payment_method_name||'-'}</td><td>客服：${r.service_name||'-'}<br>写作：${r.assigned_writing_name||'-'}<br>发表：${r.assigned_publishing_name||'-'}</td><td>${r.publish_type||'-'}<br>${r.publish_status||'-'}<br>${r.journal_name||''}</td><td>${customerDeliveryButton(r)}${canEditCustomerOrder(r)?`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',false)">修改</button>`:`<button class="ghost" onclick="openOrderDetail('${r.id||r.order_id}',true)">查看</button><br><span class="muted">其他客服订单</span>`}</td>${admin?`<td>稿费：${r.writer_fee?money(r.writer_fee):'-'}<br>版面费：${r.page_fee?money(r.page_fee):'-'}<br>利润：${r.gross_profit!=null?money(r.gross_profit):'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>`}
 function exportAdminAllOrders(){const cols=[{label:'订单编号',value:r=>r.order_no},{label:'客服',value:r=>r.service_name},{label:'提交时间',value:r=>fmtDate(r.created_at)},{label:'业务大类',value:r=>r.business_category},{label:'具体项目',value:r=>r.service_project},{label:'微信号',value:r=>r.wechat_account},{label:'淘宝账号',value:r=>r.taobao_account},{label:'订单金额',value:r=>money(r.total_amount)},{label:'实收金额',value:r=>money(r.deposit_amount)},{label:'尾款',value:r=>money(r.balance_amount)},{label:'退款',value:r=>money(r.refund_amount)},{label:'付款方式',value:r=>r.payment_method_name},{label:'订单状态',value:r=>r.order_status},{label:'交稿时间',value:r=>fmtDate(r.due_at)},{label:'写作部',value:r=>r.assigned_writing_name},{label:'写手',value:r=>r.writer_name},{label:'稿费',value:r=>money(r.writer_fee)},{label:'发表部',value:r=>r.assigned_publishing_name},{label:'期刊',value:r=>r.journal_name},{label:'版面费',value:r=>money(r.page_fee)},{label:'发表打款状态',value:r=>r.finance_payment_status},{label:'发表打款金额',value:r=>money(r.finance_payment_amount)},{label:'发表打款时间',value:r=>fmtDate(r.finance_paid_at)},{label:'利润',value:r=>money(r.gross_profit)}];downloadCSV('全部订单',cols,window.__adminAllOrderRows||[])}
@@ -7623,7 +7738,7 @@ function openModal(html){toggleMobileMenu(false);$('modalRoot').innerHTML=`<div 
 let autoRefreshTimer=null;
 let autoRefreshRunning=false;
 const AUTO_REFRESH_MENUS=[
-  'allorders','myorders','writing','publishing',
+  'allorders','myorders','unfinished','writing','publishing',
   'finance_home','finance_all','payment_confirm','publish_payment',
   'service_perf','settlement_review','settlement_summary','settlement_batches'
 ];
