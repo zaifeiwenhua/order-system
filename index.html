@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V108：未完订单入口版 */
+/* V109：手机端菜单修复版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4740,6 +4740,18 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   font-weight:900!important;
 }
 
+
+/* V109 手机端菜单点击无反应修复 */
+@media(max-width:900px){
+  .sidebar.mobile-open,
+  .sidebar.open{
+    transform:translateX(0)!important;
+  }
+  .mobile-overlay.show{
+    display:block!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4911,7 +4923,15 @@ function dateTimeLocalValue(v){
   if(isNaN(d.getTime()))return'';
   const pad=n=>String(n).padStart(2,'0');
   return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
-}function toISO(v){return v?new Date(v).toISOString():null}function todayISO(){return new Date().toISOString().slice(0,10)}function isToday(d){if(!d)return false;return new Date(d).toISOString().slice(0,10)===todayISO()}function isThisWeek(d){if(!d)return false;const now=new Date();const x=new Date(d);const day=now.getDay()||7;const start=new Date(now);start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);const end=new Date(start);end.setDate(start.getDate()+7);return x>=start&&x<end}function isThisMonth(d){if(!d)return false;const now=new Date();const x=new Date(d);return x.getFullYear()===now.getFullYear()&&x.getMonth()===now.getMonth()}function stats(rows,filter){const arr=(rows||[]).filter(filter);return {count:arr.length,total:arr.reduce((a,r)=>a+Number(r.total_amount||0),0),deposit:arr.reduce((a,r)=>a+Number(r.deposit_amount||0),0),income:arr.reduce((a,r)=>a+Number(r.actual_income||0),0),fee:arr.reduce((a,r)=>a+Number(r.writer_fee||0),0),page:arr.reduce((a,r)=>a+Number(r.page_fee||0),0)}}function msg(id,html){const el=$(id);if(el)el.innerHTML=html;if(id==='orderFormMsg'){const f=$('orderFormMsgFooter');if(f)f.innerHTML=html}}function toggleMobileMenu(force){const s=$('sidebar'),o=$('mobileOverlay');if(!s||!o)return;const open=typeof force==='boolean'?force:!s.classList.contains('mobile-open');s.classList.toggle('mobile-open',open);o.classList.toggle('show',open)}
+}function toISO(v){return v?new Date(v).toISOString():null}function todayISO(){return new Date().toISOString().slice(0,10)}function isToday(d){if(!d)return false;return new Date(d).toISOString().slice(0,10)===todayISO()}function isThisWeek(d){if(!d)return false;const now=new Date();const x=new Date(d);const day=now.getDay()||7;const start=new Date(now);start.setDate(now.getDate()-day+1);start.setHours(0,0,0,0);const end=new Date(start);end.setDate(start.getDate()+7);return x>=start&&x<end}function isThisMonth(d){if(!d)return false;const now=new Date();const x=new Date(d);return x.getFullYear()===now.getFullYear()&&x.getMonth()===now.getMonth()}function stats(rows,filter){const arr=(rows||[]).filter(filter);return {count:arr.length,total:arr.reduce((a,r)=>a+Number(r.total_amount||0),0),deposit:arr.reduce((a,r)=>a+Number(r.deposit_amount||0),0),income:arr.reduce((a,r)=>a+Number(r.actual_income||0),0),fee:arr.reduce((a,r)=>a+Number(r.writer_fee||0),0),page:arr.reduce((a,r)=>a+Number(r.page_fee||0),0)}}function msg(id,html){const el=$(id);if(el)el.innerHTML=html;if(id==='orderFormMsg'){const f=$('orderFormMsgFooter');if(f)f.innerHTML=html}}function toggleMobileMenu(force){
+  const s=$('sidebar'),o=$('mobileOverlay');
+  if(!s||!o)return;
+  const open=typeof force==='boolean'?force:!(s.classList.contains('mobile-open')||s.classList.contains('open'));
+  // 同时兼容旧版 mobile-open 和新版 open，避免手机端 CSS 覆盖导致菜单打不开。
+  s.classList.toggle('mobile-open',open);
+  s.classList.toggle('open',open);
+  o.classList.toggle('show',open);
+}
 function decorateTables(){document.querySelectorAll('table').forEach(table=>{const hs=[...table.querySelectorAll('thead th')].map(th=>th.textContent.trim());if(!hs.length)return;table.classList.add('mobile-card-table');table.querySelectorAll('tbody tr').forEach(tr=>{[...tr.children].forEach((td,i)=>{if(!td.dataset.label)td.dataset.label=hs[i]||''})})})}
 function showContent(html){$('content').innerHTML=html;closeModal();setTimeout(decorateTables,0)}function getDyn(r,k){const v=r?.dynamic_values?.[k];if(v&&typeof v==='object'&&!Array.isArray(v))return v.value??'';return v??''}function formatDynValue(v){if(v===null||v===undefined||v==='')return'';if(Array.isArray(v))return v.join('、');if(typeof v==='object')return v.value??JSON.stringify(v);return String(v)}function pickDynByLabel(fields,dv,keywords){for(const f of fields||[]){const label=f.field_label||'';const hit=keywords.some(k=>label.includes(k));const val=formatDynValue(dv?.[f.field_key]);if(hit&&val)return val}return''}function renderDynSummary(r){const dv=r?.dynamic_values||{};const labels=dv.__labels||{};const entries=Object.entries(dv).filter(([k,v])=>k!=='__labels'&&formatDynValue(v));if(!entries.length){const t=mainTitle(r),w=mainWord(r);if(t&&t!=='-')return `<strong>${esc(t)}</strong>${w?`<br><span class="muted">${esc(w)}</span>`:''}`;return'-'}return entries.map(([k,v])=>{const label=labels[k]||projectFieldLabels[k]||fieldLabel(k)||k;const val=esc(formatDynValue(v));const hideLabel=String(label).startsWith('f_')||(String(label)===String(k)&&(String(k).startsWith('f_')||String(k).includes('_')));return hideLabel?`<div>${val}</div>`:`<div><span class="muted">${esc(label)}：</span>${val}</div>`}).join('')}function mainTitle(r){return r.title||getDyn(r,'project_title')||getDyn(r,'micro_topic')||getDyn(r,'course_topic')||getDyn(r,'article_title')||getDyn(r,'project_name')||'-'}function mainWord(r){return r.word_count||getDyn(r,'word_count_req')||getDyn(r,'page_or_word_req')||''}
 function paymentStatus(r){
