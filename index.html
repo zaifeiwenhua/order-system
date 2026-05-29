@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V109：手机端菜单修复版 */
+/* V110：手机端菜单可点击修复版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4749,6 +4749,28 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
   }
   .mobile-overlay.show{
     display:block!important;
+  }
+}
+
+
+/* V110 手机端菜单可点击修复：侧边栏层级高于遮罩 */
+@media(max-width:900px){
+  .sidebar{
+    z-index:120!important;
+    pointer-events:auto!important;
+  }
+  .sidebar.mobile-open,
+  .sidebar.open{
+    z-index:120!important;
+    transform:translateX(0)!important;
+    pointer-events:auto!important;
+  }
+  .mobile-overlay{
+    z-index:90!important;
+  }
+  .mobile-overlay.show{
+    display:block!important;
+    pointer-events:auto!important;
   }
 }
 
