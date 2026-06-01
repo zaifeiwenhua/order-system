@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V112：管理员客户来源显示版 */
+/* V113：统计报表修复版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -7146,21 +7146,26 @@ async function renderAccountManage(){setMenu('accounts');await loadBase(true);sh
 
 async function renderReportView(){
     setMenu('reports');
-    const end=todayISO();
-    const start=new Date(Date.now()-6*864e5).toISOString().slice(0,10);
+    const end=localDateInputValue(new Date());
+    const start=localDateInputValue(new Date(Date.now()-6*864e5));
     showContent(`<div class="card"><h2>统计报表</h2><div class="form-grid"><div><label>开始日期</label><input id="report_start" type="date" value="${start}"></div><div><label>结束日期</label><input id="report_end" type="date" value="${end}"></div></div><button onclick="setReportRange('today')">今天</button><button onclick="setReportRange('7days')">最近7天</button><button onclick="setReportRange('month')">本月</button><button onclick="setReportRange('lastmonth')">上个月</button><button onclick="setReportRange('year')">今年</button><button class="secondary" onclick="queryReport()">查询</button><div id="reportBox"></div></div>`);
     queryReport();
+  }
+  function localDateInputValue(d){
+    const x=new Date(d);
+    const p=n=>String(n).padStart(2,'0');
+    return x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate());
   }
   function setReportRange(t){
     const d=new Date();
     let s=new Date(),e=new Date();
-    if(t==='today'){s=new Date();}
-    if(t==='7days'){s=new Date(Date.now()-6*864e5);}
-    if(t==='month'){s=new Date(d.getFullYear(),d.getMonth(),1);}
+    if(t==='today'){s=new Date();e=new Date();}
+    if(t==='7days'){s=new Date(Date.now()-6*864e5);e=new Date();}
+    if(t==='month'){s=new Date(d.getFullYear(),d.getMonth(),1);e=new Date();}
     if(t==='lastmonth'){s=new Date(d.getFullYear(),d.getMonth()-1,1);e=new Date(d.getFullYear(),d.getMonth(),0);}
-    if(t==='year'){s=new Date(d.getFullYear(),0,1);}
-    $('report_start').value=s.toISOString().slice(0,10);
-    $('report_end').value=e.toISOString().slice(0,10);
+    if(t==='year'){s=new Date(d.getFullYear(),0,1);e=new Date();}
+    $('report_start').value=localDateInputValue(s);
+    $('report_end').value=localDateInputValue(e);
     queryReport();
   }
   async function queryReport(){
@@ -7203,7 +7208,7 @@ async function renderReportView(){
       </div>
       ${groupTable('客服统计',group(rows,r=>r.service_name||'未指定'))}
       ${groupTable('业务统计',group(rows,r=>(r.business_category||'-')+' / '+(r.service_project||'-')))}
-      ${groupTable('期刊统计',group(rows,r=>r.journal_name||'无期刊'))}`;
+      ${groupTable('客户来源',group(rows,r=>r.customer_source||r.source_name||'未填写来源'))}`;
   }
 
   function sum(rows,k){return rows.reduce((a,r)=>a+Number(r[k]||0),0);}
