@@ -3220,7 +3220,7 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
 }
 
 
-/* V110：手机端菜单可点击修复版 */
+/* V111：编号复制稳定版 */
 :root{
   --side-w:184px;
   --top-h:56px;
@@ -4772,6 +4772,35 @@ button.ghost{background:#f5f8ff!important;color:#355079!important;border:1px sol
     display:block!important;
     pointer-events:auto!important;
   }
+}
+
+
+/* V111 编号复制按钮跳动修复 */
+.order-no-copy{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:0!important;
+  padding-right:46px!important;
+  min-height:24px!important;
+  white-space:nowrap!important;
+}
+
+.order-no-copy .copy-tip{
+  display:inline-flex!important;
+  position:absolute!important;
+  right:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:auto!important;
+  transition:opacity .12s ease!important;
+}
+
+.order-no-copy:hover .copy-tip{
+  visibility:visible!important;
+  opacity:1!important;
 }
 
 </style>
